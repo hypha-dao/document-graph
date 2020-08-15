@@ -1,0 +1,58 @@
+{
+    "owner": "docs",
+    "content": [
+        {
+            "key": "description",
+            "value": [[
+                "string",
+                "loreum ipsum goes to the store, could also include markdown"
+            ]]
+        },
+        {
+            "key": "salary_amount",
+            "value": [[
+                "asset",
+                "130.00 USD"
+            ]]
+        },
+        {
+            "key": "referrer",
+            "value": [[
+                "name",
+                "friendacct"
+            ],[
+                "int64",
+                67
+            ]]
+        },
+        {
+            "key": "vote_count",
+            "value": [[
+                "int64",
+                67
+            ]]
+        },
+        {
+            "key": "children",
+            "value": [[
+                "checksum256",
+                "7b5755ce318c42fc750a754b4734282d1fad08e52c0de04762cb5f159a253c24"
+            ],
+            [
+                "checksum256",
+                "2f5f8a7c18567440b244bcc07ba7bb88cea80ddb3b4cbcb75afe6e15dd9ea33b"
+            ]]
+        },
+        {
+            "key": "milestones",
+            "value": [[
+                "time_point",
+                "2020-08-15T16:01:54.000"
+            ],
+            [
+                "time_point",
+                "2020-08-19T16:01:54.000"
+            ]]
+        }
+    ]
+}

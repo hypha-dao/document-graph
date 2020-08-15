@@ -1,0 +1,132 @@
+{
+    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT ",
+    "version": "eosio::abi/1.1",
+    "types": [
+        {
+            "new_type_name": "content",
+            "type": "pair_key_value[]"
+        },
+        {
+            "new_type_name": "flexvalue",
+            "type": "variant_name_string_asset_time_point_int64_checksum256"
+        },
+        {
+            "new_type_name": "key",
+            "type": "string"
+        },
+        {
+            "new_type_name": "value",
+            "type": "flexvalue[]"
+        }
+    ],
+    "structs": [
+        {
+            "name": "create",
+            "base": "",
+            "fields": [
+                {
+                    "name": "owner",
+                    "type": "name"
+                },
+                {
+                    "name": "content",
+                    "type": "content"
+                }
+            ]
+        },
+        {
+            "name": "created",
+            "base": "",
+            "fields": [
+                {
+                    "name": "hash",
+                    "type": "checksum256"
+                },
+                {
+                    "name": "id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "owner",
+                    "type": "name"
+                },
+                {
+                    "name": "content",
+                    "type": "content"
+                }
+            ]
+        },
+        {
+            "name": "doc",
+            "base": "",
+            "fields": [
+                {
+                    "name": "hash",
+                    "type": "checksum256"
+                },
+                {
+                    "name": "id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "owner",
+                    "type": "name"
+                },
+                {
+                    "name": "content",
+                    "type": "content"
+                },
+                {
+                    "name": "created_date",
+                    "type": "time_point"
+                },
+                {
+                    "name": "updated_date",
+                    "type": "time_point"
+                }
+            ]
+        },
+        {
+            "name": "pair_key_value",
+            "base": "",
+            "fields": [
+                {
+                    "name": "key",
+                    "type": "key"
+                },
+                {
+                    "name": "value",
+                    "type": "value"
+                }
+            ]
+        }
+    ],
+    "actions": [
+        {
+            "name": "create",
+            "type": "create",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "created",
+            "type": "created",
+            "ricardian_contract": ""
+        }
+    ],
+    "tables": [
+        {
+            "name": "documents",
+            "type": "doc",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        }
+    ],
+    "ricardian_clauses": [],
+    "variants": [
+        {
+            "name": "variant_name_string_asset_time_point_int64_checksum256",
+            "types": ["name","string","asset","time_point","int64","checksum256"]
+        }
+    ]
+}
