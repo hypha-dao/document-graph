@@ -1,12 +1,22 @@
 # Document Graph data structure
 
-This smart contract stores documents, which are comprised of lists of arbitrary data tagged within string->data maps.
+![image](https://user-images.githubusercontent.com/32852271/90341046-30014980-dfca-11ea-9ea5-741ede415a49.png)
 
-Documents can be saved in a graph data structure, creating edges and vertices.  For example, one document may be a "member" (vertex) that has an edge (link) to another document for a "role".  
+This smart contract stores documents, which are comprised of lists of arbitrary data tagged within string->data maps. Below is a very small document example. A document could also hold the thousands of pages of materials due to the hierarchical nature.
 
-This contract uses "content addressing", meaning the key of the document is a hash of its contents.  Each hash must be unique in the table and this is enforced by the ```create``` action.
+![image](https://user-images.githubusercontent.com/32852271/90341069-78206c00-dfca-11ea-9e83-a9aced0664a6.png)
+
+The "value" in the KV pair is a list of variant values that can enforce type.  The supported values are string, int64, asset, name, time_point, or checksum256. The checksum256 can be used to link to other documents.  Each of the values maintains a sequence so a document can have ordered children in addition to named links.
+
+Documents can be saved in a graph data structure, creating edges and vertices.  For example, one document may be a "member" (vertex) that has an edge (link) to another document/vertex for a "role".  
+
+![image](https://user-images.githubusercontent.com/32852271/90341301-73f54e00-dfcc-11ea-8022-587beaf8fedd.png)
+
+This contract uses "content addressing", meaning the key of the document is a hash of its contents.  Each hash must be unique in the table and this is enforced by the ```create``` and the ```edit``` actions.  
 
 NOTE: currently, the graph supports bi-directional edges but I will likely remove this to align it to a Directed Acyclic Graph (DAG) like IPFS.
+
+Certificates are signed notes on documents by any account. Each certificate contains the account, timestamp, and an optional note. When the DHO approves a new proposal, the outcome would be certifying a document.  This is like signing legislation.
 
 ### Setup
 NOTE: Assumes you have relevant environmnent setup..
@@ -80,6 +90,7 @@ NOTE: use ```--json``` to show the entire document
 ```
 node index.js --certify 526bbe0d21db98c692559db22a2a32fedbea378ca25a4822d52e1171941401b7 --auth bob
 ```
+Certificates are stored in the same table as the content, but it is separate from the hashed content.
 
 ## cleos Quickstart
 ``` bash
@@ -193,4 +204,33 @@ cleos push action eosio updateauth '{
         "waits": []
     }
 }' -p documents@owner
+```
+
+
+### Document fingerprint
+The document fingerprinting algorithm creates a data structure like this to hash.
+```
+[
+    [children=[
+        [checksum256,7b5755ce318c42fc750a754b4734282d1fad08e52c0de04762cb5f159a253c24],
+        [checksum256,2f5f8a7c18567440b244bcc07ba7bb88cea80ddb3b4cbcb75afe6e15dd9ea33b]
+    ],
+    [description=[
+        [string,loreum ipsum goes to the store, could also include markdown]
+    ],
+    [milestones=[
+        [time_point,1597507314],
+        [time_point,1597852914]
+    ],
+    [referrer=[
+        [name,friendacct],
+        [int64,67]
+    ],
+    [salary_amount=[
+        [asset,130.00 USD]
+    ],
+    [vote_count=[
+        [int64,69]
+    ]
+]
 ```

@@ -20,7 +20,6 @@ void document::create(const name &creator, const content &content)
       
       // fingerprint the content object 
       string string_data = document::to_string(content); 
-      debug ("create - full fingerprinting data: " + string_data);
       checksum256 content_hash = eosio::sha256(const_cast<char *>(string_data.c_str()), string_data.length());
 
       auto hash_index = d_t.get_index<name("idhash")>();
@@ -112,8 +111,6 @@ std::string document::to_string(document::flexvalue value)
    }
    else if (std::holds_alternative<string>(value))
    {
-      string to_append = string("[string," + std::get<string>(value) + "]");
-      debug("flexvalue-to-string: string-value: " + to_append);
       return "[string," + std::get<string>(value) + "]";
    }
    else if (std::holds_alternative<checksum256>(value))
@@ -121,7 +118,6 @@ std::string document::to_string(document::flexvalue value)
       checksum256 cs_value = std::get<checksum256>(value);
       auto arr = cs_value.extract_as_byte_array();
       string str_value = to_hex( (const char*)arr.data(), arr.size()) ;
-      debug("Checksum value: " + str_value);
       return "[checksum256," + str_value + "]";
    }
    else 
@@ -142,9 +138,7 @@ std::string document::to_string(vector<flexvalue> values)
          results = results + ",";
       }
 
-      string to_append = to_string(*it);
-      // debug ("values-to-string: Iterating and appending to results: " + to_append);
-      results = results + to_append;
+      results = results + to_string(*it);
    }
    results = results + "]";
    return results;
@@ -163,12 +157,7 @@ std::string document::to_string(const content &content)
       } else {
          results = results + ",";
       }
-
-      string content_value_string = to_string(value_itr->second);
-      debug ("content-value-string: " + content_value_string);
-
-      string to_append = string("[" + value_itr->first + "=" + content_value_string);
-      debug ("content-to-string: Iterating and appending to results: " + to_append);
+      string to_append = string(value_itr->first + "=" + to_string(value_itr->second));
 
       results = results + to_append;
    }
