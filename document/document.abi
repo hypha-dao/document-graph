@@ -21,11 +21,83 @@
     ],
     "structs": [
         {
+            "name": "Debug",
+            "base": "",
+            "fields": [
+                {
+                    "name": "debug_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "notes",
+                    "type": "string"
+                },
+                {
+                    "name": "created_date",
+                    "type": "time_point"
+                }
+            ]
+        },
+        {
+            "name": "Hash",
+            "base": "",
+            "fields": [
+                {
+                    "name": "hash_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "data_to_hash",
+                    "type": "string"
+                },
+                {
+                    "name": "hash",
+                    "type": "checksum256"
+                }
+            ]
+        },
+        {
+            "name": "certificate",
+            "base": "",
+            "fields": [
+                {
+                    "name": "certifier",
+                    "type": "name"
+                },
+                {
+                    "name": "notes",
+                    "type": "string"
+                },
+                {
+                    "name": "certification_date",
+                    "type": "time_point"
+                }
+            ]
+        },
+        {
+            "name": "certify",
+            "base": "",
+            "fields": [
+                {
+                    "name": "certifier",
+                    "type": "name"
+                },
+                {
+                    "name": "hash",
+                    "type": "checksum256"
+                },
+                {
+                    "name": "notes",
+                    "type": "string"
+                }
+            ]
+        },
+        {
             "name": "create",
             "base": "",
             "fields": [
                 {
-                    "name": "owner",
+                    "name": "creator",
                     "type": "name"
                 },
                 {
@@ -47,7 +119,7 @@
                     "type": "uint64"
                 },
                 {
-                    "name": "owner",
+                    "name": "creator",
                     "type": "name"
                 },
                 {
@@ -61,20 +133,24 @@
             "base": "",
             "fields": [
                 {
-                    "name": "hash",
-                    "type": "checksum256"
-                },
-                {
                     "name": "id",
                     "type": "uint64"
                 },
                 {
-                    "name": "owner",
+                    "name": "hash",
+                    "type": "checksum256"
+                },
+                {
+                    "name": "creator",
                     "type": "name"
                 },
                 {
                     "name": "content",
                     "type": "content"
+                },
+                {
+                    "name": "certificates",
+                    "type": "certificate[]"
                 },
                 {
                     "name": "created_date",
@@ -83,6 +159,24 @@
                 {
                     "name": "updated_date",
                     "type": "time_point"
+                }
+            ]
+        },
+        {
+            "name": "fork",
+            "base": "",
+            "fields": [
+                {
+                    "name": "hash",
+                    "type": "checksum256"
+                },
+                {
+                    "name": "creator",
+                    "type": "name"
+                },
+                {
+                    "name": "content",
+                    "type": "content"
                 }
             ]
         },
@@ -99,9 +193,19 @@
                     "type": "value"
                 }
             ]
+        },
+        {
+            "name": "reset",
+            "base": "",
+            "fields": []
         }
     ],
     "actions": [
+        {
+            "name": "certify",
+            "type": "certify",
+            "ricardian_contract": ""
+        },
         {
             "name": "create",
             "type": "create",
@@ -111,12 +215,36 @@
             "name": "created",
             "type": "created",
             "ricardian_contract": ""
+        },
+        {
+            "name": "fork",
+            "type": "fork",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "reset",
+            "type": "reset",
+            "ricardian_contract": ""
         }
     ],
     "tables": [
         {
+            "name": "debugs",
+            "type": "Debug",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
             "name": "documents",
             "type": "doc",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "hashes",
+            "type": "Hash",
             "index_type": "i64",
             "key_names": [],
             "key_types": []

@@ -1,40 +1,49 @@
 {
-    "owner": "docs",
     "content": [
         {
             "key": "description",
-            "value": [[
-                "string",
-                "loreum ipsum goes to the store, could also include markdown"
-            ]]
+            "value": [
+                [
+                    "string",
+                    "loreum ipsum markdown"
+                ]
+            ]
         },
         {
             "key": "salary_amount",
-            "value": [[
-                "asset",
-                "130.00 USD"
-            ]]
+            "value": [
+                [
+                    "asset",
+                    "130.00 USD"
+                ]
+            ]
         },
         {
             "key": "referrer",
-            "value": [[
-                "name",
-                "friendacct"
-            ]]
+            "value": [
+                [
+                    "name",
+                    "friendacct"
+                ]
+            ]
         },
         {
             "key": "vote_count",
-            "value": [[
-                "int64",
-                67
-            ]]
+            "value": [
+                [
+                    "int64",
+                    67
+                ]
+            ]
         },
         {
             "key": "reference_link",
-            "value": [[
-                "checksum256",
-                "7b5755ce318c42fc750a754b4734282d1fad08e52c0de04762cb5f159a253c24"
-            ]]
+            "value": [
+                [
+                    "checksum256",
+                    "7b5755ce318c42fc750a754b4734282d1fad08e52c0de04762cb5f159a253c24"
+                ]
+            ]
         }
     ]
 }

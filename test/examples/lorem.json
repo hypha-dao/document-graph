@@ -1,0 +1,28 @@
+{
+    "creator": "alice",
+    "content": [
+        {
+            "key": "loreum",
+            "value": [[
+                "string",
+                "Aenean rhoncus feugiat ipsum ut semper. Nulla vitae efficitur dolor. Quisque in felis sed dolor lacinia auctor. Cras pulvinar eu risus at ornare. Nunc ac urna commodo, blandit massa eu, accumsan urna. Fusce erat mauris, scelerisque non ligula ut, volutpat suscipit eros. Etiam aliquet lorem id maximus sollicitudin. Quisque malesuada quam metus, eu congue est interdum sed. Etiam quis mi finibus, ullamcorper libero ut, vestibulum dui. "
+            ]]
+        },
+        {
+            "key": "ipsum",
+            "value": [[
+                "string",
+                "Donec venenatis quam sit amet nisl faucibus, vitae auctor mi viverra. Aenean at dolor sit amet neque ullamcorper maximus. Aenean molestie gravida rutrum. Quisque sit amet leo sed elit imperdiet fermentum. Phasellus leo metus, auctor in blandit quis, ullamcorper et arcu. Vivamus sit amet blandit augue. Sed dignissim id lectus et porta. Nam id ligula efficitur, sollicitudin nisi vitae, mattis felis. Nulla nibh neque, pulvinar at faucibus eget, mattis et urna. Curabitur mattis nunc lectus, at tincidunt ligula porta ut. Vestibulum commodo eu diam sed ultrices. Donec tristique urna at mauris blandit tincidunt sed quis libero. In lobortis lorem ac nunc maximus sodales. "
+            ]]
+        },
+        {
+            "key": "clauses",
+            "value": [[
+                "string",
+                "Nulla maximus nisi non varius. Suspendisse potenti. Aenean porta tincidunt sollicitudin. Proin imperdiet risus id placerat consequat. Quisque augue nisl, scelerisque pharetra nisl sit amet, gravida finibus nunc. Sed varius luctus interdum. Mauris sit amet nisi elementum, egestas neque ac, interdum odio. Cras ac viverra purus. Praesent nec sollicitudin elit. Fusce sagittis purus vitae dignissim pretium. Vivamus et molestie erat. "
+            ],[
+                "string",
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed sit amet velit ut arcu elementum rutrum sit amet ut augue. Curabitur vitae consectetur nunc. Nulla tempus metus non ullamcorper vehicula. Aenean vitae arcu vel eros tempus consequat non nec sem. Aliquam hendrerit aliquam purus eu laoreet. Quisque nec faucibus mauris, eu volutpat est. Aenean porttitor dapibus volutpat. "
+            ]]
+        }]
+}
