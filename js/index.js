@@ -3,6 +3,7 @@ const { JsSignatureProvider } = require("eosjs/dist/eosjs-jssig");
 const fetch = require("node-fetch");
 const { TextEncoder, TextDecoder } = require("util");
 const commandLineArgs = require("command-line-args");
+const commandLineUsage = require('command-line-usage');
 const fs = require('fs');
 
 async function getDocument(host, contract, dochash) {
@@ -16,7 +17,7 @@ async function getDocument(host, contract, dochash) {
     options.table = "documents";
     options.index_position = 2;
     options.key_type = "sha256";
-    options.encode_type = "hex";
+    // options.encode_type = "hex";
     options.upper_bound = dochash;
     options.lower_bound = dochash;
     options.limit = 1;
@@ -80,12 +81,91 @@ async function loadOptions() {
         { name: "certify", type: String },
         { name: "json", type: Boolean },
         { name: "get", type: Boolean, defaultValue: false },
+        { name: "getall", type: Boolean, defaultValue: false },
         { name: "auth", type: String }]
     // see here to add new options:
     //   - https://github.com/75lb/command-line-args/blob/master/doc/option-definition.md
 
     return commandLineArgs(optionDefinitions);
 }
+
+const sections = [
+    {
+        header: 'Document graph',
+        content: 'Create, fork, certify and query documents'
+    },
+    {
+        header: 'Options',
+        optionList: [
+            {
+                name: 'create',
+                description: 'create a new document?',
+                type: Boolean
+            },
+            {
+                name: 'file',
+                description: 'relative path to the json file containing the document',
+                alias: 'f',
+                type: String
+            },
+            {
+                name: 'fork',
+                description: 'fork an existing document?',
+                type: Boolean
+            },
+            {
+                name: 'hash',
+                typeLabel: '{underline hash}',
+                description: 'hash of the document to be forked',
+                type: String
+            },
+            {
+                name: 'certify',
+                typeLabel: '{underline hash}',
+                description: 'certify an existing document',
+                type: String
+            },
+            {
+                name: 'get',
+                description: 'retrieve and print the document for the hash provided',
+                type: Boolean
+            },
+            {
+                name: 'getall',
+                description: 'retrieve and print all documents',
+                type: Boolean
+            },
+            {
+                name: 'auth',
+                typeLabel: '{underline account}',
+                description: 'account to use when creating, forking, or certifying documents (e.g. johnnyhypha1)',
+                type: String
+            },
+            {
+                name: 'host',
+                description: 'eosio endpoint, defaults to https://test.telos.kitchen',
+                alias: 'h',
+                type: String
+            },
+            {
+                name: 'contract',
+                description: 'contract to use, defaults to docs.hypha',
+                type: String
+            },
+            {
+                name: 'help',
+                description: 'Print this usage guide.'
+            }
+        ]
+    },
+    {
+        header: 'Examples',
+        content: [
+            '$ node index.js --host https://test.telos.kitchen --get --hash d4a2cd2e9e4eab783c12bd5aa279036b724fca0e71a064b4030c21a7466e0289',
+            '$ node index.js --host https://test.telos.kitchen --create -f ../test/examples/lorem.json --auth johnnyhypha1'
+        ]
+    },
+]
 
 const main = async () => {
     const opts = await loadOptions();
@@ -109,25 +189,25 @@ const main = async () => {
 
     if (opts.get) {
         if (opts.json) {
-            const singleDoc = await getDocument (opts.host, opts.contract, opts.hash);
-            console.log ("Single document: ", JSON.stringify(singleDoc, null, 2));        
+            const singleDoc = await getDocument(opts.host, opts.contract, opts.hash);
+            console.log("Single document: ", JSON.stringify(singleDoc, null, 2));
         } else {
-            const singleDoc = await getDocument (opts.host, opts.contract, opts.hash);
-            console.log ("Single document: ", singleDoc);   
+            const singleDoc = await getDocument(opts.host, opts.contract, opts.hash);
+            console.log("Single document: ", singleDoc);
         }
-    
     }
 
-    const docs = await getDocuments(opts.host, opts.contract);
-    if (opts.json) {
-        console.log("Documents table: ", JSON.stringify(docs, null, 2));
-    } else {
-        console.log("Documents table: ", docs);
+    if (opts.getall) {
+        const docs = await getDocuments(opts.host, opts.contract);
+        if (opts.json) {
+            console.log("Documents table: ", JSON.stringify(docs, null, 2));
+        } else {
+            console.log("Documents table: ", docs);
+        }
     }
 
-    
-
-
+    const usage = commandLineUsage(sections)
+    console.log(usage)
 }
 
 main();
