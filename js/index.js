@@ -153,6 +153,11 @@ const sections = [
                 type: String
             },
             {
+                name: 'json',
+                description: 'output in JSON',
+                type: Boolean
+            },
+            {
                 name: 'help',
                 description: 'Print this usage guide.'
             }
@@ -206,8 +211,11 @@ const main = async () => {
         }
     }
 
-    const usage = commandLineUsage(sections)
-    console.log(usage)
+    if (opts.help || (!opts.getall && !opts.get && !opts.create && !opts.fork && !opts.certify)) {
+        const usage = commandLineUsage(sections)
+        console.log(usage)
+    }
+    
 }
 
 main();
