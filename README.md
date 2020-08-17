@@ -2,7 +2,7 @@
 
 ![image](https://user-images.githubusercontent.com/32852271/90341046-30014980-dfca-11ea-9ea5-741ede415a49.png)
 
-This smart contract stores documents, which are comprised of lists of arbitrary data tagged within string->data maps. Below is a very small document example. A document could also hold the thousands of pages of materials due to the hierarchical nature.
+This smart contract stores documents, which are comprised of lists of arbitrary data tagged with labels. Below is a very small document example. A document could also hold the thousands of pages of materials due to the hierarchical nature.
 
 ![image](https://user-images.githubusercontent.com/32852271/90341069-78206c00-dfca-11ea-9e83-a9aced0664a6.png)
 

@@ -54,7 +54,7 @@ async function sendtrx(prod, host, contract, action, authorizer, data) {
     const rpc = new JsonRpc(host, { fetch });
     var defaultPrivateKey;
     if (prod) { defaultPrivateKey = process.env.PRIVATE_KEY; }
-    else defaultPrivateKey = "5KeSkosYfKj8yQRRvfWsTubTJrhBvEZixFYN8z7CfQmxf5nrjsY";
+    else defaultPrivateKey = "5HwnoWBuuRmNdcqwBzd1LABFRKnTk2RY2kUMYKkZfF8tKodubtK";
     const signatureProvider = new JsSignatureProvider([defaultPrivateKey]);
     const api = new Api({ rpc, signatureProvider, textDecoder: new TextDecoder(), textEncoder: new TextEncoder() });
     const actions = [{ account: contract, name: action, authorization: [{ actor: authorizer, permission: "active" }], data: data }];
@@ -72,8 +72,8 @@ class FileDetails {
 async function loadOptions() {
     const optionDefinitions = [
         { name: "file", alias: "f", type: filename => new FileDetails(filename) },
-        { name: "host", alias: "h", type: String, defaultValue: "http://localhost:8888" },
-        { name: "contract", type: String, defaultValue: "documents" },
+        { name: "host", alias: "h", type: String, defaultValue: "https://test.telos.kitchen" },
+        { name: "contract", type: String, defaultValue: "docs.hypha" },
         { name: "hash", type: String },
         { name: "create", type: Boolean, defaultValue: false },
         { name: "fork", type: Boolean, defaultValue: false },
