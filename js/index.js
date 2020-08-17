@@ -14,9 +14,9 @@ async function getDocument(host, contract, dochash) {
     options.json = true;
     options.scope = contract;
     options.table = "documents";
-    options.index = 2;
+    options.index_position = 2;
     options.key_type = "sha256";
-    // options.encode_type = "hex";
+    options.encode_type = "hex";
     options.upper_bound = dochash;
     options.lower_bound = dochash;
     options.limit = 1;
@@ -79,6 +79,7 @@ async function loadOptions() {
         { name: "fork", type: Boolean, defaultValue: false },
         { name: "certify", type: String },
         { name: "json", type: Boolean },
+        { name: "get", type: Boolean, defaultValue: false },
         { name: "auth", type: String }]
     // see here to add new options:
     //   - https://github.com/75lb/command-line-args/blob/master/doc/option-definition.md
@@ -106,6 +107,17 @@ const main = async () => {
         await sendtrx(0, opts.host, opts.contract, "certify", opts.auth, data);
     }
 
+    if (opts.get) {
+        if (opts.json) {
+            const singleDoc = await getDocument (opts.host, opts.contract, opts.hash);
+            console.log ("Single document: ", JSON.stringify(singleDoc, null, 2));        
+        } else {
+            const singleDoc = await getDocument (opts.host, opts.contract, opts.hash);
+            console.log ("Single document: ", singleDoc);   
+        }
+    
+    }
+
     const docs = await getDocuments(opts.host, opts.contract);
     if (opts.json) {
         console.log("Documents table: ", JSON.stringify(docs, null, 2));
@@ -113,8 +125,9 @@ const main = async () => {
         console.log("Documents table: ", docs);
     }
 
-    // const singleDoc = await getDocument (host, "docs", "d7366c3e6b63aa8f3ff664d7713d2db6c6e54662153d50e582f2e6de54f659ea");
-    // console.log ("Single document: ", JSON.stringify(singleDoc, null, 2));
+    
+
+
 }
 
 main();

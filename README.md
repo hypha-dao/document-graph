@@ -59,6 +59,7 @@ cleos push action eosio updateauth '{
 
 ## Javascript Quickstart
 ``` bash
+git clone git@github.com:hypha-dao/document.git
 cd js && yarn install && node index.js
 ```
 

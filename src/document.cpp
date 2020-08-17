@@ -25,10 +25,11 @@ void document::create(const name &creator, const content &content)
       auto hash_index = d_t.get_index<name("idhash")>();
       auto h_itr = hash_index.find(content_hash);
 
+      auto byte_arr = content_hash.extract_as_byte_array();
+      string readable_hash = to_hex( (const char*)byte_arr.data(), byte_arr.size()) ;
+
       // if this content exists already, error out and send back the hash of the existing document
       if (h_itr != hash_index.end()) {
-         auto byte_arr = content_hash.extract_as_byte_array();
-         string readable_hash = to_hex( (const char*)byte_arr.data(), byte_arr.size()) ;
          check (false, "document exists already: " + readable_hash);
       }
 
@@ -36,7 +37,7 @@ void document::create(const name &creator, const content &content)
       action(
          permission_level{get_self(), name("active")},
          get_self(), name("created"),
-         std::make_tuple(d.hash, d.id, d.creator, d.content))
+         std::make_tuple(content_hash, d.id, d.creator, d.content))
 		.send();
 
       d.hash = content_hash;
