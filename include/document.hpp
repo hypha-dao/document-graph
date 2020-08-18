@@ -42,7 +42,8 @@ namespace hyphaspace
       // This is the broadcast event that a new document was created.
       // It includes the hash that was calculated during the create action.
       // This could be the key for a QR code to pull up an entire document, as an example
-      ACTION created(const checksum256 &hash, const uint64_t &id, const name &creator, const content &content);
+      // ACTION created(const checksum256 &hash, const uint64_t &id, const name &creator, const content &content);
+      ACTION created(const name& creator, const checksum256 &hash);
 
       // debug only: deletes all docs
       ACTION reset();

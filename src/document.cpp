@@ -20,6 +20,7 @@ void document::create(const name &creator, const content &content)
       
       // fingerprint the content object 
       string string_data = document::to_string(content); 
+      // d.content["fingerprint"] = vector {string_data;
       checksum256 content_hash = eosio::sha256(const_cast<char *>(string_data.c_str()), string_data.length());
 
       auto hash_index = d_t.get_index<name("idhash")>();
@@ -37,8 +38,9 @@ void document::create(const name &creator, const content &content)
       action(
          permission_level{get_self(), name("active")},
          get_self(), name("created"),
-         std::make_tuple(content_hash, d.id, d.creator, d.content))
-		.send();
+         std::make_tuple(d.creator, content_hash))
+         // std::make_tuple(d.hash, d.id, d.creator, d.content))  // TODO: troubleshoot "Error: inline action too big"		
+      .send();
 
       d.hash = content_hash;
    });   
@@ -70,12 +72,13 @@ void document::fork (const checksum256 &hash, const name &creator, const content
       action(
          permission_level{get_self(), name("active")},
          get_self(), name("created"),
-         std::make_tuple(d.hash, d.id, d.creator, d.content))
+         std::make_tuple(d.creator, d.hash))
+         // std::make_tuple(d.hash, d.id, d.creator, d.content))  // TODO: troubleshoot "Error: inline action too big"
 		.send();
    });
 }
 
-void document::created(const checksum256 &hash, const uint64_t &id, const name &creator, const content &content) {
+void document::created(const name& creator, const checksum256 &hash) {
    // only the contract can announce this
    require_auth (get_self());
 }
@@ -173,6 +176,14 @@ document::certificate document::new_certificate (const name &certifier, const st
    cert.notes = notes;
    return cert;
 }
+
+// document::content document::de_dup (const checksum256 &hash, const content &content) 
+// {
+//    std::map<string, vector<flexvalue>>::const_iterator value_itr;
+//    for (value_itr = content.begin(); value_itr != content.end(); ++value_itr) {
+
+//    }
+// }
 
 // void document::writehash (const string &string_data) 
 // {

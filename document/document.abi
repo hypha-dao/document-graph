@@ -111,20 +111,12 @@
             "base": "",
             "fields": [
                 {
-                    "name": "hash",
-                    "type": "checksum256"
-                },
-                {
-                    "name": "id",
-                    "type": "uint64"
-                },
-                {
                     "name": "creator",
                     "type": "name"
                 },
                 {
-                    "name": "content",
-                    "type": "content"
+                    "name": "hash",
+                    "type": "checksum256"
                 }
             ]
         },
