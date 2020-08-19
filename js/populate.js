@@ -149,7 +149,7 @@ async function fakeDocument () {
 
 const main = async () => {
 
-    const documentCount = 4;
+    const documentCount = 100;
     for (var i = 0; i < documentCount; i++ ) {
         var document = await fakeDocument();
         document["creator"] = "johnnyhypha1";
