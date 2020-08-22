@@ -63,6 +63,10 @@ async function setSchema(dgraphClient) {
     await dgraphClient.alter(op);
 }
 
+async function transformToDgraph (document) {
+
+}
+
 // Create data using JSON.
 async function createData(dgraphClient) {
     // Create a new transaction.
