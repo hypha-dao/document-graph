@@ -8,6 +8,15 @@
                     "my other value, happy birthday"
                 ]
             }
+        ],
+        [
+            {
+                "label": "my second label",
+                "value": [
+                    "string",
+                    "my other value, happy birthday"
+                ]
+            }
         ]
     ]
 }

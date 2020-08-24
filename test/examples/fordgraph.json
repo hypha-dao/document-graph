@@ -1,0 +1,39 @@
+{
+    "set": [
+        {
+            "creator": "alice",
+            "content": [
+                {
+                    "key": "loreum",
+                    "value": [
+                        "Aenean rhoncus feugiat dui.",
+                        "Nulla maximus nisi",
+                        1432,
+                        "1.20 USD"
+                    ]
+                },
+                {
+                    "key": "ipsum",
+                    "value": [
+                        "234.23 USD",
+                        "2020-08-15T00:00:00.000",
+                        "Donec venenatis quam sit amet nisl faucibus"
+                    ]
+                },
+                {
+                    "key": "clauses",
+                    "value": [
+                        "Nulla maximus nisi non varius. Suspendisse potenti."
+                    ]
+                },
+                {
+                    "key": "sections",
+                    "value": [
+                        "a77384b84cfe45ceec5298e19086189bf4140fdac0fd0920a881b183e83e89c6",
+                        "c06f2f96b522cfab9fe48bdacd8563d674f151a4a07325a0af6e4045f46a5ab2"
+                    ]
+                }
+            ]
+        }
+    ]
+}

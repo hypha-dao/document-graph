@@ -4,21 +4,35 @@
             "creator": "alice",
             "content": [
                 {
-                    "key_lvl1": "loreum",
-                    "value_lvl1": [{
-                        "key_lvl2": 0,
-                        "value_lvl2": "Aenean rhoncus feugiat dui."
+                    "entry": "loreum",
+                    "value": [{
+                        "sequence": 0,
+                        "type": "string",
+                        "label": "my label",
+                        "entry_value": "Aenean rhoncus feugiat dui."
                     }, {
-                        "key_lvl2": 1,
-                        "value_lvl2": "Nulla maximus nisi"
-                    }, {
-                        "key_lvl2": 2,
-                        "value_lvl2": 1432
+                        "sequence": 1,
+                        "type": "string",
+                        "label": "another label",
+                        "entry_value": "Nulla maximus nisi"
                     }, {
                         "key_lvl2": 3,
-                        "value_lvl2": "1.20 USD"
+                        "type": "int64",
+                        "label": "yet another label",
+                        "entry_value": 1432
+                    }, {
+                        "sequence": 4,
+                        "type": "asset",
+                        "label": "my entry",
+                        "entry_value": "1.20 USD"
                     }]
-                },
+                }
+            ]
+        }
+    ]
+}
+
+
                 {
                     "key_lvl1": "ipsum",
                     "value_lvl1": [{

@@ -55,8 +55,9 @@ async function sendtrx(prod, host, contract, action, authorizer, data) {
     const rpc = new JsonRpc(host, { fetch });
     var defaultPrivateKey;
     if (prod) { defaultPrivateKey = process.env.PRIVATE_KEY; }
-    else defaultPrivateKey = "5HwnoWBuuRmNdcqwBzd1LABFRKnTk2RY2kUMYKkZfF8tKodubtK";
+    else defaultPrivateKey = "5KeSkosYfKj8yQRRvfWsTubTJrhBvEZixFYN8z7CfQmxf5nrjsY";
     const signatureProvider = new JsSignatureProvider([defaultPrivateKey]);
+    console.log (JSON.stringify(data, null, 2))
     const api = new Api({ rpc, signatureProvider, textDecoder: new TextDecoder(), textEncoder: new TextEncoder() });
     const actions = [{ account: contract, name: action, authorization: [{ actor: authorizer, permission: "active" }], data: data }];
     const result = await api.transact({ actions: actions }, { blocksBehind: 3, expireSeconds: 30 });

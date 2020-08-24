@@ -3,20 +3,16 @@
     "version": "eosio::abi/1.1",
     "types": [
         {
-            "new_type_name": "content",
-            "type": "pair_key_value[]"
+            "new_type_name": "content_group",
+            "type": "content[]"
+        },
+        {
+            "new_type_name": "contents",
+            "type": "content_group[]"
         },
         {
             "new_type_name": "flexvalue",
             "type": "variant_name_string_asset_time_point_int64_checksum256"
-        },
-        {
-            "new_type_name": "key",
-            "type": "string"
-        },
-        {
-            "new_type_name": "value",
-            "type": "flexvalue[]"
         }
     ],
     "structs": [
@@ -39,22 +35,9 @@
             ]
         },
         {
-            "name": "Hash",
+            "name": "cc",
             "base": "",
-            "fields": [
-                {
-                    "name": "hash_id",
-                    "type": "uint64"
-                },
-                {
-                    "name": "data_to_hash",
-                    "type": "string"
-                },
-                {
-                    "name": "hash",
-                    "type": "checksum256"
-                }
-            ]
+            "fields": []
         },
         {
             "name": "certificate",
@@ -93,6 +76,20 @@
             ]
         },
         {
+            "name": "content",
+            "base": "",
+            "fields": [
+                {
+                    "name": "label",
+                    "type": "string"
+                },
+                {
+                    "name": "value",
+                    "type": "flexvalue"
+                }
+            ]
+        },
+        {
             "name": "create",
             "base": "",
             "fields": [
@@ -101,8 +98,8 @@
                     "type": "name"
                 },
                 {
-                    "name": "content",
-                    "type": "content"
+                    "name": "contents",
+                    "type": "contents"
                 }
             ]
         },
@@ -137,8 +134,8 @@
                     "type": "name"
                 },
                 {
-                    "name": "content",
-                    "type": "content"
+                    "name": "contents",
+                    "type": "contents"
                 },
                 {
                     "name": "certificates",
@@ -155,44 +152,17 @@
             ]
         },
         {
-            "name": "fork",
-            "base": "",
-            "fields": [
-                {
-                    "name": "hash",
-                    "type": "checksum256"
-                },
-                {
-                    "name": "creator",
-                    "type": "name"
-                },
-                {
-                    "name": "content",
-                    "type": "content"
-                }
-            ]
-        },
-        {
-            "name": "pair_key_value",
-            "base": "",
-            "fields": [
-                {
-                    "name": "key",
-                    "type": "key"
-                },
-                {
-                    "name": "value",
-                    "type": "value"
-                }
-            ]
-        },
-        {
             "name": "reset",
             "base": "",
             "fields": []
         }
     ],
     "actions": [
+        {
+            "name": "cc",
+            "type": "cc",
+            "ricardian_contract": ""
+        },
         {
             "name": "certify",
             "type": "certify",
@@ -206,11 +176,6 @@
         {
             "name": "created",
             "type": "created",
-            "ricardian_contract": ""
-        },
-        {
-            "name": "fork",
-            "type": "fork",
             "ricardian_contract": ""
         },
         {
@@ -230,13 +195,6 @@
         {
             "name": "documents",
             "type": "doc",
-            "index_type": "i64",
-            "key_names": [],
-            "key_types": []
-        },
-        {
-            "name": "hashes",
-            "type": "Hash",
             "index_type": "i64",
             "key_names": [],
             "key_types": []
