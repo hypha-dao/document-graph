@@ -5,7 +5,7 @@ using namespace hyphaspace;
 document::document(name self, name code, datastream<const char *> ds) : contract(self, code, ds) {}
 document::~document() {}
 
-void document::create(const name &creator, const contents &contents)
+void document::create(const name &creator, const vector<content_group> &content_groups)
 {
    require_auth(creator);
 
@@ -16,10 +16,10 @@ void document::create(const name &creator, const contents &contents)
    d_t.emplace(get_self(), [&](auto &d) {
       d.id = d_t.available_primary_key();
       d.creator = creator;
-      d.contents = contents;
+      d.content_groups = content_groups;
 
       // fingerprint the content object
-      string string_data = document::to_string(contents);
+      string string_data = document::to_string(content_groups);
 
       // stamp document with string_data used for hash
       // -- helpful when debugging
@@ -143,7 +143,7 @@ std::string document::to_string(const document::flexvalue &value)
 
 std::string document::to_string(const content& content) 
 {
-   return "{" + string(content.label + "=" + to_string(content.value) + "}"
+   return "{" + string(content.label + "=" + to_string(content.value)) + "}";
 }
 
 std::string document::to_string(const content_group &content_group)
@@ -170,12 +170,12 @@ std::string document::to_string(const content_group &content_group)
 }
 
 // TODO: combine with above for a layer of abstraction
-std::string document::to_string(const contents &contents)
+std::string document::to_string(const vector<content_group> &content_groups)
 {
    string results = "[";
    bool is_first = true;
 
-   for (const content_group &content_group : contents)
+   for (const content_group &content_group : content_groups)
    {
       if (is_first)
       {

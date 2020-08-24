@@ -139,7 +139,7 @@ async function fakeContentGroup() {
     return contentGroup;
 }
 
-async function fakeContents() {
+async function fakeContentGroups() {
     var contents = [];
     const contentGroupCount = Math.floor(Math.random() * 3) + 1;
     for (var i = 0; i < contentGroupCount; i++) {
@@ -156,7 +156,7 @@ const main = async () => {
     for (var i = 0; i < documentCount; i++) {
 
         var document = {};
-        document["contents"] = await fakeContents();
+        document["content_groups"] = await fakeContentGroups();
         document["creator"] = "johnnyhypha1";
 
         await sendtrx(0, "https://test.telos.kitchen", "docs.hypha", "create", "johnnyhypha1", document);

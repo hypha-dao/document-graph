@@ -28,10 +28,9 @@ namespace hyphaspace
       };
 
       typedef vector<content> content_group;
-      typedef vector<content_group> contents;
 
       // Any account/member can creator a new document
-      ACTION create(const name &creator, const contents &contents);
+      ACTION create(const name &creator, const vector<content_group> &content_groups);
 
       // Fork creates a new document (node in a graph) from an existing document.
       // The forked content should contain only new or updated entries to avoid data duplication. (lazily enforced?)
@@ -66,27 +65,23 @@ namespace hyphaspace
          uint64_t id;
          checksum256 hash;
          name creator;
-         contents contents;
+         vector<content_group> content_groups;
 
          vector<certificate> certificates;
          uint64_t primary_key() const { return id; }
          uint64_t by_creator() const { return creator.value; }
          checksum256 by_hash() const { return hash; }
 
-         // timestamps
          time_point created_date = current_time_point();
-         time_point updated_date = current_time_point();
          uint64_t by_created() const { return created_date.sec_since_epoch(); }
-         uint64_t by_updated() const { return updated_date.sec_since_epoch(); }
 
-         EOSLIB_SERIALIZE(doc, (id)(hash)(creator)(contents)(certificates)(created_date)(updated_date))
+         EOSLIB_SERIALIZE(doc, (id)(hash)(creator)(content_groups)(certificates)(created_date))
       };
 
       typedef multi_index<name("documents"), doc,
                           indexed_by<name("idhash"), const_mem_fun<doc, checksum256, &doc::by_hash>>,
                           indexed_by<name("bycreator"), const_mem_fun<doc, uint64_t, &doc::by_creator>>,
-                          indexed_by<name("bycreated"), const_mem_fun<doc, uint64_t, &doc::by_created>>,
-                          indexed_by<name("byupdated"), const_mem_fun<doc, uint64_t, &doc::by_updated>>> // TODO: append only?
+                          indexed_by<name("bycreated"), const_mem_fun<doc, uint64_t, &doc::by_created>>> 
           doc_table;
 
       struct [[eosio::table]] Debug
@@ -105,7 +100,7 @@ namespace hyphaspace
       // series of functions used to fingerprint each content object
       // TODO: is there a more performant way to achieve the same result?
       // TODO: put this into an interface or cleaner abstraction
-      std::string to_string(const contents &contents);
+      std::string to_string(const vector<content_group> &content_groups);
       std::string to_string(const content_group &content_group);
       std::string to_string(const content &content);
       std::string to_string(const document::flexvalue &value);
