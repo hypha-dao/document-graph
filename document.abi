@@ -1,0 +1,252 @@
+{
+    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT ",
+    "version": "eosio::abi/1.1",
+    "types": [
+        {
+            "new_type_name": "content",
+            "type": "pair_key_value[]"
+        },
+        {
+            "new_type_name": "flexvalue",
+            "type": "variant_name_string_asset_time_point_int64_checksum256"
+        },
+        {
+            "new_type_name": "key",
+            "type": "string"
+        },
+        {
+            "new_type_name": "value",
+            "type": "flexvalue[]"
+        }
+    ],
+    "structs": [
+        {
+            "name": "Debug",
+            "base": "",
+            "fields": [
+                {
+                    "name": "debug_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "notes",
+                    "type": "string"
+                },
+                {
+                    "name": "created_date",
+                    "type": "time_point"
+                }
+            ]
+        },
+        {
+            "name": "Hash",
+            "base": "",
+            "fields": [
+                {
+                    "name": "hash_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "data_to_hash",
+                    "type": "string"
+                },
+                {
+                    "name": "hash",
+                    "type": "checksum256"
+                }
+            ]
+        },
+        {
+            "name": "certificate",
+            "base": "",
+            "fields": [
+                {
+                    "name": "certifier",
+                    "type": "name"
+                },
+                {
+                    "name": "notes",
+                    "type": "string"
+                },
+                {
+                    "name": "certification_date",
+                    "type": "time_point"
+                }
+            ]
+        },
+        {
+            "name": "certify",
+            "base": "",
+            "fields": [
+                {
+                    "name": "certifier",
+                    "type": "name"
+                },
+                {
+                    "name": "hash",
+                    "type": "checksum256"
+                },
+                {
+                    "name": "notes",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "create",
+            "base": "",
+            "fields": [
+                {
+                    "name": "creator",
+                    "type": "name"
+                },
+                {
+                    "name": "content",
+                    "type": "content"
+                }
+            ]
+        },
+        {
+            "name": "created",
+            "base": "",
+            "fields": [
+                {
+                    "name": "creator",
+                    "type": "name"
+                },
+                {
+                    "name": "hash",
+                    "type": "checksum256"
+                }
+            ]
+        },
+        {
+            "name": "doc",
+            "base": "",
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "hash",
+                    "type": "checksum256"
+                },
+                {
+                    "name": "creator",
+                    "type": "name"
+                },
+                {
+                    "name": "content",
+                    "type": "content"
+                },
+                {
+                    "name": "certificates",
+                    "type": "certificate[]"
+                },
+                {
+                    "name": "created_date",
+                    "type": "time_point"
+                },
+                {
+                    "name": "updated_date",
+                    "type": "time_point"
+                }
+            ]
+        },
+        {
+            "name": "fork",
+            "base": "",
+            "fields": [
+                {
+                    "name": "hash",
+                    "type": "checksum256"
+                },
+                {
+                    "name": "creator",
+                    "type": "name"
+                },
+                {
+                    "name": "content",
+                    "type": "content"
+                }
+            ]
+        },
+        {
+            "name": "pair_key_value",
+            "base": "",
+            "fields": [
+                {
+                    "name": "key",
+                    "type": "key"
+                },
+                {
+                    "name": "value",
+                    "type": "value"
+                }
+            ]
+        },
+        {
+            "name": "reset",
+            "base": "",
+            "fields": []
+        }
+    ],
+    "actions": [
+        {
+            "name": "certify",
+            "type": "certify",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "create",
+            "type": "create",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "created",
+            "type": "created",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "fork",
+            "type": "fork",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "reset",
+            "type": "reset",
+            "ricardian_contract": ""
+        }
+    ],
+    "tables": [
+        {
+            "name": "debugs",
+            "type": "Debug",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "documents",
+            "type": "doc",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "hashes",
+            "type": "Hash",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        }
+    ],
+    "ricardian_clauses": [],
+    "variants": [
+        {
+            "name": "variant_name_string_asset_time_point_int64_checksum256",
+            "types": ["name","string","asset","time_point","int64","checksum256"]
+        }
+    ]
+}
