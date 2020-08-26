@@ -1,0 +1,29 @@
+{
+    "content_groups": [
+        [
+            {
+                "label": "1.1",
+                "value": [
+                    "string",
+                    "my other value, happy birthday"
+                ]
+            },
+            {
+                "label": "1.2",
+                "value": [
+                    "asset",
+                    "130.00 USD"
+                ]
+            }
+        ],
+        [
+            {
+                "label": "2.1",
+                "value": [
+                    "name",
+                    "myy"
+                ]
+            }
+        ]
+    ]
+}

@@ -1,0 +1,40 @@
+{
+    "set": [
+        {
+            "certificates": [],
+            "created_date": "2020-08-24T16:59:58.500",
+            "hash": "363bccee26dd6ffaa8f107d8ceb6a666a34f1de978c57dcad487475d107b79e5",
+            "creator": "johnnyhypha1",
+            "content_groups": [
+                [
+                    {
+                        "label": "content_group_name",
+                        "value": [
+                            "string",
+                            "My content group #1"
+                        ],
+                        "sequence": 0
+                    },
+                    {
+                        "label": "important_value",
+                        "value": [
+                            "int64",
+                            42
+                        ],
+                        "sequence": 1
+                    }
+                ],
+                [
+                    {
+                        "label": "",
+                        "value": [
+                            "string",
+                            "My content group #2"
+                        ],
+                        "sequence": 0
+                    }
+                ]
+            ]
+        }
+    ]
+}
