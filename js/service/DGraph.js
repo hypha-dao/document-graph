@@ -2,7 +2,8 @@ const {
   DgraphClient,
   DgraphClientStub,
   Operation,
-  Mutation
+  Mutation,
+  Request
 } = require('dgraph-js')
 
 const { Util } = require('../util')
@@ -56,6 +57,25 @@ class DGraph {
       const mutation = new Mutation()
       mutation.setSetJson(jsonData)
       const response = await txn.mutate(mutation)
+      await txn.commit()
+      return response
+    } finally {
+      await txn.discard()
+    }
+  }
+
+  async upsert (query, update, condition = null) {
+    const txn = this.newTxn()
+    try {
+      const mutation = new Mutation()
+      mutation.setSetJson(update)
+      if (condition) {
+        mutation.setCond(condition)
+      }
+      const req = new Request()
+      req.setQuery(query)
+      req.addMutations(mutation)
+      const response = await txn.doRequest(req)
       await txn.commit()
       return response
     } finally {

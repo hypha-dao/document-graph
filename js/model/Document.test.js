@@ -123,6 +123,9 @@ describe('Test store', () => {
     expect(documents).not.toBeNull()
     expect(documents).toBeInstanceOf(Array)
     expect(documents).toHaveLength(1)
+
+    const uid = await document.getUID('c0b0e48a9cd1b73ac924cf58a430abd5d3091ca7cbcda6caf5b7e7cebb379327')
+    expect(uid).not.toBeNull()
   })
 })
 

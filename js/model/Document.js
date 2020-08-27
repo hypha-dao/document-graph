@@ -75,12 +75,26 @@ class Document {
     return documents
   }
 
-  async store (chainDoc) {
-    const dgraphDoc = this._transform(chainDoc)
-    return this.dgraph.updateData(dgraphDoc)
+  async getUID (docHash) {
+    const { documents } = await this.dgraph.query(
+      `query documents ($hash: string){
+        documents(func: eq(hash, $hash)){
+          uid
+        }
+      }`,
+      { $hash: docHash }
+    )
+    return documents.length ? documents[0].uid : null
   }
 
-  _transform (chainDoc) {
+  async store (chainDoc) {
+    const uid = await this.getUID(chainDoc.hash)
+    const dgraphDoc = this._transform(chainDoc, uid)
+
+    return dgraphDoc ? this.dgraph.updateData(dgraphDoc) : null
+  }
+
+  _transform (chainDoc, uid) {
     const {
       hash,
       creator,
@@ -89,11 +103,26 @@ class Document {
       certificates
     } = chainDoc
 
+    // Invalid doc
+    if (!contentGroups) {
+      return null
+    }
+    let transformed
+
+    if (uid) {
+      transformed = {
+        uid
+      }
+    } else {
+      transformed = {
+        hash,
+        creator,
+        created_date: createdDate,
+        content_groups: this._transformContentGroups(contentGroups)
+      }
+    }
     return {
-      hash,
-      creator,
-      created_date: createdDate,
-      content_groups: this._transformContentGroups(contentGroups),
+      ...transformed,
       certificates: this._transformCertificates(certificates),
       'dgraph.type': 'Document'
 
@@ -112,6 +141,7 @@ class Document {
   }
 
   _transformContents (chainContents) {
+    chainContents = chainContents || []
     const contents = chainContents.map((content, index) => {
       const {
         label,
@@ -129,6 +159,7 @@ class Document {
   }
 
   _transformCertificates (chainCertificates) {
+    chainCertificates = chainCertificates || []
     const certificates = chainCertificates.map((certificate) => ({
       ...certificate,
       'dgraph.type': 'Certificate'
