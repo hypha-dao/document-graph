@@ -2,10 +2,31 @@
     "content_groups": [
         [
             {
-                "label": "my label",
+                "label": "content_group_name",
                 "value": [
                     "string",
-                    "my other value, happy birthday"
+                    "My Content Group #1"
+                ]
+            },
+            {
+                "label": "salary_amount",
+                "value": [
+                    "asset",
+                    "130.00 USD"
+                ]
+            },
+            {
+                "label": "referrer",
+                "value": [
+                    "name",
+                    "frienacct"
+                ]
+            },
+            {
+                "label": "vote_count",
+                "value": [
+                    "int64",
+                    67
                 ]
             }
         ]
