@@ -2,31 +2,10 @@
     "content_groups": [
         [
             {
-                "label": "content_group_name",
+                "label": "simplest_label",
                 "value": [
                     "string",
-                    "My Content Group #1"
-                ]
-            },
-            {
-                "label": "salary_amount",
-                "value": [
-                    "asset",
-                    "130.00 USD"
-                ]
-            },
-            {
-                "label": "referrer",
-                "value": [
-                    "name",
-                    "frienacct"
-                ]
-            },
-            {
-                "label": "vote_count",
-                "value": [
-                    "int64",
-                    67
+                    "Simplest"
                 ]
             }
         ]

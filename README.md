@@ -26,7 +26,7 @@ KEY=EOS696y3uuryxgRRCiajXHBtiX9umXKvhBRGMygPa82HtQDrcDnE6
 cleos create account eosio documents $KEY $KEY
 cleos create account eosio bob $KEY $KEY
 cleos create account eosio alice $KEY $KEY
-cleos set contract documents document
+cleos set contract documents docs
 ```
 
 You'll need to add the eosio.code permission (use your key)
@@ -93,58 +93,55 @@ node index.js --certify 526bbe0d21db98c692559db22a2a32fedbea378ca25a4822d52e1171
 ```
 Certificates are stored in the same table as the content, but it is separate from the hashed content.
 
+#### Add an edge
+Creates a graph edge from a document to another document.
+```
+node js/index.js --link --from e91c036d9f90a9f2dc7ab9767ea4aa19c384431a24e45cf109b4fded0608ec99 --to c0b0e48a9cd1b73ac924cf58a430abd5d3091ca7cbcda6caf5b7e7cebb379327 --edge edger --contract documents --host http://localhost:8888 --auth alice 
+```
+
+#### Remove Edges
+Edges can be removed using any of these options: 
+1) one at a time (combination of from, to, and edge name), 
+2) all edges for a specific from and to nodes, or
+3) all edges for a specific from node and edge name.
+ 
+
 ## cleos Quickstart
 ``` bash
 # this content just illustrates the various types supported
 cleos push action documents create '{
     "creator": "bob",
-    "content": [
-        {
-            "key": "description",
-            "value": [[
-                "string",
-                "loreum ipsum goes to the store, could also include markdown"
-            ]]
-        },
-        {
-            "key": "salary_amount",
-            "value": [[
-                "asset",
-                "130.00 USD"
-            ]]
-        },
-        {
-            "key": "referrer",
-            "value": [[
-                "name",
-                "friendacct"
-            ]]
-        },
-        {
-            "key": "vote_count",
-            "value": [[
-                "int64",
-                67
-            ]]
-        },
-        {
-            "key": "reference_document",
-            "value": [[
-                "checksum256",
-                "7b5755ce318c42fc750a754b4734282d1fad08e52c0de04762cb5f159a253c24"
-            ]]
-        },
-        {
-            "key": "milestones",
-            "value": [[
-                "time_point",
-                "2020-08-15T16:01:54.000"
-            ],
-            [
-                "time_point",
-                "2020-08-19T16:01:54.000"
-            ]]
-        }
+    "content_groups": [
+        [
+            {
+                "label": "content_group_name",
+                "value": [
+                    "string",
+                    "My Content Group #1"
+                ]
+            },
+            {
+                "label": "salary_amount",
+                "value": [
+                    "asset",
+                    "130.00 USD"
+                ]
+            },
+            {
+                "label": "referrer",
+                "value": [
+                    "name",
+                    "friendacct"
+                ]
+            },
+            {
+                "label": "vote_count",
+                "value": [
+                    "int64",
+                    67
+                ]
+            }
+        ]
     ]
 }' -p bob
 ```

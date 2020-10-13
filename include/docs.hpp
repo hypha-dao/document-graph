@@ -16,32 +16,48 @@ namespace hyphaspace
       docs(name self, name code, datastream<const char *> ds);
       ~docs();
 
-      struct [[eosio::table]] document
-      {
-         uint64_t id;
-         checksum256 hash;
-         name creator;
-         vector<document_graph::content_group> content_groups;
+      // struct [[eosio::table]] document
+      // {
+      //    uint64_t id;
+      //    checksum256 hash;
+      //    name creator;
+      //    vector<document_graph::content_group> content_groups;
 
-         vector<document_graph::certificate> certificates;
-         uint64_t primary_key() const { return id; }
-         uint64_t by_creator() const { return creator.value; }
-         checksum256 by_hash() const { return hash; }
+      //    vector<document_graph::certificate> certificates;
+      //    uint64_t primary_key() const { return id; }
+      //    uint64_t by_creator() const { return creator.value; }
+      //    checksum256 by_hash() const { return hash; }
 
-         time_point created_date = current_time_point();
-         uint64_t by_created() const { return created_date.sec_since_epoch(); }
+      //    time_point created_date = current_time_point();
+      //    uint64_t by_created() const { return created_date.sec_since_epoch(); }
 
-         EOSLIB_SERIALIZE(document, (id)(hash)(creator)(content_groups)(certificates)(created_date))
-      };
+      //    EOSLIB_SERIALIZE(document, (id)(hash)(creator)(content_groups)(certificates)(created_date))
+      // };
 
-      typedef multi_index<name("documents"), document,
-                          indexed_by<name("idhash"), const_mem_fun<document, checksum256, &document::by_hash>>,
-                          indexed_by<name("bycreator"), const_mem_fun<document, uint64_t, &document::by_creator>>,
-                          indexed_by<name("bycreated"), const_mem_fun<document, uint64_t, &document::by_created>>>
-          document_table;
+      typedef std::variant<name, string, asset, time_point, int64_t, checksum256> flexvalue;
+
+      typedef multi_index<name("documents"), document_graph::document,
+                            indexed_by<name("idhash"), const_mem_fun<document_graph::document, checksum256, &document_graph::document::by_hash>>,
+                            indexed_by<name("bycreator"), const_mem_fun<document_graph::document, uint64_t, &document_graph::document::by_creator>>,
+                            indexed_by<name("bycreated"), const_mem_fun<document_graph::document, uint64_t, &document_graph::document::by_created>>>
+            document_table;
+
+      typedef multi_index<name("edges"), document_graph::edge,
+                        indexed_by<name("fromnode"), const_mem_fun<document_graph::edge, checksum256, &document_graph::edge::by_from>>,
+                        indexed_by<name("tonode"), const_mem_fun<document_graph::edge, checksum256, &document_graph::edge::by_to>>,
+                        indexed_by<name("edgename"), const_mem_fun<document_graph::edge, uint64_t, &document_graph::edge::by_edge_name>>,
+                        indexed_by<name("bycreated"), const_mem_fun<document_graph::edge, uint64_t, &document_graph::edge::by_created>>>
+        edge_table;
 
       // Any account/member can creator a new document
       ACTION create(const name &creator, const vector<document_graph::content_group> &content_groups);
+      ACTION getorcreate(const name &creator, const vector<document_graph::content_group> &content_groups);
+
+      ACTION newedge(const checksum256 &from_node, const checksum256 &to_node, const name &edge_name);
+
+      ACTION removeedge (const checksum256 &from_node, const checksum256 &to_node, const name &edge_name, const bool strict);
+      ACTION removeedgest (const checksum256 &from_node, const checksum256 &to_node, const bool strict);
+      ACTION removeedgese (const checksum256 &from_node, const name &edge_name, const bool strict);
 
       // Transform a legacy object format to the new document format
       ACTION transform(const name &scope, const uint64_t &id);
@@ -124,26 +140,26 @@ namespace hyphaspace
 
       // flexvalue can any of these commonly used eosio data types
       // a checksum256 can be a link to another document, akin to an "edge" on a graph
-      typedef std::variant<name, string, asset, time_point, int64_t, checksum256> flexvalue;
+      // typedef std::variant<name, string, asset, time_point, int64_t, checksum256> flexvalue;
 
       // a single labeled flexvalue
-      struct content
-      {
-         string label;
-         flexvalue value;
+      // struct content
+      // {
+      //    string label;
+      //    flexvalue value;
 
-         EOSLIB_SERIALIZE(content, (label)(value))
-      };
+      //    EOSLIB_SERIALIZE(content, (label)(value))
+      // };
 
-      typedef vector<content> content_group;
+      // typedef vector<content> content_group;
 
-      struct certificate
-      {
-         name certifier;
-         string notes;
-         time_point certification_date = current_time_point();
+      // struct certificate
+      // {
+      //    name certifier;
+      //    string notes;
+      //    time_point certification_date = current_time_point();
 
-         EOSLIB_SERIALIZE(certificate, (certifier)(notes)(certification_date))
-      };
+      //    EOSLIB_SERIALIZE(certificate, (certifier)(notes)(certification_date))
+      // };
    };
 } // namespace hyphaspace

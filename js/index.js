@@ -54,9 +54,10 @@ async function getDocuments (host, contract) {
 async function sendtrx (prod, host, contract, action, authorizer, data) {
   const rpc = new JsonRpc(host, { fetch })
   var defaultPrivateKey
-  if (prod) { defaultPrivateKey = process.env.PRIVATE_KEY } else defaultPrivateKey = '5KeSkosYfKj8yQRRvfWsTubTJrhBvEZixFYN8z7CfQmxf5nrjsY'
+  // key for johnnyhypha1, etc: 5HwnoWBuuRmNdcqwBzd1LABFRKnTk2RY2kUMYKkZfF8tKodubtK
+  if (prod) { defaultPrivateKey = process.env.PRIVATE_KEY } else defaultPrivateKey = '5HwnoWBuuRmNdcqwBzd1LABFRKnTk2RY2kUMYKkZfF8tKodubtK' //'5KeSkosYfKj8yQRRvfWsTubTJrhBvEZixFYN8z7CfQmxf5nrjsY'
   const signatureProvider = new JsSignatureProvider([defaultPrivateKey])
-  console.log (defaultPrivateKey)
+  // console.log (defaultPrivateKey)
   // console.log(JSON.stringify(data, null, 2))
   const api = new Api({ rpc, signatureProvider, textDecoder: new TextDecoder(), textEncoder: new TextEncoder() })
   const actions = [{ account: contract, name: action, authorization: [{ actor: authorizer, permission: 'active' }], data: data }]
@@ -78,7 +79,12 @@ async function loadOptions () {
     { name: 'host', alias: 'h', type: String, defaultValue: 'https://test.telos.kitchen' },
     { name: 'contract', type: String, defaultValue: 'docs.hypha' },
     { name: 'hash', type: String },
+    { name: 'from', type: String },
+    { name: 'to', type: String },
+    { name: 'edge', type: String },
     { name: 'create', type: Boolean, defaultValue: false },
+    { name: 'getorcreate', type: Boolean, defaultValue: false },
+    { name: 'link', type: Boolean, defaultValue: false },
     { name: 'fork', type: Boolean, defaultValue: false },
     { name: 'certify', type: String },
     { name: 'json', type: Boolean },
@@ -102,6 +108,11 @@ const sections = [
       {
         name: 'create',
         description: 'create a new document?',
+        type: Boolean
+      },
+      {
+        name: 'link',
+        description: 'link one document to another document with an edge name',
         type: Boolean
       },
       {
@@ -183,6 +194,12 @@ const main = async () => {
     await sendtrx(0, opts.host, opts.contract, 'create', opts.auth, doc)
   }
 
+  if (opts.getorcreate) {
+    const doc = JSON.parse(fs.readFileSync(opts.file.filename, 'utf8'))
+    doc.creator = opts.auth
+    await sendtrx(0, opts.host, opts.contract, 'getorcreate', opts.auth, doc)
+  }
+
   if (opts.fork) {
     var doc = JSON.parse(fs.readFileSync(opts.file.filename, 'utf8'))
     doc.hash = opts.hash
@@ -204,6 +221,12 @@ const main = async () => {
     }
   }
 
+  if (opts.link) {
+    const data = { from_node: opts.from, to_node: opts.to, edge_name: opts.edge }
+    console.log (data)
+    await sendtrx(0, opts.host, opts.contract, 'newedge', opts.auth, data)
+  }
+
   if (opts.getall) {
     const docs = await getDocuments(opts.host, opts.contract)
     if (opts.json) {
@@ -213,10 +236,14 @@ const main = async () => {
     }
   }
 
-  if (opts.help || (!opts.getall && !opts.get && !opts.create && !opts.fork && !opts.certify)) {
+  if (opts.help || (!opts.getall && !opts.get && !opts.create && !opts.fork && !opts.certify && !opts.link && !opts.getorcreate)) {
     const usage = commandLineUsage(sections)
     console.log(usage)
   }
 }
 
 main()
+
+
+// e91c036d9f90a9f2dc7ab9767ea4aa19c384431a24e45cf109b4fded0608ec99
+// c0b0e48a9cd1b73ac924cf58a430abd5d3091ca7cbcda6caf5b7e7cebb379327

@@ -4,6 +4,7 @@
 #include <eosio/asset.hpp>
 #include <eosio/transaction.hpp>
 #include <eosio/crypto.hpp>
+#include <cstring>
 
 using namespace eosio;
 using namespace std;
@@ -21,6 +22,7 @@ namespace hyphaspace
         // flexvalue can any of these commonly used eosio data types
         // a checksum256 can be a link to another document, akin to an "edge" on a graph
         typedef std::variant<name, string, asset, time_point, int64_t, checksum256> flexvalue;
+        const flexvalue DOES_NOT_EXIST = -4206942069;  // arbitrary, lazy, hopefully never used value
 
         // a single labeled flexvalue
         struct content
@@ -42,7 +44,7 @@ namespace hyphaspace
             EOSLIB_SERIALIZE(certificate, (certifier)(notes)(certification_date))
         };
 
-        struct [[eosio::table, eosio::contract("multisig")]] document
+        struct [[eosio::table, eosio::contract("docs")]] document
         {
             uint64_t id;
             checksum256 hash;
@@ -66,17 +68,53 @@ namespace hyphaspace
                             indexed_by<name("bycreated"), const_mem_fun<document, uint64_t, &document::by_created>>>
             document_table;
 
+        
+        // scopes: get_self() 
+        struct [[eosio::table, eosio::contract("docs")]] edge
+        {
+            uint64_t id; 
+
+            checksum256 from_node;
+            checksum256 by_from() const { return from_node; }
+
+            checksum256 to_node;
+            checksum256 by_to() const { return to_node; }
+
+            name edge_name;
+            uint64_t by_edge_name() const { return edge_name.value; }
+
+            time_point created_date = current_time_point();
+            uint64_t by_created() const { return created_date.sec_since_epoch(); }
+
+            uint64_t primary_key() const { return id; }
+
+            EOSLIB_SERIALIZE(edge, (id)(from_node)(to_node)(edge_name)(created_date))
+        };
+
+        typedef multi_index<name("edges"), edge,
+                        indexed_by<name("fromnode"), const_mem_fun<edge, checksum256, &edge::by_from>>,
+                        indexed_by<name("tonode"), const_mem_fun<edge, checksum256, &edge::by_to>>,
+                        indexed_by<name("edgename"), const_mem_fun<edge, uint64_t, &edge::by_edge_name>>,
+                        indexed_by<name("bycreated"), const_mem_fun<edge, uint64_t, &edge::by_created>>>
+        edge_table;
+
+        uint64_t to_uint64 (const checksum256 &document_hash);
+        void create_edge (const checksum256 &from_node, const checksum256 &to_node, const name &edge_name);
+
+        void remove_edge (const checksum256 &from_node, const checksum256 &to_node, const name &edge_name, const bool strict);
+        void remove_edges (const checksum256 &from_node, const checksum256 &to_node, const bool strict);
+        void remove_edges (const checksum256 &from_node, const name &edge_name, const bool strict);
+        void remove_edges (const checksum256 &node, const bool strict);
+
         // Any account/member can creator a new document
         document create_document(const name &creator, const vector<content_group> &content_groups);
-
+        document get_or_create_document(const name &creator, const vector<content_group> &content_groups);
         void erase_document(const checksum256 &document_hash);
-
-        // Transform a legacy object format to the new document format
-        // void transform_document(const name &scope, const uint64_t &id);
-
+    
         // Fork creates a new document (node in a graph) from an existing document.
         // The forked content should contain only new or updated entries to avoid data duplication. (lazily enforced?)
         document fork_document(const checksum256 &hash, const name &creator, const vector<content_group> &content_groups);
+        document fork_document(const checksum256 &hash, const name &creator, const content &content);
 
         // Creates a 'certificate' on a specific fork.
         // A certificate can be customized based on the document, but it represents
@@ -89,8 +127,20 @@ namespace hyphaspace
         // accessors
         document get_document (const checksum256 &hash);
         document get_parent (const document &document);
-        content_group get_content_group (const document &document, const string &content_group_label);
-        flexvalue get_content (const content_group &content_group, const string& content_label);
+       
+        content_group get_content_group(const vector<content_group> &content_groups, 
+                                        const string &content_group_label, 
+                                        const bool &strict);
+        
+        content_group get_content_group (const document &document, 
+                                            const string &content_group_label, 
+                                            const bool &strict);
+
+        flexvalue get_content (const content_group &content_group, const string& content_label, const bool &strict);
+        flexvalue get_content(const document &document,
+                                const string &content_group_label,
+                                const string &content_label,
+                                const bool &strict);
 
         std::string to_string(const vector<document_graph::content_group> &content_groups);
         std::string to_string(const document_graph::content_group &content_group);
@@ -98,5 +148,7 @@ namespace hyphaspace
         std::string to_string(const document_graph::flexvalue &value);
 
         static std::string to_hex(const char *d, uint32_t s);
+        static std::string readable_hash (const checksum256 &proposal_hash);
+        static uint64_t edge_id(checksum256 from_node, checksum256 to_node, name edge_name);
     };
 }; // namespace hyphaspace

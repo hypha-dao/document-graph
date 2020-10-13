@@ -10,6 +10,31 @@ void docs::create(const name &creator, const vector<document_graph::content_grou
    _document_graph.create_document(creator, content_groups);
 }
 
+void docs::getorcreate(const name &creator, const vector<document_graph::content_group> &content_groups)
+{
+   _document_graph.get_or_create_document(creator, content_groups);
+}
+
+void docs::newedge (const checksum256 &from_node, const checksum256 &to_node, const name &edge_name)
+{
+   _document_graph.create_edge(from_node, to_node, edge_name);
+}
+
+void docs::removeedge (const checksum256 &from_node, const checksum256 &to_node, const name &edge_name, const bool strict)
+{
+   _document_graph.remove_edge(from_node, to_node, edge_name, strict);
+}
+
+void docs::removeedgest (const checksum256 &from_node, const checksum256 &to_node, const bool strict) 
+{
+   _document_graph.remove_edges(from_node, to_node, strict);
+}
+
+void docs::removeedgese (const checksum256 &from_node, const name &edge_name, const bool strict) 
+{
+   _document_graph.remove_edges (from_node, edge_name, strict);
+}
+
 void docs::fork (const checksum256 &hash, const name &creator, const vector<document_graph::content_group> &content_groups )
 {
    _document_graph.fork_document(hash, creator, content_groups);
