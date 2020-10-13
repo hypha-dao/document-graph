@@ -1,0 +1,20 @@
+{
+    "content_groups": [
+        [
+            {
+                "label": "content_group_label",
+                "value": [
+                    "string",
+                    "compliance"
+                ]
+            },
+            {
+                "label": "compliance_tag",
+                "value": [
+                    "string",
+                    "translate-usd-to-tokens-v1.2.1"
+                ]
+            }
+        ]
+    ]
+}

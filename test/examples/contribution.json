@@ -1,0 +1,83 @@
+{
+    "content_groups": [
+        [
+            {
+                "label": "document_type",
+                "value": [
+                    "string",
+                    "contribution"
+                ]
+            },
+            {
+                "label": "proposer",
+                "value": [
+                    "name",
+                    "johnnyhypha1"
+                ]
+            },
+            {
+                "label": "title",
+                "value": [
+                    "string",
+                    "Development of Hypha Space Program"
+                ]
+            },
+            {
+                "label": "description",
+                "value": [
+                    "string",
+                    "Contribution covers development and deployment of our first satellite"
+                ]
+            },
+            {
+                "label": "seeds_amount",
+                "value": [
+                    "asset",
+                    "14000.0000 SEEDS"
+                ]
+            },
+            {
+                "label": "hypha_amount",
+                "value": [
+                    "asset",
+                    "130.00 HYPHA"
+                ]
+            },
+            {
+                "label": "hvoice_amount",
+                "value": [
+                    "asset",
+                    "130.00 HVOICE"
+                ]
+            },
+            {
+                "label": "contribution_date",
+                "value": [
+                    "time_point",
+                    "2020-01-30T13:00:00.000"
+                ]
+            },
+            {
+                "label": "deferred_perc_x100",
+                "value": [
+                    "int64",
+                    100
+                ]
+            },
+            {
+                "label": "",
+                "value": [
+                    "string",
+                    "no label string"
+                ]
+            },
+            {
+                "label": "circle",
+                "value": [
+                    "checksum256",
+                    "d817d5149f3bd842b32868f9d579f83b8157f39ddd88c8c802bed900ce7b8856"
+                ]
+            }
+        ]
+    ]
+}

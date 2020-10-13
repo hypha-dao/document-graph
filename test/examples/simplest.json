@@ -2,10 +2,10 @@
     "content_groups": [
         [
             {
-                "label": "my label",
+                "label": "simplest_label",
                 "value": [
                     "string",
-                    "my other value, happy birthday"
+                    "Simplest"
                 ]
             }
         ]
