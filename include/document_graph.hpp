@@ -4,7 +4,7 @@
 #include <eosio/asset.hpp>
 #include <eosio/transaction.hpp>
 #include <eosio/crypto.hpp>
-#include <cstring>
+// #include <cstring>
 
 using namespace eosio;
 using namespace std;
@@ -106,9 +106,17 @@ namespace hyphaspace
         void remove_edges (const checksum256 &from_node, const name &edge_name, const bool strict);
         void remove_edges (const checksum256 &node, const bool strict);
 
-        // Any account/member can creator a new document
+        // Any account/member can creator a new document, support many options/constructors
         document create_document(const name &creator, const vector<content_group> &content_groups);
-        document get_or_create_document(const name &creator, const vector<content_group> &content_groups);
+        document create_document(const name &creator, const content_group &content_group);
+        document create_document(const name &creator, const content &content);
+        document create_document(const name &creator, const string &content_label, const flexvalue &content_value);
+
+        document get_or_create(const name &creator, const vector<content_group> &content_groups);
+        document get_or_create(const name &creator, const content_group &content_group);
+        document get_or_create(const name &creator, const content &content);
+        document get_or_create(const name &creator, const string &content_label, const flexvalue &content_value);
+
         void erase_document(const checksum256 &document_hash);
     
         // Fork creates a new document (node in a graph) from an existing document.
@@ -142,11 +150,12 @@ namespace hyphaspace
                                 const string &content_label,
                                 const bool &strict);
 
-        std::string to_string(const vector<document_graph::content_group> &content_groups);
-        std::string to_string(const document_graph::content_group &content_group);
-        std::string to_string(const document_graph::content &content);
-        std::string to_string(const document_graph::flexvalue &value);
+        static std::string to_string(const vector<document_graph::content_group> &content_groups);
+        static std::string to_string(const document_graph::content_group &content_group);
+        static std::string to_string(const document_graph::content &content);
+        static std::string to_string(const document_graph::flexvalue &value);
 
+        static checksum256 hash_document (const vector<content_group> &content_groups);
         static std::string to_hex(const char *d, uint32_t s);
         static std::string readable_hash (const checksum256 &proposal_hash);
         static uint64_t edge_id(checksum256 from_node, checksum256 to_node, name edge_name);

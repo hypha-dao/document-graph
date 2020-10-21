@@ -53,3 +53,8 @@ node js/index.js --file "test/examples/simplest.json" --create --auth alice -h h
 
 // invalid link - should fail
 node js/index.js --link --from ad10b49437f75ca3bbc3b762fa4e2c10286c3ece22b08f9d9313d5646ebd0e79 --to c0b0e48a9cd1b73ac924cf58a430abd5d3091ca7cbcda6caf5c7e7cebb379327 --edge edger --contract documents --host http://localhost:8888 --auth alice 
+
+
+// testnet
+
+node js/index.js --link --from ad10b49437f75ca3bbc3b762fa4e2c10286c3ece22b08f9d9313d5646ebd0e79 --to 120794413ba898001887db593afa7b4f556cbf2fb63325dd7700560936fe7fd0 --edge proposal --auth johnnyhypha1
