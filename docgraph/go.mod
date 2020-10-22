@@ -1,4 +1,4 @@
-module github.com/hypha-dao/document/go
+module github.com/hypha-dao/document/docgraph
 
 go 1.14
 
