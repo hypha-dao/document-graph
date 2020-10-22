@@ -15,7 +15,7 @@ import (
 
 const testingEndpoint = "http://localhost:8888"
 
-func getLastDocument(ctx context.Context, api *eos.API, contract eos.AccountName) (Document, error) {
+func GetLastDocument(ctx context.Context, api *eos.API, contract eos.AccountName) (Document, error) {
 	var docs []Document
 	var request eos.GetTableRowsRequest
 	request.Code = string(contract)
@@ -38,7 +38,7 @@ func getLastDocument(ctx context.Context, api *eos.API, contract eos.AccountName
 	return docs[0], nil
 }
 
-func getEdges(ctx context.Context, api *eos.API, contract eos.AccountName) ([]Edge, error) {
+func GetEdges(ctx context.Context, api *eos.API, contract eos.AccountName) ([]Edge, error) {
 	var edges []Edge
 	var request eos.GetTableRowsRequest
 	request.Code = string(contract)
@@ -130,7 +130,7 @@ func (suite *ContractTestSuite) createDocument(fileName string) Document {
 	_, err = eostest.ExecTrx(suite.ctx, suite.api, actions)
 	suite.Require().NoError(err)
 
-	lastDoc, err := getLastDocument(suite.ctx, suite.api, suite.DocsContract)
+	lastDoc, err := GetLastDocument(suite.ctx, suite.api, suite.DocsContract)
 	suite.Assert().Equal(lastDoc.Creator, eos.Name(suite.DocsContract))
 	return lastDoc
 }
@@ -224,17 +224,17 @@ func (suite *ContractTestSuite) TestEdges() {
 	suite.Run("test edges", func() {
 
 		suite.createEdge(doc1.Hash, doc2.Hash, "edge1")
-		edges, err := getEdges(suite.ctx, suite.api, suite.DocsContract)
+		edges, err := GetEdges(suite.ctx, suite.api, suite.DocsContract)
 		suite.Require().NoError(err)
 		suite.Assert().Equal(1, len(edges))
 
 		suite.createEdge(doc2.Hash, doc1.Hash, "edge2")
-		edges, err = getEdges(suite.ctx, suite.api, suite.DocsContract)
+		edges, err = GetEdges(suite.ctx, suite.api, suite.DocsContract)
 		suite.Require().NoError(err)
 		suite.Assert().Equal(2, len(edges))
 
 		suite.createEdge(doc1.Hash, doc3.Hash, "edge3")
-		edges, err = getEdges(suite.ctx, suite.api, suite.DocsContract)
+		edges, err = GetEdges(suite.ctx, suite.api, suite.DocsContract)
 		suite.Require().NoError(err)
 		suite.Assert().Equal(3, len(edges))
 	})
