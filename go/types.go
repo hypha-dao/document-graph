@@ -2,6 +2,8 @@ package docgraph
 
 import (
 	"fmt"
+	"log"
+	"strings"
 
 	eos "github.com/eoscanada/eos-go"
 )
@@ -22,19 +24,54 @@ type FlexValue struct {
 	eos.BaseVariant
 }
 
+func (fv *FlexValue) String() string {
+	switch v := fv.Impl.(type) {
+	case eos.Name:
+		return string(v)
+	case int64:
+		return string(v)
+	case *eos.Asset:
+		return v.String()
+	case string:
+		return v
+	case eos.TimePoint:
+		return v.String()
+	case eos.Checksum256:
+		return v.String()
+	default:
+		panic(fmt.Errorf("received an unexpected type %T for metadata variant %T", v, fv))
+	}
+}
+
+// IsEqual evaluates if the two FlexValues have the same types and values (deep compare)
+func (fv *FlexValue) IsEqual(fv2 *FlexValue) bool {
+
+	if fv.TypeID != fv2.TypeID {
+		log.Println("FlexValue types inequal: ", fv.TypeID, " vs ", fv2.TypeID)
+		return false
+	}
+
+	if fv.String() != fv2.String() {
+		log.Println("FlexValue Values.String() inequal: ", fv.String(), " vs ", fv2.String())
+		return false
+	}
+
+	return true
+}
+
 // MarshalJSON translates to []byte
-func (a *FlexValue) MarshalJSON() ([]byte, error) {
-	return a.BaseVariant.MarshalJSON(flexValueVariant)
+func (fv *FlexValue) MarshalJSON() ([]byte, error) {
+	return fv.BaseVariant.MarshalJSON(flexValueVariant)
 }
 
 // UnmarshalJSON translates flexValueVariant
-func (a *FlexValue) UnmarshalJSON(data []byte) error {
-	return a.BaseVariant.UnmarshalJSON(data, flexValueVariant)
+func (fv *FlexValue) UnmarshalJSON(data []byte) error {
+	return fv.BaseVariant.UnmarshalJSON(data, flexValueVariant)
 }
 
 // UnmarshalBinary ...
-func (a *FlexValue) UnmarshalBinary(decoder *eos.Decoder) error {
-	return a.BaseVariant.UnmarshalBinaryVariant(decoder, flexValueVariant)
+func (fv *FlexValue) UnmarshalBinary(decoder *eos.Decoder) error {
+	return fv.BaseVariant.UnmarshalBinaryVariant(decoder, flexValueVariant)
 }
 
 // ContentNotFoundError is used when content matching
@@ -54,13 +91,23 @@ type ContentItem struct {
 	Value *FlexValue `json:"value"`
 }
 
+// IsEqual evalutes if the label, value type and value impl are the same
+func (c *ContentItem) IsEqual(c2 ContentItem) bool {
+	if strings.Compare(c.Label, c2.Label) != 0 {
+		log.Println("ContentItem labels inequal: ", c.Label, " vs ", c2.Label)
+		return false
+	}
+
+	if !c.Value.IsEqual(c2.Value) {
+		log.Println("ContentItems inequal: ", c.Value, " vs ", c2.Value)
+		return false
+	}
+
+	return true
+}
+
 // ContentGroup ...
 type ContentGroup []ContentItem
-
-// CGFileInput ...
-// type CGFileInput struct {
-// 	ContentItems [][]ContentItem
-// }
 
 // Document is a node in the document graph
 // A document may hold any arbitrary, EOSIO compatible data
@@ -91,6 +138,39 @@ func (d *Document) GetContent(label string) (*FlexValue, error) {
 		Label:        label,
 		DocumentHash: d.Hash,
 	}
+}
+
+// IsEqual is a deep equal comparison of two documents
+//
+func (d *Document) IsEqual(d2 Document) bool {
+
+	// ensure the same number of content groups
+	if len(d.ContentGroups) != len(d2.ContentGroups) {
+		log.Println("ContentGroups lengths inequal: ", len(d.ContentGroups), " vs ", len(d2.ContentGroups))
+		return false
+	}
+
+	for contentGroupIndex, contentGroup1 := range d.ContentGroups {
+		contentGroup2 := d2.ContentGroups[contentGroupIndex]
+
+		// ensure these two content groups have the same number of items
+		if len(contentGroup1) != len(contentGroup2) {
+			log.Println("ContentGroup lengths inequal for CG index: ", contentGroupIndex, "; ", len(contentGroup1), " vs ", len(contentGroup2))
+			return false
+		}
+
+		for contentIndex, content1 := range contentGroup1 {
+			content2 := contentGroup2[contentIndex]
+
+			// ensure these content items have the same label and same value
+			if !content1.IsEqual(content2) {
+				return false
+			}
+		}
+	}
+
+	// if we got through all the above checks, the documents are equal
+	return true
 }
 
 // Edge is a directional, named connection from one graph to another

@@ -209,11 +209,90 @@ func TestExamplePayloads(t *testing.T) {
 
 			err = json.Unmarshal(data, &testFile)
 			require.NoError(t, err)
+		})
+	}
+}
 
-			// remarshalled, err := json.MarshalIndent(testFile, "", "  ")
-			// require.NoError(t, err)
-			// log.Println(string(remarshalled))
-			// TODO: compare text of file to text of unmarshalled object
+func TestDocumentEquality(t *testing.T) {
+	var d1, d2 Document
+
+	tests := []struct {
+		name  string
+		input string
+	}{
+		{
+			name:  "simplest",
+			input: "../test/examples/simplest.json",
+		},
+		{
+			name:  "each-type",
+			input: "../test/examples/each-type.json",
+		},
+		{
+			name:  "contribution",
+			input: "../test/examples/contribution.json",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+
+			data, err := ioutil.ReadFile(test.input)
+			require.NoError(t, err)
+			// log.Println(string(data))
+
+			err = json.Unmarshal(data, &d1)
+			require.NoError(t, err)
+
+			err = json.Unmarshal(data, &d2)
+			require.NoError(t, err)
+
+			require.True(t, d1.IsEqual(d2), "documents are not equal")
+		})
+	}
+}
+
+func TestDocumentInEquality(t *testing.T) {
+	var d1, d2 Document
+
+	tests := []struct {
+		name   string
+		input1 string
+		input2 string
+	}{
+		{
+			name:   "simplest vs each-type",
+			input1: "../test/examples/simplest.json",
+			input2: "../test/examples/each-type.json",
+		},
+		{
+			name:   "each-type vs contribution",
+			input1: "../test/examples/each-type.json",
+			input2: "../test/examples/contribution.json",
+		},
+		{
+			name:   "contribution vs simplest",
+			input1: "../test/examples/contribution.json",
+			input2: "../test/examples/simplest.json",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+
+			data1, err := ioutil.ReadFile(test.input1)
+			require.NoError(t, err)
+
+			err = json.Unmarshal(data1, &d1)
+			require.NoError(t, err)
+
+			data2, err := ioutil.ReadFile(test.input2)
+			require.NoError(t, err)
+
+			err = json.Unmarshal(data2, &d2)
+			require.NoError(t, err)
+
+			require.False(t, d1.IsEqual(d2), "documents are equal")
 		})
 	}
 }
