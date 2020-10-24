@@ -53,68 +53,6 @@ func (suite *ContractTestSuite) SetupTest() {
 	log.Println("Set Docs contract	: ", suite.DocsContract, " : ", trxID)
 }
 
-type createDoc struct {
-	Creator       eos.AccountName `json:"creator"`
-	ContentGroups []ContentGroup  `json:"content_groups"`
-}
-
-func (suite *ContractTestSuite) createDocument(fileName string) Document {
-	data, err := ioutil.ReadFile(fileName)
-	suite.Require().NoError(err)
-
-	action := eostest.ToActionName("create", "action")
-
-	var dump map[string]interface{}
-	err = json.Unmarshal(data, &dump)
-	suite.Require().NoError(err)
-
-	dump["creator"] = suite.DocsContract
-
-	actionBinary, err := suite.api.ABIJSONToBin(suite.ctx, suite.DocsContract, eos.Name(action), dump)
-
-	actions := []*eos.Action{
-		{
-			Account: suite.DocsContract,
-			Name:    action,
-			Authorization: []eos.PermissionLevel{
-				{Actor: suite.DocsContract, Permission: eos.PN("active")},
-			},
-			ActionData: eos.NewActionDataFromHexData([]byte(actionBinary)),
-		}}
-
-	_, err = eostest.ExecTrx(suite.ctx, suite.api, actions)
-	suite.Require().NoError(err)
-
-	lastDoc, err := GetLastDocument(suite.ctx, suite.api, suite.DocsContract)
-	suite.Assert().Equal(lastDoc.Creator, eos.Name(suite.DocsContract))
-	return lastDoc
-}
-
-func (suite *ContractTestSuite) createEdge(fromNode, toNode eos.Checksum256, edgeName eos.Name) {
-
-	action := eostest.ToActionName("newedge", "action")
-
-	actionData := make(map[string]interface{})
-	actionData["from_node"] = fromNode
-	actionData["to_node"] = toNode
-	actionData["edge_name"] = edgeName
-
-	actionBinary, err := suite.api.ABIJSONToBin(suite.ctx, suite.DocsContract, eos.Name(action), actionData)
-
-	actions := []*eos.Action{
-		{
-			Account: suite.DocsContract,
-			Name:    action,
-			Authorization: []eos.PermissionLevel{
-				{Actor: suite.DocsContract, Permission: eos.PN("active")},
-			},
-			ActionData: eos.NewActionDataFromHexData([]byte(actionBinary)),
-		}}
-
-	_, err = eostest.ExecTrx(suite.ctx, suite.api, actions)
-	suite.Require().NoError(err)
-}
-
 func (suite *ContractTestSuite) TestDocuments() {
 
 	tests := []struct {
@@ -138,7 +76,8 @@ func (suite *ContractTestSuite) TestDocuments() {
 	for _, test := range tests {
 		suite.Run(test.name, func() {
 
-			lastDoc := suite.createDocument(test.input)
+			lastDoc, err := CreateDocument(suite.ctx, suite.api, suite.DocsContract, suite.Accounts[1], test.input)
+			suite.Require().NoError(err)
 
 			// unmarshal JSON into a Document
 			data, err := ioutil.ReadFile(test.input)
@@ -154,45 +93,94 @@ func (suite *ContractTestSuite) TestDocuments() {
 }
 
 func (suite *ContractTestSuite) TestEdges() {
+
+	doc1, err := CreateDocument(suite.ctx, suite.api, suite.DocsContract, suite.Accounts[1], "../test/examples/simplest.json")
+	suite.Require().NoError(err)
+
+	doc2, err := CreateDocument(suite.ctx, suite.api, suite.DocsContract, suite.Accounts[2], "../test/examples/each-type.json")
+	suite.Require().NoError(err)
+
+	// doc3, err := CreateDocument(suite.ctx, suite.api, suite.DocsContract, suite.Accounts[3], "../test/examples/contribution.json")
+	// suite.Require().NoError(err)
+
 	tests := []struct {
-		name  string
-		input string
+		name     string
+		fromDoc  Document
+		toDoc    Document
+		creator  eos.AccountName
+		edgeName eos.Name
 	}{
 		{
-			name:  "simplest",
-			input: "../test/examples/simplest.json",
+			name:     "Test Edge 1",
+			fromDoc:  doc1,
+			toDoc:    doc2,
+			creator:  suite.Accounts[1],
+			edgeName: "edge1",
 		},
 		{
-			name:  "each-type",
-			input: "../test/examples/each-type.json",
-		},
-		{
-			name:  "contribution",
-			input: "../test/examples/contribution.json",
+			name:     "Test Edge 2",
+			fromDoc:  doc2,
+			toDoc:    doc1,
+			creator:  suite.Accounts[2],
+			edgeName: "edge2",
 		},
 	}
 
-	doc1 := suite.createDocument(tests[0].input)
-	doc2 := suite.createDocument(tests[1].input)
-	doc3 := suite.createDocument(tests[2].input)
+	for testIndex, test := range tests {
+		suite.Run("test edges", func() {
+			log.Println(test.name, "... ")
 
-	suite.Run("test edges", func() {
+			_, err = CreateEdge(suite.ctx, suite.api, suite.DocsContract, test.creator, test.fromDoc.Hash, test.toDoc.Hash, test.edgeName)
+			suite.Require().NoError(err)
 
-		suite.createEdge(doc1.Hash, doc2.Hash, "edge1")
-		edges, err := GetEdges(suite.ctx, suite.api, suite.DocsContract)
-		suite.Require().NoError(err)
-		suite.Assert().Equal(1, len(edges))
+			// test number of edges
+			edges, err := GetEdges(suite.ctx, suite.api, suite.DocsContract)
+			suite.Require().NoError(err)
+			suite.Assert().Equal(testIndex+1, len(edges))
 
-		suite.createEdge(doc2.Hash, doc1.Hash, "edge2")
-		edges, err = GetEdges(suite.ctx, suite.api, suite.DocsContract)
-		suite.Require().NoError(err)
-		suite.Assert().Equal(2, len(edges))
+			// there should be 1 edge from doc1 to doc2, named edgeName
+			edgesFrom, err := test.fromDoc.GetEdgesFrom(suite.ctx, suite.api, suite.DocsContract)
+			suite.Require().NoError(err)
+			suite.Assert().Equal(1, len(edgesFrom))
+			suite.Assert().Equal(edgesFrom[0].EdgeName, test.edgeName)
+			suite.Assert().Equal(edgesFrom[0].FromNode, test.fromDoc.Hash)
+			suite.Assert().Equal(edgesFrom[0].ToNode, test.toDoc.Hash)
 
-		suite.createEdge(doc1.Hash, doc3.Hash, "edge3")
-		edges, err = GetEdges(suite.ctx, suite.api, suite.DocsContract)
-		suite.Require().NoError(err)
-		suite.Assert().Equal(3, len(edges))
-	})
+			// there should be 0 edges from doc2 to doc1
+			edgesTo, err := test.toDoc.GetEdgesTo(suite.ctx, suite.api, suite.DocsContract)
+			suite.Require().NoError(err)
+			suite.Assert().Equal(1, len(edgesTo))
+			suite.Assert().Equal(edgesTo[0].EdgeName, test.edgeName)
+			suite.Assert().Equal(edgesTo[0].FromNode, test.fromDoc.Hash)
+			suite.Assert().Equal(edgesTo[0].ToNode, test.toDoc.Hash)
+
+			// there should be 1 edge from doc1 to doc2, named edgeName
+			edgesFromByName, err := test.fromDoc.GetEdgesFromByName(suite.ctx, suite.api, suite.DocsContract, test.edgeName)
+			suite.Require().NoError(err)
+			suite.Assert().Equal(1, len(edgesFromByName))
+			suite.Assert().Equal(edgesFromByName[0].EdgeName, test.edgeName)
+			suite.Assert().Equal(edgesFromByName[0].FromNode, test.fromDoc.Hash)
+			suite.Assert().Equal(edgesFromByName[0].ToNode, test.toDoc.Hash)
+
+			// there should be 1 edge from doc1 to doc2, named edgeName
+			edgesToByName, err := test.toDoc.GetEdgesToByName(suite.ctx, suite.api, suite.DocsContract, test.edgeName)
+			suite.Require().NoError(err)
+			suite.Assert().Equal(1, len(edgesToByName))
+			suite.Assert().Equal(edgesToByName[0].EdgeName, test.edgeName)
+			suite.Assert().Equal(edgesToByName[0].FromNode, test.fromDoc.Hash)
+			suite.Assert().Equal(edgesToByName[0].ToNode, test.toDoc.Hash)
+
+			// there should be 0 edge from doc1 to doc2, named wrongedge
+			edgesFromByName, err = test.fromDoc.GetEdgesFromByName(suite.ctx, suite.api, suite.DocsContract, eos.Name("wrongedge"))
+			suite.Require().NoError(err)
+			suite.Assert().Equal(0, len(edgesFromByName))
+
+			// there should be 0 edge from doc1 to doc2, named edgeName
+			edgesToByName, err = test.toDoc.GetEdgesToByName(suite.ctx, suite.api, suite.DocsContract, eos.Name("wrongedge"))
+			suite.Require().NoError(err)
+			suite.Assert().Equal(0, len(edgesToByName))
+		})
+	}
 }
 
 func TestContractSuite(t *testing.T) {
