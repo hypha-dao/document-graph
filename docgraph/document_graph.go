@@ -68,6 +68,38 @@ func CreateDocument(ctx context.Context, api *eos.API,
 	return lastDoc, nil
 }
 
+// LoadDocument reads a document from the blockchain and creates a Document instance
+func LoadDocument(ctx context.Context, api *eos.API,
+	contract eos.AccountName,
+	hash string) (Document, error) {
+
+	var documents []Document
+	var request eos.GetTableRowsRequest
+	request.Code = string(contract)
+	request.Scope = string(contract)
+	request.Table = "documents"
+	request.Index = "2"
+	request.KeyType = "sha256"
+	request.LowerBound = hash
+	request.UpperBound = hash
+	request.Limit = 1
+	request.JSON = true
+	response, err := api.GetTableRows(ctx, request)
+	if err != nil {
+		return Document{}, fmt.Errorf("get table rows %v: %v", hash, err)
+	}
+
+	err = response.JSONToStructs(&documents)
+	if err != nil {
+		return Document{}, fmt.Errorf("json to structs %v: %v", hash, err)
+	}
+
+	if len(documents) == 0 {
+		return Document{}, fmt.Errorf("document not found %v: %v", hash, err)
+	}
+	return documents[0], nil
+}
+
 // CreateEdge creates an edge from one document node to another with the specified name
 func CreateEdge(ctx context.Context, api *eos.API,
 	contract, creator eos.AccountName,
@@ -98,7 +130,7 @@ func CreateEdge(ctx context.Context, api *eos.API,
 	return eostest.ExecTrx(ctx, api, actions)
 }
 
-func (d *Document) getEdges(ctx context.Context, api *eos.API, contract eos.AccountName, edgeIndex string) ([]Edge, error) {
+func (d *Document) getEdgesIndex(ctx context.Context, api *eos.API, contract eos.AccountName, edgeIndex string) ([]Edge, error) {
 	var edges []Edge
 	var request eos.GetTableRowsRequest
 	request.Code = string(contract)
@@ -126,17 +158,17 @@ func (d *Document) getEdges(ctx context.Context, api *eos.API, contract eos.Acco
 
 // GetEdgesFrom retrieves a list of edges from this node to other nodes
 func (d *Document) GetEdgesFrom(ctx context.Context, api *eos.API, contract eos.AccountName) ([]Edge, error) {
-	return d.getEdges(ctx, api, contract, string("2"))
+	return d.getEdgesIndex(ctx, api, contract, string("2"))
 }
 
 // GetEdgesTo retrieves a list of edges to this node from other nodes
 func (d *Document) GetEdgesTo(ctx context.Context, api *eos.API, contract eos.AccountName) ([]Edge, error) {
-	return d.getEdges(ctx, api, contract, string("3"))
+	return d.getEdgesIndex(ctx, api, contract, string("3"))
 }
 
 // GetEdgesFromByName retrieves a list of edges from this node to other nodes
 func (d *Document) GetEdgesFromByName(ctx context.Context, api *eos.API, contract eos.AccountName, edgeName eos.Name) ([]Edge, error) {
-	edges, err := d.getEdges(ctx, api, contract, string("2"))
+	edges, err := d.getEdgesIndex(ctx, api, contract, string("2"))
 	if err != nil {
 		log.Println("Error with JSONToStructs: ", err)
 		return []Edge{}, err
@@ -153,7 +185,7 @@ func (d *Document) GetEdgesFromByName(ctx context.Context, api *eos.API, contrac
 
 // GetEdgesToByName retrieves a list of edges from this node to other nodes
 func (d *Document) GetEdgesToByName(ctx context.Context, api *eos.API, contract eos.AccountName, edgeName eos.Name) ([]Edge, error) {
-	edges, err := d.getEdges(ctx, api, contract, string("3"))
+	edges, err := d.getEdgesIndex(ctx, api, contract, string("3"))
 	if err != nil {
 		log.Println("Error with JSONToStructs: ", err)
 		return []Edge{}, err

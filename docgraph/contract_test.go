@@ -15,6 +15,29 @@ import (
 
 const testingEndpoint = "http://localhost:8888"
 
+// GetAllEdges retrieves all edges from table
+func GetAllEdges(ctx context.Context, api *eos.API, contract eos.AccountName) ([]Edge, error) {
+	var edges []Edge
+	var request eos.GetTableRowsRequest
+	request.Code = string(contract)
+	request.Scope = string(contract)
+	request.Table = "edges"
+	request.Limit = 1000
+	request.JSON = true
+	response, err := api.GetTableRows(ctx, request)
+	if err != nil {
+		log.Println("Error with GetTableRows: ", err)
+		return []Edge{}, err
+	}
+
+	err = response.JSONToStructs(&edges)
+	if err != nil {
+		log.Println("Error with JSONToStructs: ", err)
+		return []Edge{}, err
+	}
+	return edges, nil
+}
+
 type ContractTestSuite struct {
 	suite.Suite
 	Accounts     []eos.AccountName
@@ -134,7 +157,7 @@ func (suite *ContractTestSuite) TestEdges() {
 			suite.Require().NoError(err)
 
 			// test number of edges
-			edges, err := GetEdges(suite.ctx, suite.api, suite.DocsContract)
+			edges, err := GetAllEdges(suite.ctx, suite.api, suite.DocsContract)
 			suite.Require().NoError(err)
 			suite.Assert().Equal(testIndex+1, len(edges))
 
@@ -181,6 +204,20 @@ func (suite *ContractTestSuite) TestEdges() {
 			suite.Assert().Equal(0, len(edgesToByName))
 		})
 	}
+}
+
+func (suite *ContractTestSuite) TestLoadDocument() {
+
+	doc, err := CreateDocument(suite.ctx, suite.api, suite.DocsContract, suite.Accounts[1], "../test/examples/simplest.json")
+	suite.Require().NoError(err)
+
+	loadedDoc, err := LoadDocument(suite.ctx, suite.api, suite.DocsContract, doc.Hash.String())
+	suite.Require().NoError(err)
+	suite.Assert().Equal(doc.Hash.String(), loadedDoc.Hash.String())
+	suite.Assert().Equal(doc.Creator, loadedDoc.Creator)
+
+	_, err = LoadDocument(suite.ctx, suite.api, suite.DocsContract, "ahashthatwillnotexist")
+	suite.Require().Error(err)
 }
 
 func TestContractSuite(t *testing.T) {
