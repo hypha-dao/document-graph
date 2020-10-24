@@ -19,8 +19,8 @@ var FlexValueVariant = eos.NewVariantDefinition([]eos.VariantType{
 })
 
 // GetVariants returns the definition of types compatible with FlexValue
-func GetVariants() eos.VariantDefinition {
-	return *FlexValueVariant
+func GetVariants() *eos.VariantDefinition {
+	return FlexValueVariant
 }
 
 // FlexValue may hold any of the common EOSIO types
