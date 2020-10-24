@@ -61,17 +61,17 @@ func (fv *FlexValue) IsEqual(fv2 *FlexValue) bool {
 
 // MarshalJSON translates to []byte
 func (fv *FlexValue) MarshalJSON() ([]byte, error) {
-	return fv.BaseVariant.MarshalJSON(flexValueVariant)
+	return fv.BaseVariant.MarshalJSON(FlexValueVariant)
 }
 
 // UnmarshalJSON translates flexValueVariant
 func (fv *FlexValue) UnmarshalJSON(data []byte) error {
-	return fv.BaseVariant.UnmarshalJSON(data, flexValueVariant)
+	return fv.BaseVariant.UnmarshalJSON(data, FlexValueVariant)
 }
 
 // UnmarshalBinary ...
 func (fv *FlexValue) UnmarshalBinary(decoder *eos.Decoder) error {
-	return fv.BaseVariant.UnmarshalBinaryVariant(decoder, flexValueVariant)
+	return fv.BaseVariant.UnmarshalBinaryVariant(decoder, FlexValueVariant)
 }
 
 // ContentNotFoundError is used when content matching
