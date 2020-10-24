@@ -18,6 +18,11 @@ var FlexValueVariant = eos.NewVariantDefinition([]eos.VariantType{
 	{Name: "checksum256", Type: eos.Checksum256([]byte("0"))},
 })
 
+// GetVariants returns the definition of types compatible with FlexValue
+func GetVariants() eos.VariantDefinition {
+	return *FlexValueVariant
+}
+
 // FlexValue may hold any of the common EOSIO types
 // name, int64, asset, string, time_point, or checksum256
 type FlexValue struct {
