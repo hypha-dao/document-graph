@@ -8,8 +8,8 @@ import (
 	eos "github.com/eoscanada/eos-go"
 )
 
-// flexValueVariant may hold a name, int64, asset, string, or time_point
-var flexValueVariant = eos.NewVariantDefinition([]eos.VariantType{
+// FlexValueVariant may hold a name, int64, asset, string, or time_point
+var FlexValueVariant = eos.NewVariantDefinition([]eos.VariantType{
 	{Name: "name", Type: eos.Name("")},
 	{Name: "int64", Type: int64(0)},
 	{Name: "asset", Type: (*eos.Asset)(nil)}, // Syntax for pointer to a type, could be any struct
