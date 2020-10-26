@@ -31,7 +31,7 @@ func CreateDocument(ctx context.Context, api *eos.API,
 		return Document{}, fmt.Errorf("readfile %v: %v", fileName, err)
 	}
 
-	action := eostest.ToActionName("create", "action")
+	action := eos.ActN("create")
 
 	var dump map[string]interface{}
 	err = json.Unmarshal(data, &dump)
