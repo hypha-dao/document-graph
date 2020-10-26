@@ -11,10 +11,10 @@ import (
 // FlexValueVariant may hold a name, int64, asset, string, or time_point
 var FlexValueVariant = eos.NewVariantDefinition([]eos.VariantType{
 	{Name: "name", Type: eos.Name("")},
-	{Name: "int64", Type: int64(0)},
-	{Name: "asset", Type: (*eos.Asset)(nil)}, // Syntax for pointer to a type, could be any struct
 	{Name: "string", Type: ""},
+	{Name: "asset", Type: (*eos.Asset)(nil)}, // Syntax for pointer to a type, could be any struct
 	{Name: "time_point", Type: eos.TimePoint(0)},
+	{Name: "int64", Type: int64(0)},
 	{Name: "checksum256", Type: eos.Checksum256([]byte("0"))},
 })
 
@@ -119,10 +119,10 @@ type ContentGroup []ContentItem
 type Document struct {
 	ID            uint64          `json:"id"`
 	Hash          eos.Checksum256 `json:"hash"`
-	Creator       eos.Name        `json:"creator"`
+	Creator       eos.AccountName `json:"creator"`
 	ContentGroups []ContentGroup  `json:"content_groups"`
 	Certificates  []struct {
-		Certifier         eos.Name           `json:"certifier"`
+		Certifier         eos.AccountName    `json:"certifier"`
 		Notes             string             `json:"notes"`
 		CertificationDate eos.BlockTimestamp `json:"certification_date"`
 	} `json:"certificates"`

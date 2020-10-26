@@ -139,7 +139,7 @@ func TestDocumentJSONUnmarshal(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, d.ID, uint64(24), "id")
 	assert.Equal(t, d.Hash.String(), string("05e81010c4600ed5d978d2ddf22420ffdf6c4094f4b3822711f0596c7c342ccb"), "hash")
-	assert.Equal(t, d.Creator, eos.Name("johnnyhypha1"), "creator")
+	assert.Equal(t, d.Creator, eos.AN("johnnyhypha1"), "creator")
 	assert.Equal(t, len(d.ContentGroups), 2, "content groups length")
 	assert.Equal(t, len(d.ContentGroups[0]), 8, "first content group length")
 	assert.Equal(t, d.ContentGroups[0][1].Label, string("title"), "title label")
@@ -176,6 +176,30 @@ func TestGetContentNotFound(t *testing.T) {
 	})
 
 	require.Nil(t, content)
+}
+
+func TestAddContent(t *testing.T) {
+	var d Document
+
+	err := json.Unmarshal([]byte(testDocument), &d)
+	require.NoError(t, err)
+
+	require.Equal(t, 8, len(d.ContentGroups[0]))
+
+	hash := eos.Checksum256("7463fa7dda551b9c4bbd2ba17b793931c825cefff9eede14461fd1a5c9f07d15")
+
+	fv := &FlexValue{
+		BaseVariant: eos.BaseVariant{
+			TypeID: FlexValueVariant.TypeID("checksum256"),
+			Impl:   hash,
+		}}
+
+	var ci ContentItem
+	ci.Label = "badge"
+	ci.Value = fv
+
+	d.ContentGroups[0] = append(d.ContentGroups[0], ci)
+	require.Equal(t, 9, len(d.ContentGroups[0]))
 }
 
 func TestExamplePayloads(t *testing.T) {
