@@ -130,6 +130,23 @@ func CreateEdge(ctx context.Context, api *eos.API,
 	return eostest.ExecTrx(ctx, api, actions)
 }
 
+// EdgeExists checks to see if the edge exists
+func EdgeExists(ctx context.Context, api *eos.API, contract eos.AccountName,
+	fromNode, toNode Document, edgeName eos.Name) (bool, error) {
+
+	edges, err := fromNode.GetEdgesFromByName(ctx, api, contract, edgeName)
+	if err != nil {
+		return false, fmt.Errorf("get edges from by name doc: %v err: %v", fromNode.Hash, err)
+	}
+
+	for _, edge := range edges {
+		if edge.ToNode.String() == toNode.Hash.String() {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
 func (d *Document) getEdgesIndex(ctx context.Context, api *eos.API, contract eos.AccountName, edgeIndex string) ([]Edge, error) {
 	var edges []Edge
 	var request eos.GetTableRowsRequest

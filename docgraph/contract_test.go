@@ -202,6 +202,14 @@ func (suite *ContractTestSuite) TestEdges() {
 			edgesToByName, err = test.toDoc.GetEdgesToByName(suite.ctx, suite.api, suite.DocsContract, eos.Name("wrongedge"))
 			suite.Require().NoError(err)
 			suite.Assert().Equal(0, len(edgesToByName))
+
+			doesExist, err := EdgeExists(suite.ctx, suite.api, suite.DocsContract, test.fromDoc, test.toDoc, test.edgeName)
+			suite.Require().NoError(err)
+			suite.Require().True(doesExist)
+
+			doesNotExist, err := EdgeExists(suite.ctx, suite.api, suite.DocsContract, test.fromDoc, test.toDoc, eos.Name("doesnotexist"))
+			suite.Require().NoError(err)
+			suite.Require().False(doesNotExist)
 		})
 	}
 }
