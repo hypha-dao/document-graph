@@ -12,7 +12,7 @@ namespace hyphaspace
         string readable_hash = document_graph::to_hex((const char *)byte_arr.data(), byte_arr.size());
 
         // if this content exists already, error out and send back the hash of the existing document
-        check(h_itr != hash_index.end(), "parent does not exist: " + readable_hash);
+        check(h_itr != hash_index.end(), "document does not exist: " + readable_hash);
         return *h_itr;
     }
 

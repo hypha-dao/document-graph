@@ -105,6 +105,22 @@ Edges can be removed using any of these options:
 2) all edges for a specific from and to nodes, or
 3) all edges for a specific from node and edge name.
  
+# Local Testing
+A great way to get started is running the unit tests.
+
+> NOTE: there is a mocha/JS script available at test/document.test.js. However, it depends on eoslime, which is not yet compatible with eosjs 21. These tests will not work until eoslime is upgraded. Go has been adopted as the preferred test harness for Hypha DAO contracts.
+
+- Install Go (https://golang.org/dl/)
+- Install eosio & eosio.cdt
+
+```
+git clone https://github.com/hypha-dao/document
+cd document
+cmake .
+make
+cd docgraph
+go test -v -timeout 0
+```
 
 ## cleos Quickstart
 ``` bash
