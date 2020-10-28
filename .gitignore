@@ -2,7 +2,6 @@
 build
 **/CMakeFiles
 **/cmake_install.cmake
-ricardian
 **/Makefile
 **/CMakeCache.txt
 document_project-prefix

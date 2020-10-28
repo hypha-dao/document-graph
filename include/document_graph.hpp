@@ -106,6 +106,8 @@ namespace hyphaspace
         void remove_edges (const checksum256 &from_node, const name &edge_name, const bool strict);
         void remove_edges (const checksum256 &node, const bool strict);
 
+        vector<edge> get_edges (const checksum256 &from_node, const name &edge_name, const bool strict);
+        
         // Any account/member can creator a new document, support many options/constructors
         document create_document(const name &creator, const vector<content_group> &content_groups);
         document create_document(const name &creator, const content_group &content_group);

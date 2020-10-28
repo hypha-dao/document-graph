@@ -19,6 +19,28 @@ namespace hyphaspace
         });
     }
 
+    vector<document_graph::edge> document_graph::get_edges (const checksum256 &from_node, const name &edge_name, const bool strict)
+    {
+        vector<document_graph::edge> edges;
+        edge_table e_t (contract, contract.value);
+        auto from_node_index = e_t.get_index<name("fromnode")>();
+        auto itr = from_node_index.find (from_node);
+
+        bool found = false;
+        while (itr != from_node_index.end() && itr->from_node == from_node) {
+            if (itr->edge_name == edge_name) {
+                edges.push_back (*itr);
+                found = true;
+            } 
+        } 
+
+        if (strict) {
+            check (found , "no edges not exist: from " + readable_hash(from_node) + " with name " + edge_name.to_string());
+        }
+
+        return edges;
+    }
+
     // find the specific edge of this from_node, to_node, and edge_name
     // if strict, the function will assert failure if no edge is found
     void document_graph::remove_edge (const checksum256 &from_node, const checksum256 &to_node, const name &edge_name, const bool strict)
