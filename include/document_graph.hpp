@@ -94,23 +94,27 @@ namespace hyphaspace
             time_point created_date = current_time_point();
             uint64_t by_created() const { return created_date.sec_since_epoch(); }
 
+            name creator;
+            uint64_t by_creator() const { return creator.value; }
+
             uint64_t primary_key() const { return id; }
 
             EOSLIB_SERIALIZE(edge, (id) (from_node_edge_name_index)(from_node_to_node_index)(to_node_edge_name_index)
-                                        (from_node)(to_node)(edge_name)(created_date))
+                                        (from_node)(to_node)(edge_name)
+                                        (created_date)(creator))
         };
 
         typedef multi_index<name("edges"), edge,
             indexed_by<name("fromnode"), const_mem_fun<edge, checksum256, &edge::by_from>>,
             indexed_by<name("tonode"), const_mem_fun<edge, checksum256, &edge::by_to>>,
             indexed_by<name("edgename"), const_mem_fun<edge, uint64_t, &edge::by_edge_name>>,
-            indexed_by<name("bycreated"), const_mem_fun<edge, uint64_t, &edge::by_created>>,
             indexed_by<name("byfromname"), const_mem_fun<edge, uint64_t, &edge::by_from_node_edge_name_index>>,
             indexed_by<name("byfromto"), const_mem_fun<edge, uint64_t, &edge::by_from_node_to_node_index>>,
-            indexed_by<name("bytoname"), const_mem_fun<edge, uint64_t, &edge::by_to_node_edge_name_index>>>
+            indexed_by<name("bytoname"), const_mem_fun<edge, uint64_t, &edge::by_to_node_edge_name_index>>,
+            indexed_by<name("bycreated"), const_mem_fun<edge, uint64_t, &edge::by_created>>,
+            indexed_by<name("bycreator"), const_mem_fun<edge, uint64_t, &edge::by_creator>>>
         edge_table;
 
-        uint64_t to_uint64 (const checksum256 &document_hash);
         void create_edge (const checksum256 &from_node, const checksum256 &to_node, const name &edge_name);
         void create_edge (const checksum256 &from_node, const checksum256 &to_node, const name &edge_name, const bool strict);
 
@@ -189,6 +193,7 @@ namespace hyphaspace
         static std::string to_hex(const char *d, uint32_t s);
         static std::string readable_hash (const checksum256 &proposal_hash);
         
+        // uint64_t to_uint64 (const checksum256 &document_hash);
         static uint64_t to_uint64 (const string &fingerprint);
         static uint64_t edge_id(checksum256 from_node, checksum256 to_node, name edge_name);
         static uint64_t hash(checksum256 from_node, checksum256 to_node);

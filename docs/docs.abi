@@ -155,6 +155,10 @@
                 {
                     "name": "created_date",
                     "type": "time_point"
+                },
+                {
+                    "name": "creator",
+                    "type": "name"
                 }
             ]
         },

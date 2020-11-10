@@ -218,6 +218,8 @@ func TestRemoveEdges(t *testing.T) {
 		_, err = docgraph.CreateEdge(env.ctx, &env.api, env.Docs, env.Creators[1], docs[i].Hash, docs[i+1].Hash, "test")
 		assert.NilError(t, err)
 	}
+
+	_, err = docgraph.RemoveEdges(env.ctx, &env.api, env.Docs, docs[2].Hash, eos.Name("test"))
 }
 
 func TestLoadDocument(t *testing.T) {

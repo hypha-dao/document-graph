@@ -2,7 +2,10 @@
 
 namespace hyphaspace
 {
-    void document_graph::create_edge (const checksum256 &from_node, const checksum256 &to_node, const name &edge_name, const bool strict)
+    void document_graph::create_edge (const checksum256 &from_node, 
+                                        const checksum256 &to_node, 
+                                        const name &edge_name, 
+                                        const bool strict)
     {
         // these functions will assert failure if the documents do not exist
         get_document(from_node);
@@ -23,6 +26,8 @@ namespace hyphaspace
                 e.from_node_edge_name_index = hash(from_node, edge_name);
                 e.from_node_to_node_index = hash(from_node, to_node);
                 e.to_node_edge_name_index = hash(to_node, edge_name);
+
+                e.creator = contract;
             });
             return;
         } else if (strict) {  // if it does exist and the function was called with strict=true, error out
@@ -34,7 +39,9 @@ namespace hyphaspace
         return;
     }
 
-    void document_graph::create_edge (const checksum256 &from_node, const checksum256 &to_node, const name &edge_name)
+    void document_graph::create_edge (  const checksum256 &from_node, 
+                                        const checksum256 &to_node, 
+                                        const name &edge_name)
     {
         return create_edge (from_node, to_node, edge_name, true);
     }
@@ -147,10 +154,10 @@ namespace hyphaspace
         edge_table e_t (contract, contract.value);
         auto itr = e_t.find (edge_id (from_node, to_node, edge_name));
 
-        if (strict) {
-            check (itr != e_t.end(), "edge does not exist: from " + readable_hash(from_node) 
+        if (itr == e_t.end()) {
+            check (strict, "edge does not exist: from " + readable_hash(from_node) 
                 + " to " + readable_hash(to_node) + " with edge name of " + edge_name.to_string());
-
+        } else {
             e_t.erase (itr);
         }
     }
@@ -159,19 +166,16 @@ namespace hyphaspace
     // if strict, the function will assert failure if no edges are found
     void document_graph::remove_edges (const checksum256 &from_node, const name &edge_name, const bool strict)
     {
+        vector<document_graph::edge> edges;
+        uint64_t index = hash(from_node, edge_name);
         edge_table e_t (contract, contract.value);
-        
-        auto from_node_index = e_t.get_index<name("fromnode")>();
-        auto itr = from_node_index.find (from_node);
+        auto from_name_index = e_t.get_index<name("byfromname")>();
+        auto itr = from_name_index.find (index);
 
         bool found = false;
-        while (itr != from_node_index.end() && itr->from_node == from_node) {
-            if (itr->edge_name == edge_name) {
-                itr = from_node_index.erase (itr);
-                found = true;
-            } else {
-                itr++;
-            }
+        while (itr != from_name_index.end() && itr->from_node_edge_name_index == index) {
+            itr = from_name_index.erase (itr);
+            found = true;
         } 
 
         if (strict) {
@@ -183,19 +187,16 @@ namespace hyphaspace
     // if strict, the function will assert failure if no edges are found
     void document_graph::remove_edges (const checksum256 &from_node, const checksum256 &to_node, const bool strict)
     {
+        vector<document_graph::edge> edges;
+        uint64_t index = hash(from_node, to_node);
         edge_table e_t (contract, contract.value);
-        
-        auto from_node_index = e_t.get_index<name("fromnode")>();
-        auto itr = from_node_index.find (from_node);
+        auto from_to_index = e_t.get_index<name("byfromto")>();
+        auto itr = from_to_index.find (index);
 
         bool found = false;
-        while (itr != from_node_index.end() && itr->from_node == from_node) {
-            if (itr->to_node == to_node) {
-                itr = from_node_index.erase (itr);
-                found = true;
-            } else {
-                itr++;
-            }
+        while (itr != from_to_index.end() && itr->from_node_to_node_index == index) {
+            itr = from_to_index.erase (itr);
+            found = true;
         } 
 
         if (strict) {
