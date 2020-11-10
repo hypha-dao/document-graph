@@ -129,6 +129,18 @@
                     "type": "uint64"
                 },
                 {
+                    "name": "from_node_edge_name_index",
+                    "type": "uint64"
+                },
+                {
+                    "name": "from_node_to_node_index",
+                    "type": "uint64"
+                },
+                {
+                    "name": "to_node_edge_name_index",
+                    "type": "uint64"
+                },
+                {
                     "name": "from_node",
                     "type": "checksum256"
                 },

@@ -151,21 +151,9 @@ namespace hyphaspace
         return document_graph::to_hex((const char *)byte_arr.data(), byte_arr.size());
     }
 
-    // converts a checksum256 to a uint64 type
-    // uint64_t document_graph::to_uint64 (const checksum256 &document_hash) 
-    // {
-    //     uint64_t id = 0;
-    //     auto hbytes = document_hash.extract_as_byte_array();
-    //     for(int i=0; i<4; i++) {
-    //         id <<=8;
-    //         id |= hbytes[i];
-    //     }
-    //     return id;
-    // }
-
-    uint64_t document_graph::edge_id(checksum256 from_node, checksum256 to_node, name edge_name)
+    // converts a string to a uint64 type
+    uint64_t document_graph::to_uint64 (const string &fingerprint) 
     {
-        std::string fingerprint = readable_hash(from_node) + readable_hash(to_node) + edge_name.to_string();
         uint64_t id = 0;
         checksum256 h = sha256(const_cast<char*>(fingerprint.c_str()), fingerprint.size());
         auto hbytes = h.extract_as_byte_array();
@@ -174,6 +162,21 @@ namespace hyphaspace
             id |= hbytes[i];
         }
         return id;
+    }
+
+    uint64_t document_graph::edge_id(checksum256 from_node, checksum256 to_node, name edge_name)
+    {
+        return to_uint64(readable_hash(from_node) + readable_hash(to_node) + edge_name.to_string());
+    }
+
+    uint64_t document_graph::hash(checksum256 from_node, checksum256 to_node) 
+    {
+        return to_uint64(readable_hash(from_node) + readable_hash(to_node));
+    }
+
+    uint64_t document_graph::hash(checksum256 node, name edge_name) 
+    {
+        return to_uint64(readable_hash(node) + edge_name.to_string());
     }
 
 } // namespace hyphaspace
