@@ -105,9 +105,9 @@ namespace hyphaspace
             indexed_by<name("tonode"), const_mem_fun<edge, checksum256, &edge::by_to>>,
             indexed_by<name("edgename"), const_mem_fun<edge, uint64_t, &edge::by_edge_name>>,
             indexed_by<name("bycreated"), const_mem_fun<edge, uint64_t, &edge::by_created>>,
-            indexed_by<name("byfromedge"), const_mem_fun<edge, uint64_t, &edge::by_from_node_edge_name_index>>,
+            indexed_by<name("byfromname"), const_mem_fun<edge, uint64_t, &edge::by_from_node_edge_name_index>>,
             indexed_by<name("byfromto"), const_mem_fun<edge, uint64_t, &edge::by_from_node_to_node_index>>,
-            indexed_by<name("bytoedge"), const_mem_fun<edge, uint64_t, &edge::by_to_node_edge_name_index>>>
+            indexed_by<name("bytoname"), const_mem_fun<edge, uint64_t, &edge::by_to_node_edge_name_index>>>
         edge_table;
 
         uint64_t to_uint64 (const checksum256 &document_hash);
@@ -120,12 +120,14 @@ namespace hyphaspace
         void remove_edges (const checksum256 &node, const bool strict);
 
         vector<edge> get_edges (const checksum256 &from_node, const name &edge_name, const bool strict);
-        // vector<edge> get_edges (const checksum256 &to_node, const name &edge_name, const bool strict);
-        // vector<edge> get_edges (const checksum256 &from_node, const checksum256 &to_node, const bool strict);
+        vector<edge> get_edges_from_name (const checksum256 &from_node, const name &edge_name, const bool strict);
+        vector<edge> get_edges_to_name (const checksum256 &to_node, const name &edge_name, const bool strict);
+        vector<edge> get_edges_from_to (const checksum256 &from_node, const checksum256 &to_node, const bool strict);
 
         edge get_edge (const checksum256 &from_node, const name &edge_name, const bool strict);
-        // edge get_edge (const checksum256 &to_node, const name &edge_name, const bool strict);
-        // edge get_edge (const checksum256 &from_node, const checksum256 &to_node, const bool strict);
+        edge get_edge_from_name (const checksum256 &from_node, const name &edge_name, const bool strict);
+        edge get_edge_to_name (const checksum256 &to_node, const name &edge_name, const bool strict);
+        edge get_edge_from_to (const checksum256 &from_node, const checksum256 &to_node, const bool strict);
         
         // Any account/member can creator a new document, support many options/constructors
         document create_document(const name &creator, const vector<content_group> &content_groups);

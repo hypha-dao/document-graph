@@ -1,135 +1,118 @@
-package docgraph
+package docgraph_test
 
 import (
-	"context"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
+	"os/exec"
 	"testing"
+	"time"
 
-	eostest "github.com/digital-scarcity/eos-go-test"
 	eos "github.com/eoscanada/eos-go"
-	"github.com/stretchr/testify/suite"
+	"github.com/hypha-dao/document/docgraph"
+	"gotest.tools/assert"
 )
 
 const testingEndpoint = "http://localhost:8888"
 
-// GetAllEdges retrieves all edges from table
-func GetAllEdges(ctx context.Context, api *eos.API, contract eos.AccountName) ([]Edge, error) {
-	var edges []Edge
-	var request eos.GetTableRowsRequest
-	request.Code = string(contract)
-	request.Scope = string(contract)
-	request.Table = "edges"
-	request.Limit = 1000
-	request.JSON = true
-	response, err := api.GetTableRows(ctx, request)
-	if err != nil {
-		log.Println("Error with GetTableRows: ", err)
-		return []Edge{}, err
+var env *Environment
+
+func setupTestCase(t *testing.T) func(t *testing.T) {
+	t.Log("Bootstrapping testing environment ...")
+
+	_, err := exec.Command("sh", "-c", "pkill -SIGINT nodeos").Output()
+	if err == nil {
+		pause(t, time.Second, "Killing nodeos ...", "")
 	}
 
-	err = response.JSONToStructs(&edges)
-	if err != nil {
-		log.Println("Error with JSONToStructs: ", err)
-		return []Edge{}, err
-	}
-	return edges, nil
-}
+	t.Log("Starting nodeos from 'nodeos.sh' script ...")
+	cmd := exec.Command("./nodeos.sh")
+	cmd.Stdout = os.Stdout
+	err = cmd.Start()
+	assert.NilError(t, err)
 
-type ContractTestSuite struct {
-	suite.Suite
-	Accounts     []eos.AccountName
-	DocsContract eos.AccountName
-	api          *eos.API
-	ctx          context.Context
-}
+	t.Log("nodeos PID: ", cmd.Process.Pid)
 
-func (suite *ContractTestSuite) SetupTest() {
-	fmt.Println()
-	fmt.Println("**************  Setting up the test environment *****************")
-	fmt.Println()
+	pause(t, time.Second, "", "")
 
-	suite.api = eos.New(testingEndpoint)
-	//api.Debug = true
-	suite.ctx = context.Background()
-
-	keyBag := &eos.KeyBag{}
-	err := keyBag.ImportPrivateKey(suite.ctx, eostest.DefaultKey())
-	if err != nil {
-		log.Panicf("cannot import default private key: %s", err)
-	}
-	suite.api.SetSigner(keyBag)
-
-	suite.Accounts, err = eostest.CreateRandoms(suite.ctx, suite.api, 20)
-	if err != nil {
-		log.Panicf("cannot create random accounts: %s", err)
-	}
-
-	suite.DocsContract = suite.Accounts[0]
-
-	trxID, err := eostest.SetContract(suite.ctx, suite.api, &suite.DocsContract, "../docs/docs.wasm", "../docs/docs.abi")
-	if err != nil {
-		log.Panicf("cannot set contract: %s", err)
-	}
-	log.Println("Set Docs contract	: ", suite.DocsContract, " : ", trxID)
-}
-
-func (suite *ContractTestSuite) TestDocuments() {
-
-	tests := []struct {
-		name  string
-		input string
-	}{
-		{
-			name:  "simplest",
-			input: "../test/examples/simplest.json",
-		},
-		{
-			name:  "each-type",
-			input: "../test/examples/each-type.json",
-		},
-		{
-			name:  "contribution",
-			input: "../test/examples/contribution.json",
-		},
-	}
-
-	for _, test := range tests {
-		suite.Run(test.name, func() {
-
-			lastDoc, err := CreateDocument(suite.ctx, suite.api, suite.DocsContract, suite.Accounts[1], test.input)
-			suite.Require().NoError(err)
-
-			// unmarshal JSON into a Document
-			data, err := ioutil.ReadFile(test.input)
-			suite.Require().NoError(err)
-			var documentFromFile Document
-			err = json.Unmarshal(data, &documentFromFile)
-			suite.Require().NoError(err)
-
-			// compare document from chain to document from file
-			suite.Assert().True(lastDoc.IsEqual(documentFromFile))
-		})
+	return func(t *testing.T) {
+		folderName := "test_results"
+		t.Log("Saving graph to : ", folderName)
+		err := SaveGraph(env.ctx, &env.api, env.Docs, folderName)
+		assert.NilError(t, err)
 	}
 }
 
-func (suite *ContractTestSuite) TestEdges() {
+func TestDocuments(t *testing.T) {
 
-	doc1, err := CreateDocument(suite.ctx, suite.api, suite.DocsContract, suite.Accounts[1], "../test/examples/simplest.json")
-	suite.Require().NoError(err)
+	teardownTestCase := setupTestCase(t)
+	defer teardownTestCase(t)
 
-	doc2, err := CreateDocument(suite.ctx, suite.api, suite.DocsContract, suite.Accounts[2], "../test/examples/each-type.json")
-	suite.Require().NoError(err)
+	// var env Environment
+	env = SetupEnvironment(t)
+	t.Log("\nEnvironment Setup complete\n")
 
-	// doc3, err := CreateDocument(suite.ctx, suite.api, suite.DocsContract, suite.Accounts[3], "../test/examples/contribution.json")
+	t.Run("Test Documents", func(t *testing.T) {
+
+		tests := []struct {
+			name  string
+			input string
+		}{
+			{
+				name:  "simplest",
+				input: "../test/examples/simplest.json",
+			},
+			{
+				name:  "each-type",
+				input: "../test/examples/each-type.json",
+			},
+			{
+				name:  "contribution",
+				input: "../test/examples/contribution.json",
+			},
+		}
+
+		for _, test := range tests {
+			t.Run(test.name, func(t *testing.T) {
+
+				lastDoc, err := docgraph.CreateDocument(env.ctx, &env.api, env.Docs, env.Creators[0], test.input)
+				assert.NilError(t, err)
+
+				// unmarshal JSON into a Document
+				data, err := ioutil.ReadFile(test.input)
+				assert.NilError(t, err)
+				var documentFromFile docgraph.Document
+				err = json.Unmarshal(data, &documentFromFile)
+				assert.NilError(t, err)
+
+				// compare document from chain to document from file
+				assert.Assert(t, lastDoc.IsEqual(documentFromFile))
+			})
+		}
+	})
+}
+
+func TestEdges(t *testing.T) {
+
+	teardownTestCase := setupTestCase(t)
+	defer teardownTestCase(t)
+	env = SetupEnvironment(t)
+	t.Log("\nEnvironment Setup complete\n")
+
+	doc1, err := docgraph.CreateDocument(env.ctx, &env.api, env.Docs, env.Creators[0], "../test/examples/simplest.json")
+	assert.NilError(t, err)
+
+	doc2, err := docgraph.CreateDocument(env.ctx, &env.api, env.Docs, env.Creators[0], "../test/examples/each-type.json")
+	assert.NilError(t, err)
+
+	// doc3, err := CreateDocument(env.ctx, &env.api, env.Docs, suite.Accounts[3], "../test/examples/contribution.json")
 	// suite.Require().NoError(err)
 
 	tests := []struct {
 		name     string
-		fromDoc  Document
-		toDoc    Document
+		fromDoc  docgraph.Document
+		toDoc    docgraph.Document
 		creator  eos.AccountName
 		edgeName eos.Name
 	}{
@@ -137,97 +120,123 @@ func (suite *ContractTestSuite) TestEdges() {
 			name:     "Test Edge 1",
 			fromDoc:  doc1,
 			toDoc:    doc2,
-			creator:  suite.Accounts[1],
+			creator:  env.Creators[1],
 			edgeName: "edge1",
 		},
 		{
 			name:     "Test Edge 2",
 			fromDoc:  doc2,
 			toDoc:    doc1,
-			creator:  suite.Accounts[2],
+			creator:  env.Creators[2],
 			edgeName: "edge2",
 		},
 	}
 
 	for testIndex, test := range tests {
-		suite.Run("test edges", func() {
+		t.Run("test edges", func(t *testing.T) {
 			log.Println(test.name, "... ")
 
-			_, err = CreateEdge(suite.ctx, suite.api, suite.DocsContract, test.creator, test.fromDoc.Hash, test.toDoc.Hash, test.edgeName)
-			suite.Require().NoError(err)
+			_, err = docgraph.CreateEdge(env.ctx, &env.api, env.Docs, env.Creators[0], test.fromDoc.Hash, test.toDoc.Hash, test.edgeName)
+			assert.NilError(t, err)
 
 			// test number of edges
-			edges, err := GetAllEdges(suite.ctx, suite.api, suite.DocsContract)
-			suite.Require().NoError(err)
-			suite.Assert().Equal(testIndex+1, len(edges))
+			edges, err := GetAllEdges(env.ctx, &env.api, env.Docs)
+			assert.NilError(t, err)
+			assert.Equal(t, testIndex+1, len(edges))
 
 			// there should be 1 edge from doc1 to doc2, named edgeName
-			edgesFrom, err := test.fromDoc.GetEdgesFrom(suite.ctx, suite.api, suite.DocsContract)
-			suite.Require().NoError(err)
-			suite.Assert().Equal(1, len(edgesFrom))
-			suite.Assert().Equal(edgesFrom[0].EdgeName, test.edgeName)
-			suite.Assert().Equal(edgesFrom[0].FromNode, test.fromDoc.Hash)
-			suite.Assert().Equal(edgesFrom[0].ToNode, test.toDoc.Hash)
+			edgesFrom, err := test.fromDoc.GetEdgesFrom(env.ctx, &env.api, env.Docs)
+			assert.NilError(t, err)
+			assert.Equal(t, 1, len(edgesFrom))
+			assert.Equal(t, edgesFrom[0].EdgeName, test.edgeName)
+			assert.Equal(t, edgesFrom[0].FromNode.String(), test.fromDoc.Hash.String())
+			assert.Equal(t, edgesFrom[0].ToNode.String(), test.toDoc.Hash.String())
 
 			// there should be 0 edges from doc2 to doc1
-			edgesTo, err := test.toDoc.GetEdgesTo(suite.ctx, suite.api, suite.DocsContract)
-			suite.Require().NoError(err)
-			suite.Assert().Equal(1, len(edgesTo))
-			suite.Assert().Equal(edgesTo[0].EdgeName, test.edgeName)
-			suite.Assert().Equal(edgesTo[0].FromNode, test.fromDoc.Hash)
-			suite.Assert().Equal(edgesTo[0].ToNode, test.toDoc.Hash)
+			edgesTo, err := test.toDoc.GetEdgesTo(env.ctx, &env.api, env.Docs)
+			assert.NilError(t, err)
+			assert.Equal(t, 1, len(edgesTo))
+			assert.Equal(t, edgesTo[0].EdgeName, test.edgeName)
+			assert.Equal(t, edgesTo[0].FromNode.String(), test.fromDoc.Hash.String())
+			assert.Equal(t, edgesTo[0].ToNode.String(), test.toDoc.Hash.String())
 
 			// there should be 1 edge from doc1 to doc2, named edgeName
-			edgesFromByName, err := test.fromDoc.GetEdgesFromByName(suite.ctx, suite.api, suite.DocsContract, test.edgeName)
-			suite.Require().NoError(err)
-			suite.Assert().Equal(1, len(edgesFromByName))
-			suite.Assert().Equal(edgesFromByName[0].EdgeName, test.edgeName)
-			suite.Assert().Equal(edgesFromByName[0].FromNode, test.fromDoc.Hash)
-			suite.Assert().Equal(edgesFromByName[0].ToNode, test.toDoc.Hash)
+			edgesFromByName, err := test.fromDoc.GetEdgesFromByName(env.ctx, &env.api, env.Docs, test.edgeName)
+			assert.NilError(t, err)
+			assert.Equal(t, 1, len(edgesFromByName))
+			assert.Equal(t, edgesFromByName[0].EdgeName, test.edgeName)
+			assert.Equal(t, edgesFromByName[0].FromNode.String(), test.fromDoc.Hash.String())
+			assert.Equal(t, edgesFromByName[0].ToNode.String(), test.toDoc.Hash.String())
 
 			// there should be 1 edge from doc1 to doc2, named edgeName
-			edgesToByName, err := test.toDoc.GetEdgesToByName(suite.ctx, suite.api, suite.DocsContract, test.edgeName)
-			suite.Require().NoError(err)
-			suite.Assert().Equal(1, len(edgesToByName))
-			suite.Assert().Equal(edgesToByName[0].EdgeName, test.edgeName)
-			suite.Assert().Equal(edgesToByName[0].FromNode, test.fromDoc.Hash)
-			suite.Assert().Equal(edgesToByName[0].ToNode, test.toDoc.Hash)
+			edgesToByName, err := test.toDoc.GetEdgesToByName(env.ctx, &env.api, env.Docs, test.edgeName)
+			assert.NilError(t, err)
+			assert.Equal(t, 1, len(edgesToByName))
+			assert.Equal(t, edgesToByName[0].EdgeName, test.edgeName)
+			assert.Equal(t, edgesToByName[0].FromNode.String(), test.fromDoc.Hash.String())
+			assert.Equal(t, edgesToByName[0].ToNode.String(), test.toDoc.Hash.String())
 
 			// there should be 0 edge from doc1 to doc2, named wrongedge
-			edgesFromByName, err = test.fromDoc.GetEdgesFromByName(suite.ctx, suite.api, suite.DocsContract, eos.Name("wrongedge"))
-			suite.Require().NoError(err)
-			suite.Assert().Equal(0, len(edgesFromByName))
+			edgesFromByName, err = test.fromDoc.GetEdgesFromByName(env.ctx, &env.api, env.Docs, eos.Name("wrongedge"))
+			assert.NilError(t, err)
+			assert.Equal(t, 0, len(edgesFromByName))
 
 			// there should be 0 edge from doc1 to doc2, named edgeName
-			edgesToByName, err = test.toDoc.GetEdgesToByName(suite.ctx, suite.api, suite.DocsContract, eos.Name("wrongedge"))
-			suite.Require().NoError(err)
-			suite.Assert().Equal(0, len(edgesToByName))
+			edgesToByName, err = test.toDoc.GetEdgesToByName(env.ctx, &env.api, env.Docs, eos.Name("wrongedge"))
+			assert.NilError(t, err)
+			assert.Equal(t, 0, len(edgesToByName))
 
-			doesExist, err := EdgeExists(suite.ctx, suite.api, suite.DocsContract, test.fromDoc, test.toDoc, test.edgeName)
-			suite.Require().NoError(err)
-			suite.Require().True(doesExist)
+			doesExist, err := docgraph.EdgeExists(env.ctx, &env.api, env.Docs, test.fromDoc, test.toDoc, test.edgeName)
+			assert.NilError(t, err)
+			assert.Assert(t, doesExist)
 
-			doesNotExist, err := EdgeExists(suite.ctx, suite.api, suite.DocsContract, test.fromDoc, test.toDoc, eos.Name("doesnotexist"))
-			suite.Require().NoError(err)
-			suite.Require().False(doesNotExist)
+			doesNotExist, err := docgraph.EdgeExists(env.ctx, &env.api, env.Docs, test.fromDoc, test.toDoc, eos.Name("doesnotexist"))
+			assert.NilError(t, err)
+			assert.Assert(t, !doesNotExist)
 		})
 	}
 }
 
-func (suite *ContractTestSuite) TestLoadDocument() {
+func TestRemoveEdges(t *testing.T) {
 
-	doc, err := CreateDocument(suite.ctx, suite.api, suite.DocsContract, suite.Accounts[1], "../test/examples/simplest.json")
-	suite.Require().NoError(err)
+	teardownTestCase := setupTestCase(t)
+	defer teardownTestCase(t)
 
-	loadedDoc, err := LoadDocument(suite.ctx, suite.api, suite.DocsContract, doc.Hash.String())
-	suite.Require().NoError(err)
-	suite.Assert().Equal(doc.Hash.String(), loadedDoc.Hash.String())
-	suite.Assert().Equal(doc.Creator, loadedDoc.Creator)
+	// var env Environment
+	env = SetupEnvironment(t)
+	t.Log("\nEnvironment Setup complete\n")
 
-	_, err = LoadDocument(suite.ctx, suite.api, suite.DocsContract, "ahashthatwillnotexist")
-	suite.Require().Error(err)
+	// var docs []Document
+	var err error
+	docs := make([]docgraph.Document, 10)
+	for i := 1; i < 10; i++ {
+		docs[i], err = CreateRandomDocument(env.ctx, &env.api, env.Docs, env.Creators[1])
+		assert.NilError(t, err)
+	}
+
+	for i := 1; i < 5; i++ {
+		_, err = docgraph.CreateEdge(env.ctx, &env.api, env.Docs, env.Creators[1], docs[i].Hash, docs[i+1].Hash, "test")
+		assert.NilError(t, err)
+	}
 }
 
-func TestContractSuite(t *testing.T) {
-	suite.Run(t, new(ContractTestSuite))
+func TestLoadDocument(t *testing.T) {
+
+	teardownTestCase := setupTestCase(t)
+	defer teardownTestCase(t)
+
+	// var env Environment
+	env = SetupEnvironment(t)
+	t.Log("\nEnvironment Setup complete\n")
+
+	doc, err := docgraph.CreateDocument(env.ctx, &env.api, env.Docs, env.Creators[1], "../test/examples/simplest.json")
+	assert.NilError(t, err)
+
+	loadedDoc, err := docgraph.LoadDocument(env.ctx, &env.api, env.Docs, doc.Hash.String())
+	assert.NilError(t, err)
+	assert.Equal(t, doc.Hash.String(), loadedDoc.Hash.String())
+	assert.Equal(t, doc.Creator, loadedDoc.Creator)
+
+	_, err = docgraph.LoadDocument(env.ctx, &env.api, env.Docs, "ahashthatwillnotexist")
+	assert.ErrorContains(t, err, "Internal Service Error")
 }
