@@ -16,11 +16,6 @@ type DocumentGraph struct {
 	RootNode Document
 }
 
-type createDoc struct {
-	Creator       eos.AccountName `json:"creator"`
-	ContentGroups []ContentGroup  `json:"content_groups"`
-}
-
 // CreateDocument creates a new document on chain from the provided file
 func CreateDocument(ctx context.Context, api *eos.API,
 	contract, creator eos.AccountName,

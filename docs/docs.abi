@@ -129,6 +129,18 @@
                     "type": "uint64"
                 },
                 {
+                    "name": "from_node_edge_name_index",
+                    "type": "uint64"
+                },
+                {
+                    "name": "from_node_to_node_index",
+                    "type": "uint64"
+                },
+                {
+                    "name": "to_node_edge_name_index",
+                    "type": "uint64"
+                },
+                {
                     "name": "from_node",
                     "type": "checksum256"
                 },
@@ -143,6 +155,10 @@
                 {
                     "name": "created_date",
                     "type": "time_point"
+                },
+                {
+                    "name": "creator",
+                    "type": "name"
                 }
             ]
         },
@@ -197,6 +213,42 @@
             ]
         },
         {
+            "name": "remedgesfn",
+            "base": "",
+            "fields": [
+                {
+                    "name": "from_node",
+                    "type": "checksum256"
+                },
+                {
+                    "name": "edge_name",
+                    "type": "name"
+                },
+                {
+                    "name": "strict",
+                    "type": "bool"
+                }
+            ]
+        },
+        {
+            "name": "remedgesft",
+            "base": "",
+            "fields": [
+                {
+                    "name": "from_node",
+                    "type": "checksum256"
+                },
+                {
+                    "name": "to_node",
+                    "type": "checksum256"
+                },
+                {
+                    "name": "strict",
+                    "type": "bool"
+                }
+            ]
+        },
+        {
             "name": "removeedge",
             "base": "",
             "fields": [
@@ -219,7 +271,12 @@
             ]
         },
         {
-            "name": "removeedgese",
+            "name": "reset",
+            "base": "",
+            "fields": []
+        },
+        {
+            "name": "testedgeidx",
             "base": "",
             "fields": [
                 {
@@ -235,29 +292,6 @@
                     "type": "bool"
                 }
             ]
-        },
-        {
-            "name": "removeedgest",
-            "base": "",
-            "fields": [
-                {
-                    "name": "from_node",
-                    "type": "checksum256"
-                },
-                {
-                    "name": "to_node",
-                    "type": "checksum256"
-                },
-                {
-                    "name": "strict",
-                    "type": "bool"
-                }
-            ]
-        },
-        {
-            "name": "reset",
-            "base": "",
-            "fields": []
         }
     ],
     "actions": [
@@ -292,23 +326,28 @@
             "ricardian_contract": ""
         },
         {
+            "name": "remedgesfn",
+            "type": "remedgesfn",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "remedgesft",
+            "type": "remedgesft",
+            "ricardian_contract": ""
+        },
+        {
             "name": "removeedge",
             "type": "removeedge",
             "ricardian_contract": ""
         },
         {
-            "name": "removeedgese",
-            "type": "removeedgese",
-            "ricardian_contract": ""
-        },
-        {
-            "name": "removeedgest",
-            "type": "removeedgest",
-            "ricardian_contract": ""
-        },
-        {
             "name": "reset",
             "type": "reset",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "testedgeidx",
+            "type": "testedgeidx",
             "ricardian_contract": ""
         }
     ],

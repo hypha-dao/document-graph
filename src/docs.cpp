@@ -25,14 +25,23 @@ void docs::removeedge (const checksum256 &from_node, const checksum256 &to_node,
    _document_graph.remove_edge(from_node, to_node, edge_name, strict);
 }
 
-void docs::removeedgest (const checksum256 &from_node, const checksum256 &to_node, const bool strict) 
+void docs::remedgesft (const checksum256 &from_node, const checksum256 &to_node, const bool strict) 
 {
    _document_graph.remove_edges(from_node, to_node, strict);
 }
 
-void docs::removeedgese (const checksum256 &from_node, const name &edge_name, const bool strict) 
+void docs::remedgesfn (const checksum256 &from_node, const name &edge_name, const bool strict) 
 {
    _document_graph.remove_edges (from_node, edge_name, strict);
+}
+
+void docs::testedgeidx (const checksum256 &from_node, const name &edge_name, const bool strict) 
+{
+   vector<document_graph::edge> edges = _document_graph.get_edges_from_name(from_node, edge_name, strict);
+   for ( document_graph::edge e : edges) 
+   {
+      _document_graph.remove_edge(e.from_node, e.to_node, e.edge_name, true);
+   }
 }
 
 void docs::fork (const checksum256 &hash, const name &creator, const vector<document_graph::content_group> &content_groups )
