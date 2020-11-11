@@ -53,6 +53,35 @@ namespace hyphaspace
         return get_content_group (document.content_groups, content_group_label, strict);
     }
 
+    std::vector<document_graph::content_group> document_graph::get_content_groups_of_type(const vector<content_group> &content_groups, 
+                                                                            const name &content_group_type,
+                                                                            const bool &strict)
+    {
+        vector<content_group> typed_content_groups;
+        bool found = false;
+        for (const document_graph::content_group &content_group : content_groups)
+        {
+            for (const document_graph::content &content : content_group)
+            {
+                if (content.label == "content_group_type")
+                {
+                    check(std::holds_alternative<name>(content.value), "fatal error: content_group_type must be a name");
+                    if (std::get<name>(content.value) == content_group_type)
+                    {
+                        typed_content_groups.push_back (content_group);
+                        found = true;
+                        break;
+                    }
+                }
+            }
+        }
+        if (strict && !found) 
+        {
+            check (false, "content_group_type with provided value is required in at least one content_group: " + content_group_type.to_string());
+        }        
+        return typed_content_groups;
+    }
+
     document_graph::flexvalue document_graph::get_content(const content_group &content_group,
                                                           const string &content_label,
                                                           const bool &strict)
