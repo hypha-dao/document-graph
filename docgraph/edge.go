@@ -16,26 +16,53 @@ type Edge struct {
 	CreatedDate eos.BlockTimestamp `json:"created_date"`
 }
 
-type removeEdges struct {
+// RemoveEdges ...
+type RemoveEdges struct {
 	FromNode eos.Checksum256 `json:"from_node"`
 	EdgeName eos.Name        `json:"edge_name"`
 	Strict   bool            `json:"strict"`
 }
 
-// RemoveEdges ...
-func RemoveEdges(ctx context.Context, api *eos.API,
+type removeEdgesFT struct {
+	FromNode eos.Checksum256 `json:"from_node"`
+	ToNode   eos.Checksum256 `json:"to_node"`
+	Strict   bool            `json:"strict"`
+}
+
+// RemoveEdgesFromAndName ...
+func RemoveEdgesFromAndName(ctx context.Context, api *eos.API,
 	contract eos.AccountName,
 	fromHash eos.Checksum256, edgeName eos.Name) (string, error) {
 
 	actions := []*eos.Action{{
 		Account: contract,
-		Name:    eos.ActN("removeedgese"),
+		Name:    eos.ActN("remedgesfn"),
 		Authorization: []eos.PermissionLevel{
 			{Actor: contract, Permission: eos.PN("active")},
 		},
-		ActionData: eos.NewActionData(removeEdges{
+		ActionData: eos.NewActionData(RemoveEdges{
 			FromNode: fromHash,
 			EdgeName: edgeName,
+			Strict:   true,
+		}),
+	}}
+	return eostest.ExecTrx(ctx, api, actions)
+}
+
+// RemoveEdgesFromAndTo ...
+func RemoveEdgesFromAndTo(ctx context.Context, api *eos.API,
+	contract eos.AccountName,
+	fromHash, toHash eos.Checksum256) (string, error) {
+
+	actions := []*eos.Action{{
+		Account: contract,
+		Name:    eos.ActN("remedgesft"),
+		Authorization: []eos.PermissionLevel{
+			{Actor: contract, Permission: eos.PN("active")},
+		},
+		ActionData: eos.NewActionData(removeEdgesFT{
+			FromNode: fromHash,
+			ToNode:   toHash,
 			Strict:   true,
 		}),
 	}}

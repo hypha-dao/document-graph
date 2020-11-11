@@ -14,6 +14,7 @@ import (
 	"github.com/hypha-dao/document/docgraph"
 	"github.com/k0kubun/go-ansi"
 	"github.com/schollz/progressbar/v3"
+	"gotest.tools/assert"
 )
 
 type createDoc struct {
@@ -176,4 +177,33 @@ func SaveGraph(ctx context.Context, api *eos.API, contract eos.AccountName, fold
 	}
 
 	return nil
+}
+
+func checkEdge(t *testing.T, env *Environment, fromEdge, toEdge docgraph.Document, edgeName eos.Name) {
+	exists, err := docgraph.EdgeExists(env.ctx, &env.api, env.Docs, fromEdge, toEdge, edgeName)
+	assert.NilError(t, err)
+	if !exists {
+		t.Log("Edge does not exist	: ", fromEdge.Hash.String(), "	-- ", edgeName, "	--> 	", toEdge.Hash.String())
+	}
+	assert.Check(t, exists)
+}
+
+// this function/action will remove all edges with the from node and edge name
+func EdgeIdxTest(ctx context.Context, api *eos.API,
+	contract eos.AccountName,
+	fromHash eos.Checksum256, edgeName eos.Name) (string, error) {
+
+	actions := []*eos.Action{{
+		Account: contract,
+		Name:    eos.ActN("testedgeidx"),
+		Authorization: []eos.PermissionLevel{
+			{Actor: contract, Permission: eos.PN("active")},
+		},
+		ActionData: eos.NewActionData(docgraph.RemoveEdges{
+			FromNode: fromHash,
+			EdgeName: edgeName,
+			Strict:   true,
+		}),
+	}}
+	return eostest.ExecTrx(ctx, api, actions)
 }

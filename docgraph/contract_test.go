@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"strconv"
 	"testing"
 	"time"
 
@@ -17,6 +18,7 @@ import (
 const testingEndpoint = "http://localhost:8888"
 
 var env *Environment
+var chainResponsePause time.Duration
 
 func setupTestCase(t *testing.T) func(t *testing.T) {
 	t.Log("Bootstrapping testing environment ...")
@@ -31,10 +33,11 @@ func setupTestCase(t *testing.T) func(t *testing.T) {
 	cmd.Stdout = os.Stdout
 	err = cmd.Start()
 	assert.NilError(t, err)
+	chainResponsePause = time.Second
 
 	t.Log("nodeos PID: ", cmd.Process.Pid)
 
-	pause(t, time.Second, "", "")
+	pause(t, 500*time.Millisecond, "", "")
 
 	return func(t *testing.T) {
 		folderName := "test_results"
@@ -209,17 +212,85 @@ func TestRemoveEdges(t *testing.T) {
 	// var docs []Document
 	var err error
 	docs := make([]docgraph.Document, 10)
-	for i := 1; i < 10; i++ {
+	for i := 0; i < 10; i++ {
 		docs[i], err = CreateRandomDocument(env.ctx, &env.api, env.Docs, env.Creators[1])
 		assert.NilError(t, err)
 	}
 
-	for i := 1; i < 5; i++ {
-		_, err = docgraph.CreateEdge(env.ctx, &env.api, env.Docs, env.Creators[1], docs[i].Hash, docs[i+1].Hash, "test")
+	// ***************************  BEGIN
+	// test removal of edges based on the from_node and edge_name
+	for i := 0; i < 5; i++ {
+		_, err = docgraph.CreateEdge(env.ctx, &env.api, env.Docs, env.Creators[1], docs[0].Hash, docs[i].Hash, "test")
 		assert.NilError(t, err)
+		pause(t, chainResponsePause, "Build block...", "")
 	}
 
-	_, err = docgraph.RemoveEdges(env.ctx, &env.api, env.Docs, docs[2].Hash, eos.Name("test"))
+	allEdges, err := GetAllEdges(env.ctx, &env.api, env.Docs)
+	assert.NilError(t, err)
+	assert.Equal(t, len(allEdges), 5)
+
+	for i := 0; i < 5; i++ {
+		checkEdge(t, env, docs[0], docs[i], eos.Name("test"))
+	}
+
+	// remove edges based on the from_node and edge_name
+	_, err = docgraph.RemoveEdgesFromAndName(env.ctx, &env.api, env.Docs, docs[0].Hash, eos.Name("test"))
+	assert.NilError(t, err)
+
+	allEdges, err = GetAllEdges(env.ctx, &env.api, env.Docs)
+	assert.NilError(t, err)
+	assert.Equal(t, len(allEdges), 0)
+	// *****************************  END
+
+	// *****************************  BEGIN
+	// test removal of edges based on the from_node and to_node
+	for i := 0; i < 3; i++ {
+		_, err = docgraph.CreateEdge(env.ctx, &env.api, env.Docs, env.Creators[1], docs[0].Hash, docs[1].Hash, eos.Name("test"+strconv.Itoa(i+1)))
+		assert.NilError(t, err)
+		pause(t, chainResponsePause, "Build block...", "")
+	}
+
+	allEdges, err = GetAllEdges(env.ctx, &env.api, env.Docs)
+	assert.NilError(t, err)
+	assert.Equal(t, len(allEdges), 3)
+
+	for i := 0; i < 3; i++ {
+		checkEdge(t, env, docs[0], docs[1], eos.Name("test"+strconv.Itoa(i+1)))
+	}
+
+	// remove edges based on the from_node and edge_name
+	_, err = docgraph.RemoveEdgesFromAndTo(env.ctx, &env.api, env.Docs, docs[0].Hash, docs[1].Hash)
+	assert.NilError(t, err)
+
+	allEdges, err = GetAllEdges(env.ctx, &env.api, env.Docs)
+	assert.NilError(t, err)
+	assert.Equal(t, len(allEdges), 0)
+	// *****************************  END
+
+	// ***************************  BEGIN
+	// test removal of edges based on the testedge index action
+	for i := 0; i < 5; i++ {
+		_, err = docgraph.CreateEdge(env.ctx, &env.api, env.Docs, env.Creators[1], docs[0].Hash, docs[i].Hash, "test")
+		assert.NilError(t, err)
+		pause(t, chainResponsePause, "Build block...", "")
+	}
+
+	allEdges, err = GetAllEdges(env.ctx, &env.api, env.Docs)
+	assert.NilError(t, err)
+	assert.Equal(t, len(allEdges), 5)
+
+	for i := 0; i < 5; i++ {
+		checkEdge(t, env, docs[0], docs[i], eos.Name("test"))
+	}
+
+	// remove edges based on the from_node and edge_name
+	_, err = EdgeIdxTest(env.ctx, &env.api, env.Docs, docs[0].Hash, eos.Name("test"))
+	assert.NilError(t, err)
+
+	allEdges, err = GetAllEdges(env.ctx, &env.api, env.Docs)
+	assert.NilError(t, err)
+	assert.Equal(t, len(allEdges), 0)
+	// *****************************  END
 }
 
 func TestLoadDocument(t *testing.T) {

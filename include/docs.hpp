@@ -41,8 +41,11 @@ namespace hyphaspace
       ACTION newedge(const checksum256 &from_node, const checksum256 &to_node, const name &edge_name);
 
       ACTION removeedge(const checksum256 &from_node, const checksum256 &to_node, const name &edge_name, const bool strict);
-      ACTION removeedgest(const checksum256 &from_node, const checksum256 &to_node, const bool strict);
-      ACTION removeedgese(const checksum256 &from_node, const name &edge_name, const bool strict);
+      ACTION remedgesft(const checksum256 &from_node, const checksum256 &to_node, const bool strict);
+      ACTION remedgesfn(const checksum256 &from_node, const name &edge_name, const bool strict);
+      // ACTION remedgestn(const checksum256 &to_node, const name &edge_name, const bool strict);
+
+      ACTION testedgeidx (const checksum256 &from_node, const name &edge_name, const bool strict);
 
       // Fork creates a new document (node in a graph) from an existing document.
       // The forked content should contain only new or updated entries to avoid data duplication. (lazily enforced?)

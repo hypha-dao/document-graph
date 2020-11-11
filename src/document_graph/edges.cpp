@@ -83,7 +83,10 @@ namespace hyphaspace
             edges.push_back (*itr);
             itr++;
         } 
-        check (!strict || edges.size() == 0 , "no edges exist: from " + readable_hash(from_node) + " with name " + edge_name.to_string());
+
+        if (strict) {
+            check (edges.size() > 0 , "no edges exist: from " + readable_hash(from_node) + " with name " + edge_name.to_string());
+        }
 
         return edges;
     }
@@ -92,23 +95,19 @@ namespace hyphaspace
     {
         vector<document_graph::edge> edges;
 
-        // uint64_t index = hash(to_node, edge_name);
-        // edge_table e_t (contract, contract.value);
-        // auto to_name_index = e_t.get_index<name("bytoname")>();
-        // auto itr = to_name_index.find (index);
+        uint64_t index = hash(to_node, edge_name);
+        edge_table e_t (contract, contract.value);
+        auto to_name_index = e_t.get_index<name("bytoname")>();
+        auto itr = to_name_index.find (index);
 
-        // bool found = false;
-        // while (itr != to_name_index.end() && itr->to_node_edge_name_index == index) {
-        //     if (itr->edge_name == edge_name) {
-        //         edges.push_back (*itr);
-        //         found = true;
-        //     } 
-        //     itr++;
-        // } 
+        while (itr != to_name_index.end() && itr->to_node_edge_name_index == index) {
+            edges.push_back (*itr);
+            itr++;
+        } 
 
-        // if (strict) {
-        //     check (found , "no edges exist: to " + readable_hash(to_node) + " with name " + edge_name.to_string());
-        // }
+        if (strict) {
+            check (edges.size() > 0 , "no edges exist: to " + readable_hash(to_node) + " with name " + edge_name.to_string());
+        }
 
         return edges;
     }
@@ -117,23 +116,19 @@ namespace hyphaspace
     {
         vector<document_graph::edge> edges;
 
-        // uint64_t index = hash(from_node, to_node);
-        // edge_table e_t (contract, contract.value);
-        // auto from_to_index = e_t.get_index<name("byfromto")>();
-        // auto itr = from_to_index.find (index);
+        uint64_t index = hash(from_node, to_node);
+        edge_table e_t (contract, contract.value);
+        auto from_to_index = e_t.get_index<name("byfromto")>();
+        auto itr = from_to_index.find (index);
 
-        // bool found = false;
-        // while (itr != from_to_index.end() && itr->from_node_to_node_index == index) {
-        //     if (itr->edge_name == edge_name) {
-        //         edges.push_back (*itr);
-        //         found = true;
-        //     } 
-        //     itr++;
-        // } 
+        while (itr != from_to_index.end() && itr->from_node_to_node_index == index) {
+            edges.push_back (*itr);
+            itr++;
+        } 
 
-        // if (strict) {
-        //     check (found , "no edges exist: to " + readable_hash(to_node) + " with name " + edge_name.to_string());
-        // }
+        if (strict) {
+            check (edges.size() > 0 , "no edges exist: from " + readable_hash(from_node) + " to " + readable_hash(to_node));
+        }
 
         return edges;
     }
