@@ -44,7 +44,7 @@ namespace hyphaspace
             EOSLIB_SERIALIZE(certificate, (certifier)(notes)(certification_date))
         };
 
-        struct [[eosio::table, eosio::contract("docs")]] document
+        struct document
         {
             uint64_t id;
             checksum256 hash;
@@ -70,7 +70,7 @@ namespace hyphaspace
 
         
         // scopes: get_self() 
-        struct [[eosio::table, eosio::contract("docs")]] edge
+        struct edge
         {
             uint64_t id; 
 
@@ -200,3 +200,29 @@ namespace hyphaspace
         static uint64_t hash(checksum256 from_node, name edge_name); 
     };
 }; // namespace hyphaspace
+
+
+
+#define str(x) #x
+
+#define DECLARE_DOCUMENT(contract)\
+using flexvalue = hyphaspace::document_graph::flexvalue;\
+using root_doc = hyphaspace::document_graph::document;\
+struct [[eosio::table, eosio::contract(str(contract)]] contract##document : public root_doc {};\
+using contract_document = contract##document;\
+using document_table =  multi_index<name("documents"), contract_document,\
+                            indexed_by<name("idhash"), const_mem_fun<root_doc, checksum256, &root_doc::by_hash>>,\
+                            indexed_by<name("bycreator"), const_mem_fun<root_doc, uint64_t, &root_doc::by_creator>>,\
+                            indexed_by<name("bycreated"), const_mem_fun<root_doc, uint64_t, &root_doc::by_created>>>;\
+using root_edge = hyphaspace::document_graph::edge;\
+struct [[eosio::table, eosio::contract(str(contract)]] contract##edge : public hyphaspace::document_graph::edge {};\
+using contract_edge = contract##edge;\
+using edge_table = multi_index<name("edges"), contract_edge,\
+            indexed_by<name("fromnode"), const_mem_fun<root_edge, checksum256, &root_edge::by_from>>,\
+            indexed_by<name("tonode"), const_mem_fun<root_edge, checksum256, &root_edge::by_to>>,\
+            indexed_by<name("edgename"), const_mem_fun<root_edge, uint64_t, &root_edge::by_edge_name>>,\
+            indexed_by<name("byfromname"), const_mem_fun<root_edge, uint64_t, &root_edge::by_from_node_edge_name_index>>,\
+            indexed_by<name("byfromto"), const_mem_fun<root_edge, uint64_t, &root_edge::by_from_node_to_node_index>>,\
+            indexed_by<name("bytoname"), const_mem_fun<root_edge, uint64_t, &root_edge::by_to_node_edge_name_index>>,\
+            indexed_by<name("bycreated"), const_mem_fun<root_edge, uint64_t, &root_edge::by_created>>,\
+            indexed_by<name("bycreator"), const_mem_fun<root_edge, uint64_t, &root_edge::by_creator>>>;
