@@ -202,21 +202,18 @@ namespace hyphaspace
 }; // namespace hyphaspace
 
 
-
-#define str(x) #x
-
 #define DECLARE_DOCUMENT(contract)\
 using flexvalue = hyphaspace::document_graph::flexvalue;\
 using root_doc = hyphaspace::document_graph::document;\
-struct [[eosio::table, eosio::contract(str(contract)]] contract##document : public root_doc {};\
-using contract_document = contract##document;\
+TABLE contract##_document : public root_doc {};\
+using contract_document = contract##_document;\
 using document_table =  multi_index<name("documents"), contract_document,\
                             indexed_by<name("idhash"), const_mem_fun<root_doc, checksum256, &root_doc::by_hash>>,\
                             indexed_by<name("bycreator"), const_mem_fun<root_doc, uint64_t, &root_doc::by_creator>>,\
                             indexed_by<name("bycreated"), const_mem_fun<root_doc, uint64_t, &root_doc::by_created>>>;\
 using root_edge = hyphaspace::document_graph::edge;\
-struct [[eosio::table, eosio::contract(str(contract)]] contract##edge : public hyphaspace::document_graph::edge {};\
-using contract_edge = contract##edge;\
+TABLE contract##_edge : public hyphaspace::document_graph::edge {};\
+using contract_edge = contract##_edge;\
 using edge_table = multi_index<name("edges"), contract_edge,\
             indexed_by<name("fromnode"), const_mem_fun<root_edge, checksum256, &root_edge::by_from>>,\
             indexed_by<name("tonode"), const_mem_fun<root_edge, checksum256, &root_edge::by_to>>,\

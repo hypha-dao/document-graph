@@ -16,11 +16,6 @@ namespace hyphaspace
       docs(name self, name code, datastream<const char *> ds);
       ~docs();
 
-
-      struct test : document_graph::document {}
-      
-      
-
       DECLARE_DOCUMENT(docs)
       //typedef std::variant<name, string, asset, time_point, int64_t, checksum256> flexvalue;
       // Any account/member can creator a new document
