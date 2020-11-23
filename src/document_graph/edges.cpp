@@ -1,6 +1,6 @@
 #include <document_graph.hpp>
 
-namespace hyphaspace
+namespace hypha
 {
     void document_graph::create_edge (const checksum256 &from_node, 
                                         const checksum256 &to_node, 

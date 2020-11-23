@@ -1,6 +1,6 @@
 #include <document_graph.hpp>
 
-namespace hyphaspace {
+namespace hypha {
 
     checksum256 document_graph::hash_document (const vector<content_group> &content_groups)
     {

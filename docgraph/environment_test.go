@@ -35,7 +35,7 @@ func SetupEnvironment(t *testing.T) *Environment {
 	env.Docs, err = eostest.CreateAccountFromString(env.ctx, &env.api, "documents", eostest.DefaultKey())
 	assert.NilError(t, err)
 
-	_, err = eostest.SetContract(env.ctx, &env.api, env.Docs, "../docs/docs.wasm", "../docs/docs.abi")
+	_, err = eostest.SetContract(env.ctx, &env.api, env.Docs, "../build/docs/docs.wasm", "../build/docs/docs.abi")
 	assert.NilError(t, err)
 
 	for i := 1; i < 5; i++ {

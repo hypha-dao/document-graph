@@ -1,6 +1,6 @@
 #include <document_graph.hpp>
 
-namespace hyphaspace
+namespace hypha
 {
     document_graph::document document_graph::get_document(const checksum256 &hash)
     {
@@ -122,4 +122,4 @@ namespace hyphaspace
         return content{};
     }
 
-} // namespace hyphaspace
+} // namespace hypha

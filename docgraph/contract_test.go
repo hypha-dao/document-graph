@@ -47,6 +47,34 @@ func setupTestCase(t *testing.T) func(t *testing.T) {
 	}
 }
 
+func TestCreate1(t *testing.T) {
+
+	teardownTestCase := setupTestCase(t)
+	defer teardownTestCase(t)
+
+	// var env Environment
+	env = SetupEnvironment(t)
+	t.Log("\nEnvironment Setup complete\n")
+
+	t.Run("Test Documents", func(t *testing.T) {
+
+		lastDoc, err := docgraph.Create1(env.ctx, &env.api, env.Docs, env.Creators[0])
+		assert.NilError(t, err)
+
+		t.Log(lastDoc)
+		// unmarshal JSON into a Document
+		// data, err := ioutil.ReadFile(test.input)
+		// assert.NilError(t, err)
+		// var documentFromFile docgraph.Document
+		// err = json.Unmarshal(data, &documentFromFile)
+		// assert.NilError(t, err)
+
+		// // compare document from chain to document from file
+		// assert.Assert(t, lastDoc.IsEqual(documentFromFile))
+
+	})
+}
+
 func TestDocuments(t *testing.T) {
 
 	teardownTestCase := setupTestCase(t)
@@ -66,14 +94,14 @@ func TestDocuments(t *testing.T) {
 				name:  "simplest",
 				input: "../test/examples/simplest.json",
 			},
-			{
-				name:  "each-type",
-				input: "../test/examples/each-type.json",
-			},
-			{
-				name:  "contribution",
-				input: "../test/examples/contribution.json",
-			},
+			// {
+			// 	name:  "each-type",
+			// 	input: "../test/examples/each-type.json",
+			// },
+			// {
+			// 	name:  "contribution",
+			// 	input: "../test/examples/contribution.json",
+			// },
 		}
 
 		for _, test := range tests {

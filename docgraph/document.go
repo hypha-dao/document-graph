@@ -34,7 +34,7 @@ func (fv *FlexValue) String() string {
 	case eos.Name:
 		return string(v)
 	case int64:
-		return string(v)
+		return fmt.Sprint(v)
 	case *eos.Asset:
 		return v.String()
 	case string:

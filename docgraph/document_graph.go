@@ -16,6 +16,41 @@ type DocumentGraph struct {
 	RootNode Document
 }
 
+// Create1P ...
+type Create1P struct {
+	Creator eos.AccountName `json:"creator"`
+}
+
+// Create1 ...
+func Create1(ctx context.Context, api *eos.API,
+	contract, creator eos.AccountName) (Document, error) {
+
+	action := eos.ActN("create1")
+
+	actions := []*eos.Action{
+		{
+			Account: contract,
+			Name:    action,
+			Authorization: []eos.PermissionLevel{
+				{Actor: creator, Permission: eos.PN("active")},
+			},
+			ActionData: eos.NewActionData(Create1P{
+				Creator: creator,
+			}),
+		}}
+
+	_, err := eostest.ExecTrx(ctx, api, actions)
+	if err != nil {
+		return Document{}, fmt.Errorf("execute transaction %v", err)
+	}
+
+	lastDoc, err := GetLastDocument(ctx, api, contract)
+	if err != nil {
+		return Document{}, fmt.Errorf("get last document %v", err)
+	}
+	return lastDoc, nil
+}
+
 // CreateDocument creates a new document on chain from the provided file
 func CreateDocument(ctx context.Context, api *eos.API,
 	contract, creator eos.AccountName,
