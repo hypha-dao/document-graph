@@ -1,8 +1,53 @@
-#include <document_graph.hpp>
+#include <document_graph/edge.hpp>
 
 namespace hypha
 {
-    void document_graph::create_edge (const checksum256 &from_node, 
+    Edge::Edge();
+    Edge::Edge(const eosio::checksum256 &from_node, const eosio::checksum256 &to_node, const eosio::name &edge_name) 
+    {
+        auto new_edge_id = createID (from_node, to_node, edge_name);
+        id    = new_edge_id;
+        from_node = from_node;
+        to_node = to_node;
+        edge_name = edge_name;
+
+        from_node_edge_name_index = hash(from_node, edge_name);
+        from_node_to_node_index = hash(from_node, to_node);
+        to_node_edge_name_index = hash(to_node, edge_name);
+
+        e.creator = contract;
+
+    }
+
+// converts a string to a uint64 type
+    uint64_t document_graph::to_uint64 (const string &fingerprint)
+    {
+        uint64_t id = 0;
+        checksum256 h = sha256(const_cast<char*>(fingerprint.c_str()), fingerprint.size());
+        auto hbytes = h.extract_as_byte_array();
+        for(int i=0; i<4; i++) {
+            id <<=8;
+            id |= hbytes[i];
+        }
+        return id;
+    }
+
+    uint64_t document_graph::edge_id(checksum256 from_node, checksum256 to_node, name edge_name)
+    {
+        return to_uint64(readable_hash(from_node) + readable_hash(to_node) + edge_name.to_string());
+    }
+
+    uint64_t document_graph::hash(checksum256 from_node, checksum256 to_node)
+    {
+        return to_uint64(readable_hash(from_node) + readable_hash(to_node));
+    }
+
+    uint64_t document_graph::hash(checksum256 node, name edge_name)
+    {
+        return to_uint64(readable_hash(node) + edge_name.to_string());
+    }
+
+    void Edge::create_edge (const checksum256 &from_node, 
                                         const checksum256 &to_node, 
                                         const name &edge_name, 
                                         const bool strict)

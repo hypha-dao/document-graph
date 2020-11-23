@@ -5,6 +5,8 @@
 
 namespace hypha
 {
+
+
     // Document DocumentGraph::create_document(eosio::name &creator, std::vector<ContentGroup> &content_groups) {
 
     //     require_auth(creator);
@@ -31,7 +33,7 @@ namespace hypha
     //     return *document;
     // }
 
-    Document DocumentGraph::create_document(eosio::name &creator)
+    Document DocumentGraph::createDocument(eosio::name &creator)
     {
 
         require_auth(creator);
@@ -61,11 +63,17 @@ namespace hypha
 
         d_t.emplace(m_contract, [&](auto &d) {
             d = std::move(document);
-            d.created_date = current_time_point();
+            d.created_date = eosio::current_time_point();
         });
 
         return document;
     }
+
+    // Edge DocumentGraph::createEdge (const eosio::checksum256 &from_node, const eosio::checksum256 &to_node, const eosio::name &edge_name)
+    // {
+
+    // }
+
 
     // document_graph::content document_graph::new_content(const string &label, const flexvalue &fv)
     // {

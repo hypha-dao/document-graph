@@ -4,77 +4,39 @@
 #include <eosio/asset.hpp>
 #include <eosio/transaction.hpp>
 #include <eosio/crypto.hpp>
+#include <eosio/multi_index.hpp>
+#include <eosio/name.hpp>
 #include <cstring>
 
 #include <document_graph/content.hpp>
 #include <document_graph/document.hpp>
-
-using namespace eosio;
-using namespace std;
+// #include <document_graph/edge.hpp>
 
 namespace hypha
 {
     class DocumentGraph
     {
     public:
-        name m_contract;
+        eosio::name m_contract;
 
-        DocumentGraph(const name &contract) : m_contract(contract){}
+        DocumentGraph(const eosio::name &contract) : m_contract(contract){}
         ~DocumentGraph(){}
-
-        // const flexvalue DOES_NOT_EXIST = -4206942069;  // arbitrary, lazy, hopefully never used value
-  
+ 
         typedef eosio::multi_index<eosio::name("documents"), Document,
-                        indexed_by<eosio::name("idhash"), const_mem_fun<Document, checksum256, &Document::by_hash>>,
-                        indexed_by<eosio::name("bycreator"), const_mem_fun<Document, uint64_t, &Document::by_creator>>,
-                        indexed_by<eosio::name("bycreated"), const_mem_fun<Document, uint64_t, &Document::by_created>>>
+                        eosio::indexed_by<eosio::name("idhash"), eosio::const_mem_fun<Document, eosio::checksum256, &Document::by_hash>>,
+                        eosio::indexed_by<eosio::name("bycreator"), eosio::const_mem_fun<Document, uint64_t, &Document::by_creator>>,
+                        eosio::indexed_by<eosio::name("bycreated"), eosio::const_mem_fun<Document, uint64_t, &Document::by_created>>>
         document_table;
 
-        
-        // scopes: get_self() 
-        // struct edge
-        // {
-        //     uint64_t id; 
-
-        //     // these three additional indexes allow isolating/querying edges more precisely (less iteration)
-        //     uint64_t from_node_edge_name_index;
-        //     uint64_t from_node_to_node_index;
-        //     uint64_t to_node_edge_name_index;
-        //     uint64_t by_from_node_edge_name_index() const { return from_node_edge_name_index; }
-        //     uint64_t by_from_node_to_node_index() const { return from_node_to_node_index; } 
-        //     uint64_t by_to_node_edge_name_index() const { return to_node_edge_name_index; }
-
-        //     checksum256 from_node;
-        //     checksum256 by_from() const { return from_node; }
-
-        //     checksum256 to_node;
-        //     checksum256 by_to() const { return to_node; }
-
-        //     name edge_name;
-        //     uint64_t by_edge_name() const { return edge_name.value; }
-
-        //     time_point created_date = current_time_point();
-        //     uint64_t by_created() const { return created_date.sec_since_epoch(); }
-
-        //     name creator;
-        //     uint64_t by_creator() const { return creator.value; }
-
-        //     uint64_t primary_key() const { return id; }
-
-        //     EOSLIB_SERIALIZE(edge, (id) (from_node_edge_name_index)(from_node_to_node_index)(to_node_edge_name_index)
-        //                                 (from_node)(to_node)(edge_name)
-        //                                 (created_date)(creator))
-        // };
-
-        // typedef multi_index<name("edges"), edge,
-        //     indexed_by<name("fromnode"), const_mem_fun<edge, checksum256, &edge::by_from>>,
-        //     indexed_by<name("tonode"), const_mem_fun<edge, checksum256, &edge::by_to>>,
-        //     indexed_by<name("edgename"), const_mem_fun<edge, uint64_t, &edge::by_edge_name>>,
-        //     indexed_by<name("byfromname"), const_mem_fun<edge, uint64_t, &edge::by_from_node_edge_name_index>>,
-        //     indexed_by<name("byfromto"), const_mem_fun<edge, uint64_t, &edge::by_from_node_to_node_index>>,
-        //     indexed_by<name("bytoname"), const_mem_fun<edge, uint64_t, &edge::by_to_node_edge_name_index>>,
-        //     indexed_by<name("bycreated"), const_mem_fun<edge, uint64_t, &edge::by_created>>,
-        //     indexed_by<name("bycreator"), const_mem_fun<edge, uint64_t, &edge::by_creator>>>
+        // typedef eosio::multi_index<eosio::name("edges"), Edge,
+        //     indexed_by<eosio::name("fromnode"), const_mem_fun<Edge, eosio::checksum256, &Edge::by_from>>,
+        //     indexed_by<eosio::name("tonode"), const_mem_fun<Edge, eosio::checksum256, &Edge::by_to>>,
+        //     indexed_by<eosio::name("edgename"), const_mem_fun<Edge, uint64_t, &Edge::by_edge_name>>,
+        //     indexed_by<eosio::name("byfromname"), const_mem_fun<Edge, uint64_t, &Edge::by_from_node_edge_name_index>>,
+        //     indexed_by<eosio::name("byfromto"), const_mem_fun<Edge, uint64_t, &Edge::by_from_node_to_node_index>>,
+        //     indexed_by<eosio::name("bytoname"), const_mem_fun<Edge, uint64_t, &Edge::by_to_node_edge_name_index>>,
+        //     indexed_by<eosio::name("bycreated"), const_mem_fun<Edge, uint64_t, &Edge::by_created>>,
+        //     indexed_by<eosio::name("bycreator"), const_mem_fun<Edge, uint64_t, &Edge::by_creator>>>
         // edge_table;
 
         // void create_edge (const checksum256 &from_node, const checksum256 &to_node, const name &edge_name);
@@ -97,7 +59,8 @@ namespace hypha
         
         // Any account/member can creator a new document, support many options/constructors
         // Document create_document(name &creator, vector<ContentGroup> &content_groups);
-        Document create_document(eosio::name &creator);
+        Document createDocument(eosio::name &creator);
+        // Edge createEdge (const eosio::checksum256 &from_node, const eosio::checksum256 &to_node, const eosio::name &edge_name);
         // document create_document(const name &creator, const content_group &content_group);
         // document create_document(const name &creator, const content &content);
         // document create_document(const name &creator, const string &content_label, const flexvalue &content_value);

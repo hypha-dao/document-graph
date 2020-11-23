@@ -23,7 +23,7 @@ namespace hypha {
       // vector<ContentGroup> cgs {};
       // cgs.push_back (cg);
 
-      m_dg.create_document(creator);
+      m_dg.createDocument(creator);
    }
 }
 // void docs::getorcreate(const name &creator, const vector<document_graph::content_group> &content_groups)
