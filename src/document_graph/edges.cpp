@@ -19,7 +19,7 @@ namespace hypha
 
     }
 
-// converts a string to a uint64 type
+    // converts a string to a uint64 type
     uint64_t document_graph::to_uint64 (const string &fingerprint)
     {
         uint64_t id = 0;

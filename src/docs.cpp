@@ -5,10 +5,10 @@ namespace hypha {
    docs::docs(name self, name code, datastream<const char *> ds) : contract(self, code, ds) {}
    docs::~docs() {}
 
-   // void docs::create(name &creator, vector<ContentGroup> &content_groups)
-   // {
-   //    // m_dg.create_document(creator, content_groups);
-   // }
+   void docs::create(name &creator, std::vector<ContentGroup> &content_groups)
+   {
+      m_dg.createDocument(creator, content_groups);
+   }
 
    void docs::create1(name &creator) 
    {

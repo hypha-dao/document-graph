@@ -58,7 +58,7 @@ namespace hypha
         // edge get_edge_from_to (const checksum256 &from_node, const checksum256 &to_node, const bool strict);
         
         // Any account/member can creator a new document, support many options/constructors
-        // Document create_document(name &creator, vector<ContentGroup> &content_groups);
+        Document createDocument(eosio::name &creator, std::vector<ContentGroup> &contentGroups);
         Document createDocument(eosio::name &creator);
         // Edge createEdge (const eosio::checksum256 &from_node, const eosio::checksum256 &to_node, const eosio::name &edge_name);
         // document create_document(const name &creator, const content_group &content_group);

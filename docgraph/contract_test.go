@@ -94,14 +94,14 @@ func TestDocuments(t *testing.T) {
 				name:  "simplest",
 				input: "../test/examples/simplest.json",
 			},
-			// {
-			// 	name:  "each-type",
-			// 	input: "../test/examples/each-type.json",
-			// },
-			// {
-			// 	name:  "contribution",
-			// 	input: "../test/examples/contribution.json",
-			// },
+			{
+				name:  "each-type",
+				input: "../test/examples/each-type.json",
+			},
+			{
+				name:  "contribution",
+				input: "../test/examples/contribution.json",
+			},
 		}
 
 		for _, test := range tests {

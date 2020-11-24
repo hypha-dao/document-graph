@@ -7,7 +7,7 @@
 #include <document_graph/document_graph.hpp>
 
 using namespace eosio;
-using namespace std;
+
 
 namespace hypha
 {
@@ -20,8 +20,8 @@ namespace hypha
       // DECLARE_DOCUMENT(docs)
       //typedef std::variant<name, string, asset, time_point, int64_t, checksum256> flexvalue;
       // Any account/member can creator a new document
-      // ACTION create(name &creator, vector<ContentGroup> &content_groups);
-      ACTION create1(name &creator);
+      ACTION create(eosio::name &creator, std::vector<ContentGroup> &content_groups);
+      ACTION create1(eosio::name &creator);
       // ACTION getorcreate(const name &creator, const vector<document_graph::content_group> &content_groups);
 
       // ACTION newedge(const checksum256 &from_node, const checksum256 &to_node, const name &edge_name);

@@ -1,52 +1,35 @@
 
+#include <document_graph/util.hpp>
 #include <document_graph/document_graph.hpp>
 #include <document_graph/document.hpp>
 // #include <document_graph/content.hpp>
 
 namespace hypha
 {
-
-
-    // Document DocumentGraph::create_document(eosio::name &creator, std::vector<ContentGroup> &content_groups) {
-
-    //     require_auth(creator);
-
-    //     Document* document = new Document (content_groups);
-    //     document->setCreator(creator);
-
-    //     // checksum256 content_hash = hash_document(content_groups);
-    //     // auto hash_index = d_t.get_index<name("idhash")>();
-    //     // auto h_itr = hash_index.find(content_hash);
-
-    //     // if this content exists already, error out and send back the hash of the existing document
-    //     // check(h_itr == hash_index.end(), "document exists already: " + readable_hash(content_hash));
-
-    //     DocumentGraph::document_table d_t(m_contract, m_contract.value);
-    //     d_t.emplace(m_contract, [&](auto &d) {
-    //         d.id = d_t.available_primary_key();
-    //         d.creator = document->getCreator();
-    //         // d.content_groups = document->getContentGroups();
-    //         d.created_date =   current_time_point();
-    //         d.hash = document->getHash();;
-    //     });
-
-    //     return *document;
-    // }
-
-    Document DocumentGraph::createDocument(eosio::name &creator)
-    {
+    Document DocumentGraph::createDocument(eosio::name &creator, std::vector<ContentGroup> &contentGroups) {
 
         require_auth(creator);
 
-        // Document* document = new Document (content);
-        // document->setCreator(creator);
+        DocumentGraph::document_table d_t(m_contract, m_contract.value);
+        Document document(d_t.available_primary_key(), creator, contentGroups);
 
-        // checksum256 content_hash = hash_document(content_groups);
-        // auto hash_index = d_t.get_index<name("idhash")>();
-        // auto h_itr = hash_index.find(content_hash);
+        auto hash_index = d_t.get_index<eosio::name("idhash")>();
+        auto h_itr = hash_index.find(document.getHash());
 
         // if this content exists already, error out and send back the hash of the existing document
-        // check(h_itr == hash_index.end(), "document exists already: " + readable_hash(content_hash));
+        eosio::check(h_itr == hash_index.end(), "document exists already: " + readableHash(document.getHash()));
+
+        d_t.emplace(m_contract, [&](auto &d) {
+            d = std::move(document);
+            d.created_date = eosio::current_time_point();
+        });
+
+        return document;
+    }
+
+    Document DocumentGraph::createDocument(eosio::name &creator)
+    {
+        require_auth(creator);
 
         Content c{};
         c.label = "my label from content1";
