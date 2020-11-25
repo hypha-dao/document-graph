@@ -10,14 +10,29 @@ namespace hypha
     Document::Document() {}
 
     Document::Document(eosio::name contract, eosio::name creator, std::vector<ContentGroup> contentGroups) 
-        : m_contract{contract}, creator{creator}, content_groups{std::move(contentGroups)}
+        : contract{contract}, creator{creator}, content_groups{std::move(contentGroups)}
     {
         hash = hashContents();
     }
 
-    Document::Document(eosio::name contract, const eosio::checksum256 &_hash) : m_contract{contract}
+    Document::Document(eosio::name contract, eosio::name creator, ContentGroup contentGroup)
     {
-        document_table d_t(m_contract, m_contract.value);
+        Document (contract, creator, rollup (contentGroup));
+    }
+
+    Document::Document(eosio::name contract, eosio::name creator, Content content)
+    {
+        Document (contract, creator, rollup (content));
+    }
+
+    Document::Document(eosio::name contract, eosio::name creator, const std::string &label, const Content::FlexValue &value)
+    {
+        Document (contract, creator, rollup (Content (label, value)));
+    }
+
+    Document::Document(eosio::name contract, const eosio::checksum256 &_hash) : contract{contract}
+    {
+        document_table d_t(contract, contract.value);
         auto hash_index = d_t.get_index<eosio::name("idhash")>();
         auto h_itr = hash_index.find(_hash);
         eosio::check(h_itr != hash_index.end(), "document not found: " + readableHash(_hash));
@@ -38,29 +53,27 @@ namespace hypha
         require_auth(creator);
         hash = hashContents();
 
-        document_table d_t(m_contract, m_contract.value);
+        document_table d_t(contract, contract.value);
         auto hash_index = d_t.get_index<eosio::name("idhash")>();
         auto h_itr = hash_index.find(hash);
 
         // if this content exists already, error out and send back the hash of the existing document
         eosio::check(h_itr == hash_index.end(), "document exists already: " + readableHash(hash));
 
-        d_t.emplace(m_contract, [&](auto &d) {
+        d_t.emplace(contract, [&](auto &d) {
             id = d_t.available_primary_key(); 
             created_date = eosio::current_time_point();
             d = *this;
         });
     }
 
-    Document Document::getOrCreate (eosio::name contract, eosio::name creator, std::vector<ContentGroup> contentGroups) 
+    Document Document::getOrNew (eosio::name _contract, eosio::name _creator, std::vector<ContentGroup> contentGroups) 
     {
-        require_auth(creator);
-
         Document document {};
         document.content_groups = contentGroups;
         document.hash = document.hashContents();
 
-        Document::document_table d_t(contract, contract.value);
+        Document::document_table d_t(_contract, _contract.value);
         auto hash_index = d_t.get_index<eosio::name("idhash")>();
         auto h_itr = hash_index.find(document.getHash());
 
@@ -73,14 +86,23 @@ namespace hypha
             return document;
         }
 
-        return Document (contract, creator, contentGroups);
+        require_auth(_creator);
+        return Document (_contract, _creator, contentGroups);
     }
 
-    const eosio::checksum256 Document::hashContents()
+    Document Document::getOrNew (eosio::name contract, eosio::name creator, ContentGroup contentGroup)
     {
-        std::string string_data = toString();
-        hash = eosio::sha256(const_cast<char *>(string_data.c_str()), string_data.length());
-        return hash;
+        return getOrNew (contract, creator, rollup (contentGroup));
+    }
+
+    Document Document::getOrNew (eosio::name contract, eosio::name creator, Content content) 
+    {
+        return getOrNew (contract, creator, rollup (content));
+    }
+
+    Document Document::getOrNew (eosio::name contract, eosio::name creator, const std::string &label, const Content::FlexValue &value)
+    {
+        return getOrNew (contract, creator, rollup (Content (label, value)));
     }
 
     void Document::setCreator(eosio::name &creator)
@@ -168,13 +190,31 @@ namespace hypha
     //     });
     // }
 
+    const eosio::checksum256 Document::hashContents()
+    {
+        // save/cache the hash in the member 
+        hash = hashContents (content_groups);
+        return hash;
+    }
 
-    const std::string Document::toString()
+    const std::string Document::toString ()
+    {
+        return toString (content_groups);
+    }
+
+    // static version cannot cache the hash in a member
+    const eosio::checksum256 Document::hashContents (std::vector<ContentGroup> &contentGroups)
+    {
+        std::string string_data = toString(contentGroups);
+        return eosio::sha256(const_cast<char *>(string_data.c_str()), string_data.length());
+    }
+
+    const std::string Document::toString(std::vector<ContentGroup> &contentGroups)
     {
         std::string results = "[";
         bool is_first = true;
 
-        for (ContentGroup contentGroup : content_groups)
+        for (ContentGroup &contentGroup : contentGroups)
         {
             if (is_first)
             {
@@ -191,7 +231,7 @@ namespace hypha
         return results;
     }
 
-    const std::string Document::toString(ContentGroup contentGroup)
+    const std::string Document::toString(ContentGroup &contentGroup)
     {
         std::string results = "[";
         bool is_first = true;
@@ -212,4 +252,19 @@ namespace hypha
         results = results + "]";
         return results;
     }
+
+    std::vector<ContentGroup> Document::rollup (ContentGroup contentGroup)
+    {
+        std::vector<ContentGroup> contentGroups;
+        contentGroups.push_back (contentGroup);
+        return contentGroups;
+    }
+
+    ContentGroup Document::rollup (Content content)
+    {
+        ContentGroup contentGroup;
+        contentGroup.push_back (content);
+        return rollup (content);
+    }
+
 } // namespace hypha

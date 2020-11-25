@@ -1,6 +1,9 @@
 package docgraph
 
 import (
+	"context"
+
+	eostest "github.com/digital-scarcity/eos-go-test"
 	eos "github.com/eoscanada/eos-go"
 )
 
@@ -20,10 +23,30 @@ type RemoveEdges struct {
 	Strict   bool            `json:"strict"`
 }
 
-type removeEdgesFT struct {
+type removeEdge struct {
 	FromNode eos.Checksum256 `json:"from_node"`
 	ToNode   eos.Checksum256 `json:"to_node"`
-	Strict   bool            `json:"strict"`
+	EdgeName eos.Name        `json:"edge_name"`
+}
+
+// RemoveEdge ...
+func RemoveEdge(ctx context.Context, api *eos.API,
+	contract eos.AccountName,
+	fromHash, toHash eos.Checksum256, edgeName eos.Name) (string, error) {
+
+	actions := []*eos.Action{{
+		Account: contract,
+		Name:    eos.ActN("removeedge"),
+		Authorization: []eos.PermissionLevel{
+			{Actor: contract, Permission: eos.PN("active")},
+		},
+		ActionData: eos.NewActionData(removeEdge{
+			FromNode: fromHash,
+			ToNode:   toHash,
+			EdgeName: edgeName,
+		}),
+	}}
+	return eostest.ExecTrx(ctx, api, actions)
 }
 
 // RemoveEdgesFromAndName ...

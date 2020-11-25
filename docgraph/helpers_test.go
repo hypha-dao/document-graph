@@ -39,6 +39,58 @@ func randomString() string {
 	return stringWithCharset(12, charset)
 }
 
+// GetOrNewNew creates a document with a single random value
+func GetOrNewNew(ctx context.Context, api *eos.API, contract, creator eos.AccountName, d docgraph.Document) (docgraph.Document, error) {
+
+	actions := []*eos.Action{{
+		Account: contract,
+		Name:    eos.ActN("getornewnew"),
+		Authorization: []eos.PermissionLevel{
+			{Actor: creator, Permission: eos.PN("active")},
+		},
+		ActionData: eos.NewActionData(createDoc{
+			Creator:       creator,
+			ContentGroups: d.ContentGroups,
+		}),
+	}}
+	_, err := eostest.ExecTrx(ctx, api, actions)
+	if err != nil {
+		return docgraph.Document{}, fmt.Errorf("execute transaction getornewnew: %v", err)
+	}
+
+	lastDoc, err := docgraph.GetLastDocument(ctx, api, contract)
+	if err != nil {
+		return docgraph.Document{}, fmt.Errorf("get last document: %v", err)
+	}
+	return lastDoc, nil
+}
+
+// GetOrNewGet creates a document with a single random value
+func GetOrNewGet(ctx context.Context, api *eos.API, contract, creator eos.AccountName, d docgraph.Document) (docgraph.Document, error) {
+
+	actions := []*eos.Action{{
+		Account: contract,
+		Name:    eos.ActN("getornewget"),
+		Authorization: []eos.PermissionLevel{
+			{Actor: creator, Permission: eos.PN("active")},
+		},
+		ActionData: eos.NewActionData(createDoc{
+			Creator:       creator,
+			ContentGroups: d.ContentGroups,
+		}),
+	}}
+	_, err := eostest.ExecTrx(ctx, api, actions)
+	if err != nil {
+		return docgraph.Document{}, fmt.Errorf("execute transaction getornewnew: %v", err)
+	}
+
+	lastDoc, err := docgraph.GetLastDocument(ctx, api, contract)
+	if err != nil {
+		return docgraph.Document{}, fmt.Errorf("get last document: %v", err)
+	}
+	return lastDoc, nil
+}
+
 // CreateRandomDocument creates a document with a single random value
 func CreateRandomDocument(ctx context.Context, api *eos.API, contract, creator eos.AccountName) (docgraph.Document, error) {
 

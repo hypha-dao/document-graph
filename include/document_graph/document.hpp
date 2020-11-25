@@ -15,7 +15,7 @@ namespace hypha
     struct Certificate
     {
         Certificate() {}
-        Certificate(const eosio::name &certifier, const std::string notes) : certifier{certifier}, notes{notes}{}
+        Certificate(const eosio::name &certifier, const std::string notes) : certifier{certifier}, notes{notes} {}
 
         eosio::name certifier;
         std::string notes;
@@ -26,26 +26,38 @@ namespace hypha
 
     struct [[eosio::table, eosio::contract("docs")]] Document
     {
-        public:
+    public:
         Document();
+
+        // these constructors populate a Document instance without saving
         Document(eosio::name contract, eosio::name creator, std::vector<ContentGroup> contentGroups);
+        Document(eosio::name contract, eosio::name creator, ContentGroup contentGroup);
+        Document(eosio::name contract, eosio::name creator, Content content);
+        Document(eosio::name contract, eosio::name creator, const std::string &label, const Content::FlexValue &value);
+
+        // this constructor reads the hash from the table and populates the object from storage
         Document(eosio::name contract, const eosio::checksum256 &hash);
         ~Document();
 
-        void emplace ();
+        void emplace();
 
-        static Document getOrCreate (eosio::name contract, eosio::name creator, std::vector<ContentGroup> contentGroups);
+        static Document getOrNew (eosio::name contract, eosio::name creator, std::vector<ContentGroup> contentGroups);
+        static Document getOrNew (eosio::name contract, eosio::name creator, ContentGroup contentGroup);
+        static Document getOrNew (eosio::name contract, eosio::name creator, Content content);
+        static Document getOrNew (eosio::name contract, eosio::name creator, const std::string &label, const Content::FlexValue &value);
+
         uint64_t primary_key() const { return id; }
+
         uint64_t by_creator() const { return creator.value; }
         eosio::checksum256 by_hash() const { return hash; }
         uint64_t by_created() const { return created_date.sec_since_epoch(); }
-        
+
         void setCreator(eosio::name & creator);
         eosio::name getCreator();
         eosio::checksum256 getHash();
         std::vector<ContentGroupWrapper> getContentGroups();
         std::pair<int64_t, ContentGroupWrapper *> getContentGroup(const std::string &label);
-        ContentGroupWrapper * getContentGroupOrFail(const std::string &label, const std::string &error);
+        ContentGroupWrapper *getContentGroupOrFail(const std::string &label, const std::string &error);
         Content::FlexValue getValueOrFail(const std::string &contentGroupLabel, const std::string &contentLabel, const std::string &error);
         void add(ContentGroup cg);
 
@@ -62,18 +74,28 @@ namespace hypha
 
         const eosio::checksum256 hashContents();
 
+        // static version for use without creating an instance, useful for just checking a hash
+        static const eosio::checksum256 hashContents (std::vector<ContentGroup> &contentGroups);
+
         typedef eosio::multi_index<eosio::name("documents"), Document,
-                eosio::indexed_by<eosio::name("idhash"), eosio::const_mem_fun<Document, eosio::checksum256, &Document::by_hash>>,
-                eosio::indexed_by<eosio::name("bycreator"), eosio::const_mem_fun<Document, uint64_t, &Document::by_creator>>,
-                eosio::indexed_by<eosio::name("bycreated"), eosio::const_mem_fun<Document, uint64_t, &Document::by_created>>>
-        document_table;
+                                   eosio::indexed_by<eosio::name("idhash"), eosio::const_mem_fun<Document, eosio::checksum256, &Document::by_hash>>,
+                                   eosio::indexed_by<eosio::name("bycreator"), eosio::const_mem_fun<Document, uint64_t, &Document::by_creator>>,
+                                   eosio::indexed_by<eosio::name("bycreated"), eosio::const_mem_fun<Document, uint64_t, &Document::by_created>>>
+            document_table;
 
-        private: 
-            eosio::name m_contract;
-            const std::string toString();
-            const std::string toString(ContentGroup contentGroup);
+    private:
+        eosio::name contract;
 
-        EOSLIB_SERIALIZE(Document, (id)(hash)(creator)(content_groups)(certificates)(created_date))
+        // toString iterates through all content, all levels, concatenating all values
+        // the resulting string is used for fingerprinting and hashing
+        const std::string toString();
+        static const std::string toString(std::vector<ContentGroup> &contentGroups);
+        static const std::string toString(ContentGroup &contentGroup);
+
+        static std::vector<ContentGroup> rollup (ContentGroup contentGroup);
+        static ContentGroup rollup (Content content);
+
+        EOSLIB_SERIALIZE(Document, (id)(hash)(creator)(content_groups)(certificates)(created_date)(contract))
     };
 
 } // namespace hypha

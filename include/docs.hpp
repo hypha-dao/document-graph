@@ -18,20 +18,17 @@ namespace hypha
       ~docs();
 
       // DECLARE_DOCUMENT(docs)
-      //typedef std::variant<name, string, asset, time_point, int64_t, checksum256> flexvalue;
+    
       // Any account/member can creator a new document
       ACTION create(eosio::name &creator, std::vector<ContentGroup> &content_groups);
-      // ACTION getorcreate(const name &creator, const vector<document_graph::content_group> &content_groups);
+
+      ACTION getornewget(const name &creator, const std::vector<ContentGroup> &content_groups);
+      ACTION getornewnew(const name &creator, const std::vector<ContentGroup> &content_groups);
 
       ACTION newedge(eosio::name &creator, const checksum256 &from_node, const checksum256 &to_node, const name &edge_name);
 
-      ACTION removeedge(const checksum256 &from_node, const checksum256 &to_node, const name &edge_name, const bool strict);
-      // ACTION remedgesft(const checksum256 &from_node, const checksum256 &to_node, const bool strict);
-      // ACTION remedgesfn(const checksum256 &from_node, const name &edge_name, const bool strict);
-      // // ACTION remedgestn(const checksum256 &to_node, const name &edge_name, const bool strict);
-
-      // ACTION testedgeidx (const checksum256 &from_node, const name &edge_name, const bool strict);
-
+      ACTION removeedge(const checksum256 &from_node, const checksum256 &to_node, const name &edge_name);
+    
       // // Fork creates a new document (node in a graph) from an existing document.
       // // The forked content should contain only new or updated entries to avoid data duplication. (lazily enforced?)
       // ACTION fork(const checksum256 &hash, const name &creator, const vector<document_graph::content_group> &content_groups);

@@ -16,9 +16,8 @@ type DocumentGraph struct {
 	RootNode Document
 }
 
-// CreateDocument creates a new document on chain from the provided file
-func CreateDocument(ctx context.Context, api *eos.API,
-	contract, creator eos.AccountName,
+func newDocumentTrx(ctx context.Context, api *eos.API,
+	contract, creator eos.AccountName, actionName,
 	fileName string) (Document, error) {
 
 	data, err := ioutil.ReadFile(fileName)
@@ -26,7 +25,7 @@ func CreateDocument(ctx context.Context, api *eos.API,
 		return Document{}, fmt.Errorf("readfile %v: %v", fileName, err)
 	}
 
-	action := eos.ActN("create")
+	action := eos.ActN(actionName)
 
 	var dump map[string]interface{}
 	err = json.Unmarshal(data, &dump)
@@ -62,6 +61,32 @@ func CreateDocument(ctx context.Context, api *eos.API,
 	}
 	return lastDoc, nil
 }
+
+// CreateDocument creates a new document on chain from the provided file
+func CreateDocument(ctx context.Context, api *eos.API,
+	contract, creator eos.AccountName,
+	fileName string) (Document, error) {
+
+	return newDocumentTrx(ctx, api, contract, creator, "create", fileName)
+}
+
+// // GetOrNewNew creates a new document on chain from the provided file
+// func GetOrNewNew(ctx context.Context, api *eos.API,
+// 	contract, creator eos.AccountName,
+// 	fileName string) (Document, error) {
+
+// 	return newDocumentTrx(ctx, api, contract, creator, "getornewnew", fileName)
+
+// }
+
+// // GetOrNewGet creates a new document on chain from the provided file
+// func GetOrNewGet(ctx context.Context, api *eos.API,
+// 	contract, creator eos.AccountName,
+// 	fileName string) (Document, error) {
+
+// 	return newDocumentTrx(ctx, api, contract, creator, "getornewget", fileName)
+
+// }
 
 // LoadDocument reads a document from the blockchain and creates a Document instance
 func LoadDocument(ctx context.Context, api *eos.API,
