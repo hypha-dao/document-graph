@@ -10,7 +10,7 @@
 
 #include <document_graph/content.hpp>
 #include <document_graph/document.hpp>
-// #include <document_graph/edge.hpp>
+#include <document_graph/edge.hpp>
 
 namespace hypha
 {
@@ -22,55 +22,47 @@ namespace hypha
         DocumentGraph(const eosio::name &contract) : m_contract(contract){}
         ~DocumentGraph(){}
  
-        typedef eosio::multi_index<eosio::name("documents"), Document,
-                        eosio::indexed_by<eosio::name("idhash"), eosio::const_mem_fun<Document, eosio::checksum256, &Document::by_hash>>,
-                        eosio::indexed_by<eosio::name("bycreator"), eosio::const_mem_fun<Document, uint64_t, &Document::by_creator>>,
-                        eosio::indexed_by<eosio::name("bycreated"), eosio::const_mem_fun<Document, uint64_t, &Document::by_created>>>
-        document_table;
+        typedef eosio::multi_index<eosio::name("edges"), Edge,
+            eosio::indexed_by<eosio::name("fromnode"), eosio::const_mem_fun<Edge, eosio::checksum256, &Edge::by_from>>,
+            eosio::indexed_by<eosio::name("tonode"), eosio::const_mem_fun<Edge, eosio::checksum256, &Edge::by_to>>,
+            eosio::indexed_by<eosio::name("edgename"), eosio::const_mem_fun<Edge, uint64_t, &Edge::by_edge_name>>,
+            eosio::indexed_by<eosio::name("byfromname"), eosio::const_mem_fun<Edge, uint64_t, &Edge::by_from_node_edge_name_index>>,
+            eosio::indexed_by<eosio::name("byfromto"), eosio::const_mem_fun<Edge, uint64_t, &Edge::by_from_node_to_node_index>>,
+            eosio::indexed_by<eosio::name("bytoname"), eosio::const_mem_fun<Edge, uint64_t, &Edge::by_to_node_edge_name_index>>,
+            eosio::indexed_by<eosio::name("bycreated"), eosio::const_mem_fun<Edge, uint64_t, &Edge::by_created>>,
+            eosio::indexed_by<eosio::name("bycreator"), eosio::const_mem_fun<Edge, uint64_t, &Edge::by_creator>>>
+        edge_table;
 
-        // typedef eosio::multi_index<eosio::name("edges"), Edge,
-        //     indexed_by<eosio::name("fromnode"), const_mem_fun<Edge, eosio::checksum256, &Edge::by_from>>,
-        //     indexed_by<eosio::name("tonode"), const_mem_fun<Edge, eosio::checksum256, &Edge::by_to>>,
-        //     indexed_by<eosio::name("edgename"), const_mem_fun<Edge, uint64_t, &Edge::by_edge_name>>,
-        //     indexed_by<eosio::name("byfromname"), const_mem_fun<Edge, uint64_t, &Edge::by_from_node_edge_name_index>>,
-        //     indexed_by<eosio::name("byfromto"), const_mem_fun<Edge, uint64_t, &Edge::by_from_node_to_node_index>>,
-        //     indexed_by<eosio::name("bytoname"), const_mem_fun<Edge, uint64_t, &Edge::by_to_node_edge_name_index>>,
-        //     indexed_by<eosio::name("bycreated"), const_mem_fun<Edge, uint64_t, &Edge::by_created>>,
-        //     indexed_by<eosio::name("bycreator"), const_mem_fun<Edge, uint64_t, &Edge::by_creator>>>
-        // edge_table;
+        // always strict (fails if edge does not exist)
+        void removeEdge (const eosio::checksum256 &fromNode, const eosio::checksum256 &toNode, const eosio::name &edgeName);
+        void removeEdges (const eosio::checksum256 &node);
 
-        // void create_edge (const checksum256 &from_node, const checksum256 &to_node, const name &edge_name);
-        // void create_edge (const checksum256 &from_node, const checksum256 &to_node, const name &edge_name, const bool strict);
+        std::vector<Edge> getEdges (const eosio::checksum256 &fromNode, const eosio::checksum256 &toNode);
+        std::vector<Edge> getEdgesOrFail (const eosio::checksum256 &fromNode, const eosio::checksum256 &toNode);
 
-        // void remove_edge (const checksum256 &from_node, const checksum256 &to_node, const name &edge_name, const bool strict);
-        // void remove_edges (const checksum256 &from_node, const checksum256 &to_node, const bool strict);
-        // void remove_edges (const checksum256 &from_node, const name &edge_name, const bool strict);
-        // void remove_edges (const checksum256 &node, const bool strict);
+        std::vector<Edge> getEdgesFrom (const eosio::checksum256 &fromNode, const eosio::name &edgeName);
+        std::vector<Edge> getEdgesFromOrFail (const eosio::checksum256 &fromNode, const eosio::name &edgeName);
 
-        // vector<edge> get_edges (const checksum256 &from_node, const name &edge_name, const bool strict);
-        // vector<edge> get_edges_from_name (const checksum256 &from_node, const name &edge_name, const bool strict);
-        // vector<edge> get_edges_to_name (const checksum256 &to_node, const name &edge_name, const bool strict);
-        // vector<edge> get_edges_from_to (const checksum256 &from_node, const checksum256 &to_node, const bool strict);
+        std::vector<Edge> getEdgesTo (const eosio::checksum256 &toNode, const eosio::name &edgeName);
+        std::vector<Edge> getEdgesToOrFail (const eosio::checksum256 &toNode, const eosio::name &edgeName);
 
-        // edge get_edge (const checksum256 &from_node, const name &edge_name, const bool strict);
-        // edge get_edge_from_name (const checksum256 &from_node, const name &edge_name, const bool strict);
-        // edge get_edge_to_name (const checksum256 &to_node, const name &edge_name, const bool strict);
-        // edge get_edge_from_to (const checksum256 &from_node, const checksum256 &to_node, const bool strict);
-        
         // Any account/member can creator a new document, support many options/constructors
-        Document createDocument(eosio::name &creator, std::vector<ContentGroup> &contentGroups);
-        Document createDocument(eosio::name &creator);
-        // Edge createEdge (const eosio::checksum256 &from_node, const eosio::checksum256 &to_node, const eosio::name &edge_name);
-        // document create_document(const name &creator, const content_group &content_group);
-        // document create_document(const name &creator, const content &content);
-        // document create_document(const name &creator, const string &content_label, const flexvalue &content_value);
+        // Document createDocument(eosio::name &creator, std::vector<ContentGroup> &contentGroups);
+        // Document createDocument(eosio::name &creator, ContentGroup &contentGroup);
+        // Document createDocument(eosio::name &creator, Content &content);
+        // Document createDocument(eosio::name &creator, const std::string &label, const Content::FlexValue &value);
 
-        // document get_or_create(const name &creator, const vector<content_group> &content_groups);
-        // document get_or_create(const name &creator, const content_group &content_group);
-        // document get_or_create(const name &creator, const content &content);
-        // document get_or_create(const name &creator, const string &content_label, const flexvalue &content_value);
+        // only for testing
+        // Document createDocument(eosio::name &creator);
 
-        // void erase_document(const checksum256 &document_hash);
+        Edge createEdge (eosio::name &creator, const eosio::checksum256 &fromNode, const eosio::checksum256 &toNode, const eosio::name &edgeName);
+
+        // Document getOrCreate(const eosio::name &creator, const std::vector<ContentGroup> &contentGroups);
+        // Document getOrCreate(const eosio::name &creator, const ContentGroup &contentGroup);
+        // Document getOrCreate(const eosio::name &creator, const Content &content);
+        // Document getOrCreate(const eosio::name &creator, const std::string &label, const Content::FlexValue &value);
+
+        void eraseDocument(const eosio::checksum256 &document_hash);
     
         // // Fork creates a new document (node in a graph) from an existing document.
         // // The forked content should contain only new or updated entries to avoid data duplication. (lazily enforced?)

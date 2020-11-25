@@ -6,7 +6,6 @@ import (
 	"log"
 	"os"
 	"os/exec"
-	"strconv"
 	"testing"
 	"time"
 
@@ -45,34 +44,6 @@ func setupTestCase(t *testing.T) func(t *testing.T) {
 		err := SaveGraph(env.ctx, &env.api, env.Docs, folderName)
 		assert.NilError(t, err)
 	}
-}
-
-func TestCreate1(t *testing.T) {
-
-	teardownTestCase := setupTestCase(t)
-	defer teardownTestCase(t)
-
-	// var env Environment
-	env = SetupEnvironment(t)
-	t.Log("\nEnvironment Setup complete\n")
-
-	t.Run("Test Documents", func(t *testing.T) {
-
-		lastDoc, err := docgraph.Create1(env.ctx, &env.api, env.Docs, env.Creators[0])
-		assert.NilError(t, err)
-
-		t.Log(lastDoc)
-		// unmarshal JSON into a Document
-		// data, err := ioutil.ReadFile(test.input)
-		// assert.NilError(t, err)
-		// var documentFromFile docgraph.Document
-		// err = json.Unmarshal(data, &documentFromFile)
-		// assert.NilError(t, err)
-
-		// // compare document from chain to document from file
-		// assert.Assert(t, lastDoc.IsEqual(documentFromFile))
-
-	})
 }
 
 func TestDocuments(t *testing.T) {
@@ -228,105 +199,104 @@ func TestEdges(t *testing.T) {
 	}
 }
 
-func TestRemoveEdges(t *testing.T) {
+// func TestRemoveEdges(t *testing.T) {
 
-	teardownTestCase := setupTestCase(t)
-	defer teardownTestCase(t)
+// 	teardownTestCase := setupTestCase(t)
+// 	defer teardownTestCase(t)
 
-	// var env Environment
-	env = SetupEnvironment(t)
-	t.Log("\nEnvironment Setup complete\n")
+// 	// var env Environment
+// 	env = SetupEnvironment(t)
+// 	t.Log("\nEnvironment Setup complete\n")
 
-	// var docs []Document
-	var err error
-	docs := make([]docgraph.Document, 10)
-	for i := 0; i < 10; i++ {
-		docs[i], err = CreateRandomDocument(env.ctx, &env.api, env.Docs, env.Creators[1])
-		assert.NilError(t, err)
-	}
+// 	// var docs []Document
+// 	var err error
+// 	docs := make([]docgraph.Document, 10)
+// 	for i := 0; i < 10; i++ {
+// 		docs[i], err = CreateRandomDocument(env.ctx, &env.api, env.Docs, env.Creators[1])
+// 		assert.NilError(t, err)
+// 	}
 
-	// ***************************  BEGIN
-	// test removal of edges based on the from_node and edge_name
-	for i := 0; i < 5; i++ {
-		_, err = docgraph.CreateEdge(env.ctx, &env.api, env.Docs, env.Creators[1], docs[0].Hash, docs[i].Hash, "test")
-		assert.NilError(t, err)
-		pause(t, chainResponsePause, "Build block...", "")
-	}
+// 	// ***************************  BEGIN
+// 	// test removal of edges based on the from_node and edge_name
+// 	for i := 0; i < 5; i++ {
+// 		_, err = docgraph.CreateEdge(env.ctx, &env.api, env.Docs, env.Creators[1], docs[0].Hash, docs[i].Hash, "test")
+// 		assert.NilError(t, err)
+// 		pause(t, chainResponsePause, "Build block...", "")
+// 	}
 
-	allEdges, err := GetAllEdges(env.ctx, &env.api, env.Docs)
-	assert.NilError(t, err)
-	assert.Equal(t, len(allEdges), 5)
+// 	allEdges, err := GetAllEdges(env.ctx, &env.api, env.Docs)
+// 	assert.NilError(t, err)
+// 	assert.Equal(t, len(allEdges), 5)
 
-	for i := 0; i < 5; i++ {
-		checkEdge(t, env, docs[0], docs[i], eos.Name("test"))
-	}
+// 	for i := 0; i < 5; i++ {
+// 		checkEdge(t, env, docs[0], docs[i], eos.Name("test"))
+// 	}
 
-	// remove edges based on the from_node and edge_name
-	_, err = docgraph.RemoveEdgesFromAndName(env.ctx, &env.api, env.Docs, docs[0].Hash, eos.Name("test"))
-	assert.NilError(t, err)
+// 	// remove edges based on the from_node and edge_name
+// 	_, err = docgraph.RemoveEdgesFromAndName(env.ctx, &env.api, env.Docs, docs[0].Hash, eos.Name("test"))
+// 	assert.NilError(t, err)
 
-	allEdges, err = GetAllEdges(env.ctx, &env.api, env.Docs)
-	assert.NilError(t, err)
-	assert.Equal(t, len(allEdges), 0)
-	// *****************************  END
+// 	allEdges, err = GetAllEdges(env.ctx, &env.api, env.Docs)
+// 	assert.NilError(t, err)
+// 	assert.Equal(t, len(allEdges), 0)
+// 	// *****************************  END
 
-	// *****************************  BEGIN
-	// test removal of edges based on the from_node and to_node
-	for i := 0; i < 3; i++ {
-		_, err = docgraph.CreateEdge(env.ctx, &env.api, env.Docs, env.Creators[1], docs[0].Hash, docs[1].Hash, eos.Name("test"+strconv.Itoa(i+1)))
-		assert.NilError(t, err)
-		pause(t, chainResponsePause, "Build block...", "")
-	}
+// 	// *****************************  BEGIN
+// 	// test removal of edges based on the from_node and to_node
+// 	for i := 0; i < 3; i++ {
+// 		_, err = docgraph.CreateEdge(env.ctx, &env.api, env.Docs, env.Creators[1], docs[0].Hash, docs[1].Hash, eos.Name("test"+strconv.Itoa(i+1)))
+// 		assert.NilError(t, err)
+// 		pause(t, chainResponsePause, "Build block...", "")
+// 	}
 
-	allEdges, err = GetAllEdges(env.ctx, &env.api, env.Docs)
-	assert.NilError(t, err)
-	assert.Equal(t, len(allEdges), 3)
+// 	allEdges, err = GetAllEdges(env.ctx, &env.api, env.Docs)
+// 	assert.NilError(t, err)
+// 	assert.Equal(t, len(allEdges), 3)
 
-	for i := 0; i < 3; i++ {
-		checkEdge(t, env, docs[0], docs[1], eos.Name("test"+strconv.Itoa(i+1)))
-	}
+// 	for i := 0; i < 3; i++ {
+// 		checkEdge(t, env, docs[0], docs[1], eos.Name("test"+strconv.Itoa(i+1)))
+// 	}
 
-	// remove edges based on the from_node and edge_name
-	_, err = docgraph.RemoveEdgesFromAndTo(env.ctx, &env.api, env.Docs, docs[0].Hash, docs[1].Hash)
-	assert.NilError(t, err)
+// 	// remove edges based on the from_node and edge_name
+// 	_, err = docgraph.RemoveEdgesFromAndTo(env.ctx, &env.api, env.Docs, docs[0].Hash, docs[1].Hash)
+// 	assert.NilError(t, err)
 
-	allEdges, err = GetAllEdges(env.ctx, &env.api, env.Docs)
-	assert.NilError(t, err)
-	assert.Equal(t, len(allEdges), 0)
-	// *****************************  END
+// 	allEdges, err = GetAllEdges(env.ctx, &env.api, env.Docs)
+// 	assert.NilError(t, err)
+// 	assert.Equal(t, len(allEdges), 0)
+// 	// *****************************  END
 
-	// ***************************  BEGIN
-	// test removal of edges based on the testedge index action
-	for i := 0; i < 5; i++ {
-		_, err = docgraph.CreateEdge(env.ctx, &env.api, env.Docs, env.Creators[1], docs[0].Hash, docs[i].Hash, "test")
-		assert.NilError(t, err)
-		pause(t, chainResponsePause, "Build block...", "")
-	}
+// 	// ***************************  BEGIN
+// 	// test removal of edges based on the testedge index action
+// 	for i := 0; i < 5; i++ {
+// 		_, err = docgraph.CreateEdge(env.ctx, &env.api, env.Docs, env.Creators[1], docs[0].Hash, docs[i].Hash, "test")
+// 		assert.NilError(t, err)
+// 		pause(t, chainResponsePause, "Build block...", "")
+// 	}
 
-	allEdges, err = GetAllEdges(env.ctx, &env.api, env.Docs)
-	assert.NilError(t, err)
-	assert.Equal(t, len(allEdges), 5)
+// 	allEdges, err = GetAllEdges(env.ctx, &env.api, env.Docs)
+// 	assert.NilError(t, err)
+// 	assert.Equal(t, len(allEdges), 5)
 
-	for i := 0; i < 5; i++ {
-		checkEdge(t, env, docs[0], docs[i], eos.Name("test"))
-	}
+// 	for i := 0; i < 5; i++ {
+// 		checkEdge(t, env, docs[0], docs[i], eos.Name("test"))
+// 	}
 
-	// remove edges based on the from_node and edge_name
-	_, err = EdgeIdxTest(env.ctx, &env.api, env.Docs, docs[0].Hash, eos.Name("test"))
-	assert.NilError(t, err)
+// 	// remove edges based on the from_node and edge_name
+// 	_, err = EdgeIdxTest(env.ctx, &env.api, env.Docs, docs[0].Hash, eos.Name("test"))
+// 	assert.NilError(t, err)
 
-	allEdges, err = GetAllEdges(env.ctx, &env.api, env.Docs)
-	assert.NilError(t, err)
-	assert.Equal(t, len(allEdges), 0)
-	// *****************************  END
-}
+// 	allEdges, err = GetAllEdges(env.ctx, &env.api, env.Docs)
+// 	assert.NilError(t, err)
+// 	assert.Equal(t, len(allEdges), 0)
+// 	// *****************************  END
+// }
 
 func TestLoadDocument(t *testing.T) {
 
 	teardownTestCase := setupTestCase(t)
 	defer teardownTestCase(t)
 
-	// var env Environment
 	env = SetupEnvironment(t)
 	t.Log("\nEnvironment Setup complete\n")
 

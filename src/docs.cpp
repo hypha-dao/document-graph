@@ -7,49 +7,24 @@ namespace hypha {
 
    void docs::create(name &creator, std::vector<ContentGroup> &content_groups)
    {
-      m_dg.createDocument(creator, content_groups);
+      Document document (get_self(), creator, content_groups);
+      document.emplace ();
    }
 
-   void docs::create1(name &creator) 
-   {
-      // content c {};
-      // c.setLabel("my label");
-      // c.setValue("my string value");
-
-      // ContentGroup cg {};
-      // cg.add (c);
-
-      // Document doc {};
-      // vector<ContentGroup> cgs {};
-      // cgs.push_back (cg);
-
-      m_dg.createDocument(creator);
-   }
-}
 // void docs::getorcreate(const name &creator, const vector<document_graph::content_group> &content_groups)
 // {
 //    _document_graph.get_or_create(creator, content_groups);
 // }
 
-// void docs::newedge (const checksum256 &from_node, const checksum256 &to_node, const name &edge_name)
-// {
-//    _document_graph.create_edge(from_node, to_node, edge_name);
-// }
+   void docs::newedge (name &creator, const checksum256 &from_node, const checksum256 &to_node, const name &edge_name)
+   {
+      m_dg.createEdge(creator, from_node, to_node, edge_name);
+   }
 
-// void docs::removeedge (const checksum256 &from_node, const checksum256 &to_node, const name &edge_name, const bool strict)
-// {
-//    _document_graph.remove_edge(from_node, to_node, edge_name, strict);
-// }
-
-// void docs::remedgesft (const checksum256 &from_node, const checksum256 &to_node, const bool strict) 
-// {
-//    _document_graph.remove_edges(from_node, to_node, strict);
-// }
-
-// void docs::remedgesfn (const checksum256 &from_node, const name &edge_name, const bool strict) 
-// {
-//    _document_graph.remove_edges (from_node, edge_name, strict);
-// }
+   void docs::removeedge (const checksum256 &from_node, const checksum256 &to_node, const name &edge_name, const bool strict)
+   {
+      m_dg.removeEdge(from_node, to_node, edge_name);
+   }
 
 // void docs::testedgeidx (const checksum256 &from_node, const name &edge_name, const bool strict) 
 // {
@@ -65,16 +40,11 @@ namespace hypha {
 //    _document_graph.fork_document(hash, creator, content_groups);
 // }
 
-// void docs::created(const name &creator, const checksum256 &hash)
-// {
-//    // only the contract can announce this
-//    require_auth(get_self());
-// }
-
-// void docs::certify(const name &certifier, const checksum256 &hash, const string &notes)
-// {
-//    _document_graph.certify_document(certifier, hash, notes);
-// }
+   // void docs::certify(const name &certifier, const checksum256 &hash, const std::string &notes)
+   // {
+   //    Document document (get_self(), hash);
+   //    document.certify(certifier, notes);
+   // }
 
 // void docs::reset()
 // {
@@ -93,3 +63,4 @@ namespace hypha {
 //       e_itr = e_t.erase(e_itr);
 //    }
 // }
+}

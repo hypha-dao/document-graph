@@ -1,5 +1,6 @@
 #include <document_graph/document.hpp>
 #include <document_graph/content_group.hpp>
+#include <document_graph/util.hpp>
 #include <eosio/crypto.hpp>
 
 namespace hypha
@@ -8,16 +9,78 @@ namespace hypha
     Document::~Document() {}
     Document::Document() {}
 
-    Document::Document(const uint64_t id, const eosio::name creator, std::vector<ContentGroup> contentGroups) : id{id}, creator{creator}
+    Document::Document(eosio::name contract, eosio::name creator, std::vector<ContentGroup> contentGroups) 
+        : m_contract{contract}, creator{creator}, content_groups{std::move(contentGroups)}
     {
-        content_groups = contentGroups;
-        hash = hash_contents();
+        hash = hashContents();
     }
 
-    const eosio::checksum256 Document::hash_contents()
+    Document::Document(eosio::name contract, const eosio::checksum256 &_hash) : m_contract{contract}
+    {
+        document_table d_t(m_contract, m_contract.value);
+        auto hash_index = d_t.get_index<eosio::name("idhash")>();
+        auto h_itr = hash_index.find(_hash);
+        eosio::check(h_itr != hash_index.end(), "document not found: " + readableHash(_hash));
+
+        id = h_itr->id;
+        creator = h_itr->creator;
+        created_date = h_itr->created_date;
+        certificates = h_itr->certificates;
+        content_groups = h_itr->content_groups;
+        hash = hashContents();
+
+        // this should never happen, only if hash algorithm somehow changed
+        eosio::check (hash == _hash, "fatal error: provided and indexed hash does not match newly generated hash");
+    }
+
+    void Document::emplace () 
+    {
+        require_auth(creator);
+        hash = hashContents();
+
+        document_table d_t(m_contract, m_contract.value);
+        auto hash_index = d_t.get_index<eosio::name("idhash")>();
+        auto h_itr = hash_index.find(hash);
+
+        // if this content exists already, error out and send back the hash of the existing document
+        eosio::check(h_itr == hash_index.end(), "document exists already: " + readableHash(hash));
+
+        d_t.emplace(m_contract, [&](auto &d) {
+            id = d_t.available_primary_key(); 
+            created_date = eosio::current_time_point();
+            d = *this;
+        });
+    }
+
+    Document Document::getOrCreate (eosio::name contract, eosio::name creator, std::vector<ContentGroup> contentGroups) 
+    {
+        require_auth(creator);
+
+        Document document {};
+        document.content_groups = contentGroups;
+        document.hash = document.hashContents();
+
+        Document::document_table d_t(contract, contract.value);
+        auto hash_index = d_t.get_index<eosio::name("idhash")>();
+        auto h_itr = hash_index.find(document.getHash());
+
+        // if this content exists already, return this one
+        if (h_itr != hash_index.end()) {
+            document.creator = h_itr->creator;
+            document.created_date = h_itr->created_date;
+            document.certificates = h_itr->certificates;
+            document.id = h_itr->id;
+            return document;
+        }
+
+        return Document (contract, creator, contentGroups);
+    }
+
+    const eosio::checksum256 Document::hashContents()
     {
         std::string string_data = toString();
-        return eosio::sha256(const_cast<char *>(string_data.c_str()), string_data.length());
+        hash = eosio::sha256(const_cast<char *>(string_data.c_str()), string_data.length());
+        return hash;
     }
 
     void Document::setCreator(eosio::name &creator)
@@ -88,6 +151,23 @@ namespace hypha
         
         return contentGroups;
     }
+
+    // void Document::certify(const eosio::name &certifier, const std::string &notes)
+    // {
+    //     // check if document is already saved??
+    //     document_table d_t(m_contract, m_contract.value);
+    //     auto h_itr = hash_index.find(id);
+    //     eosio::check(h_itr != d_t.end(), "document not found when attemption to certify: " + readableHash(geash()));
+
+    //     require_auth(certifier);
+
+    //     // TODO: should a certifier be able to sign the same document fork multiple times?
+    //     d_t.modify(h_itr, m_contract, [&](auto &d) {
+    //         d = std::move(this);
+    //         d.certificates.push_back(new_certificate(certifier, notes));
+    //     });
+    // }
+
 
     const std::string Document::toString()
     {
