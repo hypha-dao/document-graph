@@ -34,6 +34,17 @@ namespace hypha
         return *itr;
     }
 
+    bool Edge::exists (const eosio::name &_contract,
+                        const eosio::checksum256 &_from_node, 
+                        const eosio::checksum256 &_to_node, 
+                        const eosio::name &_edge_name)
+    {
+        edge_table e_t (_contract, _contract.value);
+        auto itr = e_t.find (concatHash (_from_node, _to_node, _edge_name));
+        if (itr != e_t.end()) return true;
+        return false;
+    }
+
     void Edge::emplace () 
     {
         require_auth (creator);

@@ -22,6 +22,12 @@ namespace hypha
                         const eosio::checksum256 &to_node, 
                         const eosio::name &edge_name);
 
+        
+        static bool exists (const eosio::name &_contract,
+                        const eosio::checksum256 &_from_node, 
+                        const eosio::checksum256 &_to_node, 
+                        const eosio::name &_edge_name);
+
         uint64_t id;
 
         // these three additional indexes allow isolating/querying edges more precisely (less iteration)

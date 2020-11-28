@@ -5,19 +5,19 @@ namespace hypha {
    docs::docs(name self, name code, datastream<const char *> ds) : contract(self, code, ds) {}
    docs::~docs() {}
 
-   void docs::create(name &creator, std::vector<ContentGroup> &content_groups)
+   void docs::create(name &creator, ContentGroups &content_groups)
    {
       Document document (get_self(), creator, content_groups);
       document.emplace ();
    }
 
-   void docs::getornewget(const name &creator, const std::vector<ContentGroup> &content_groups)
+   void docs::getornewget(const name &creator, const ContentGroups &content_groups)
    {
       Document document = Document::getOrNew(get_self(), creator, content_groups);
       eosio::check (document.created_date.sec_since_epoch() > 0, "created new instead of reading from existing");
    }
 
-   void docs::getornewnew(const name &creator, const std::vector<ContentGroup> &content_groups)
+   void docs::getornewnew(const name &creator, const ContentGroups &content_groups)
    {
       Document document = Document::getOrNew(get_self(), creator, content_groups);
       eosio::check (document.created_date.sec_since_epoch() == 0, "read from existing instead of creating new");
@@ -35,6 +35,17 @@ namespace hypha {
    {
       Edge edge = Edge::get(get_self(), from_node, to_node, edge_name);
       edge.erase();
+   }
+
+   void docs::testgetasset (const checksum256& hash, 
+                              const string &groupLabel, 
+                              const string &contentLabel, 
+                              const asset& contentValue)
+   {
+      Document document (get_self(), hash);
+      asset readValue = ContentWrapper::getAsset (document.content_groups, groupLabel, contentLabel);
+      eosio::check (readValue == contentValue, "read value does not equal content value. read value: " + 
+         readValue.to_string() + " expected value: " + contentValue.to_string());
    }
 
    // void docs::fork (const checksum256 &hash, const name &creator, const vector<document_graph::content_group> &content_groups )

@@ -9,7 +9,7 @@ namespace hypha
     Document::~Document() {}
     Document::Document() {}
 
-    Document::Document(eosio::name contract, eosio::name creator, std::vector<ContentGroup> contentGroups) 
+    Document::Document(eosio::name contract, eosio::name creator, ContentGroups contentGroups) 
         : contract{contract}, creator{creator}, content_groups{std::move(contentGroups)}
     {
         hash = hashContents();
@@ -67,7 +67,7 @@ namespace hypha
         });
     }
 
-    Document Document::getOrNew (eosio::name _contract, eosio::name _creator, std::vector<ContentGroup> contentGroups) 
+    Document Document::getOrNew (eosio::name _contract, eosio::name _creator, ContentGroups contentGroups) 
     {
         Document document {};
         document.content_groups = contentGroups;
@@ -125,54 +125,54 @@ namespace hypha
         content_groups.push_back(cg);
     }
 
-    std::pair<int64_t, ContentGroupWrapper *> Document::getContentGroup(const std::string &label)
-    {
-        for (std::size_t i = 0; i < content_groups.size(); ++i)
-        {
-            for (const Content &content : content_groups[i])
-            {
-                if (content.label == CONTENT_GROUP_LABEL)
-                {
-                    eosio::check(std::holds_alternative<std::string>(content.value), "fatal error: " + CONTENT_GROUP_LABEL + " must be a string");
-                    if (std::get<std::string>(content.value) == label)
-                    {
-                        ContentGroupWrapper cgw (content_groups[i]);
-                        return {(int64_t)i, &cgw};
-                    }
-                }
-            }
-        }
-        return {-1, nullptr};
-    }
+    // std::pair<int64_t, ContentWrapper *> Document::getContentGroup(const std::string &label)
+    // {
+    //     for (std::size_t i = 0; i < content_groups.size(); ++i)
+    //     {
+    //         for (const Content &content : content_groups[i])
+    //         {
+    //             if (content.label == CONTENT_GROUP_LABEL)
+    //             {
+    //                 eosio::check(std::holds_alternative<std::string>(content.value), "fatal error: " + CONTENT_GROUP_LABEL + " must be a string");
+    //                 if (std::get<std::string>(content.value) == label)
+    //                 {
+    //                     ContentWrapper cgw (content_groups[i]);
+    //                     return {(int64_t)i, &cgw};
+    //                 }
+    //             }
+    //         }
+    //     }
+    //     return {-1, nullptr};
+    // }
 
-    ContentGroupWrapper* Document::getContentGroupOrFail(const std::string &label, const std::string &error)
-    {
-        auto [idx, contentGroup] = getContentGroup(label);
-        if (idx == -1)
-        {
-            eosio::check(false, error);
-        }
-        return contentGroup;
-    }
+    // ContentWrapper* Document::getContentGroupOrFail(const std::string &label, const std::string &error)
+    // {
+    //     auto [idx, contentGroup] = getContentGroup(label);
+    //     if (idx == -1)
+    //     {
+    //         eosio::check(false, error);
+    //     }
+    //     return contentGroup;
+    // }
 
-    Content::FlexValue Document::getValueOrFail(const std::string &contentGroupLabel, const std::string &contentLabel, const std::string &error)
-    {
-        auto contentGroup = getContentGroupOrFail(contentGroupLabel, error);
-        auto contentItem = contentGroup->getOrFail(contentLabel, error); 
-        return contentItem->value;
-    }
+    // Content::FlexValue Document::getValueOrFail(const std::string &contentGroupLabel, const std::string &contentLabel, const std::string &error)
+    // {
+    //     auto contentGroup = getContentGroupOrFail(contentGroupLabel, error);
+    //     auto contentItem = contentGroup->getOrFail(contentLabel, error); 
+    //     return contentItem->value;
+    // }
 
-    std::vector<ContentGroupWrapper> Document::getContentGroups()
-    {
-        std::vector<ContentGroupWrapper> contentGroups;
-        for (ContentGroup &contentGroup : content_groups)
-        {
-            // auto cgw = ContentGroupWrapper (contentGroup);
-            contentGroups.push_back(ContentGroupWrapper(contentGroup));
-        }    
+    // std::vector<ContentWrapper> Document::getContentGroups()
+    // {
+    //     std::vector<ContentWrapper> contentGroups;
+    //     for (ContentGroup &contentGroup : content_groups)
+    //     {
+    //         // auto cgw = ContentWrapper (contentGroup);
+    //         contentGroups.push_back(ContentWrapper(contentGroup));
+    //     }    
         
-        return contentGroups;
-    }
+    //     return contentGroups;
+    // }
 
     // void Document::certify(const eosio::name &certifier, const std::string &notes)
     // {
@@ -203,13 +203,13 @@ namespace hypha
     }
 
     // static version cannot cache the hash in a member
-    const eosio::checksum256 Document::hashContents (std::vector<ContentGroup> &contentGroups)
+    const eosio::checksum256 Document::hashContents (ContentGroups &contentGroups)
     {
         std::string string_data = toString(contentGroups);
         return eosio::sha256(const_cast<char *>(string_data.c_str()), string_data.length());
     }
 
-    const std::string Document::toString(std::vector<ContentGroup> &contentGroups)
+    const std::string Document::toString(ContentGroups &contentGroups)
     {
         std::string results = "[";
         bool is_first = true;
@@ -253,14 +253,14 @@ namespace hypha
         return results;
     }
 
-    std::vector<ContentGroup> Document::rollup (ContentGroup contentGroup)
+    ContentGroups Document::rollup (ContentGroup contentGroup)
     {
-        std::vector<ContentGroup> contentGroups;
+        ContentGroups contentGroups;
         contentGroups.push_back (contentGroup);
         return contentGroups;
     }
 
-    ContentGroup Document::rollup (Content content)
+    ContentGroups Document::rollup (Content content)
     {
         ContentGroup contentGroup;
         contentGroup.push_back (content);
