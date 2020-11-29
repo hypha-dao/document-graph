@@ -57,7 +57,7 @@ namespace hypha
         static ContentGroups rollup(ContentGroup contentGroup);
         static ContentGroups rollup(Content content);
 
-        ContentGroups &getContentGroups() { return content_groups; } // should this be const?
+        const ContentGroups &getContentGroups() const { return content_groups; } // should this be const?
         const eosio::checksum256 &getHash() const { return hash; }
         const eosio::time_point &getCreated() const { return created_date; }
         const eosio::name &getCreator() const { return creator; }
