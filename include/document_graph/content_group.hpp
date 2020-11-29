@@ -22,12 +22,6 @@ namespace hypha
         Content getContent(const std::string &groupLabel, const std::string &contentLabel);
         bool exists(const std::string &groupLabel, const std::string &contentLabel);
 
-        eosio::asset getAsset(const std::string &groupLabel, const std::string &contentLabel);
-        std::string getString(const std::string &groupLabel, const std::string &contentLabel);
-        eosio::name getName(const std::string &groupLabel, const std::string &contentLabel);
-        std::int64_t getInt(const std::string &groupLabel, const std::string &contentLabel);
-        eosio::checksum256 getChecksum(const std::string &groupLabel, const std::string &contentLabel);
-
         // series of static methods that instantiate an instance and call the non-static member
         // I imagine there is a smarter way to do this...
         static ContentGroup getGroup(const ContentGroups &contentGroups, const string &groupLabel);
@@ -35,10 +29,6 @@ namespace hypha
         static Content getContent(const ContentGroups &contentGroups,
                                   const std::string &groupLabel,
                                   const std::string &contentLabel);
-
-        static Content::FlexValue getValue(const ContentGroups &contentGroups,
-                                           const std::string &groupLabel,
-                                           const std::string &contentLabel);
 
         static void insertOrReplace(ContentGroup &contentGroup, Content &newContent);
 

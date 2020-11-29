@@ -88,53 +88,6 @@ namespace hypha
         return cw.getContent(groupLabel, contentLabel);
     }
 
-    // static
-    // eosio::asset ContentWrapper::getAsset(const ContentGroups &contentGroups,
-    //                                            const std::string &groupLabel,
-    //                                            const std::string &contentLabel)
-    // {
-    //     ContentWrapper cw (contentGroups);
-    //     return cw.getAsset (groupLabel, contentLabel);
-    // }
-
-    // // static
-    // std::string ContentWrapper::getString(const ContentGroups &contentGroups,
-    //                                            const std::string &groupLabel,
-    //                                            const std::string &contentLabel)
-    // {
-    //     ContentWrapper cw (contentGroups);
-    //     return cw.getString(groupLabel, contentLabel);
-    // }
-
-    // // static
-    // std::int64_t ContentWrapper::getInt(const ContentGroups &contentGroups,
-    //                                          const std::string &groupLabel,
-    //                                          const std::string &contentLabel)
-    // {
-    //    ContentWrapper cw (contentGroups);
-    //    return cw.getInt(groupLabel, contentLabel);
-    // }
-
-    // // static
-    // eosio::name ContentWrapper::getName(const ContentGroups &contentGroups,
-    //                                          const std::string &groupLabel,
-    //                                          const std::string &contentLabel)
-    // {
-    //     ContentWrapper cw (contentGroups);
-    //     return cw.getName(groupLabel, contentLabel);
-    // }
-
-    // // static
-    // eosio::checksum256 ContentWrapper::getChecksum(const ContentGroups &contentGroups,
-    //                                          const std::string &groupLabel,
-    //                                          const std::string &contentLabel)
-    // {
-    //     ContentWrapper cw (contentGroups);
-    //     return cw.getChecksum(groupLabel, contentLabel);
-    // }
-
-
-
     // std::pair<int64_t, Content *> ContentWrapper::get(const std::string &label)
     // {
     //     for (std::size_t i = 0; i < m_contentGroup.size(); ++i)
