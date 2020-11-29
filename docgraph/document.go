@@ -10,6 +10,7 @@ import (
 
 // FlexValueVariant may hold a name, int64, asset, string, or time_point
 var FlexValueVariant = eos.NewVariantDefinition([]eos.VariantType{
+	{Name: "monostate", Type: int64(0)},
 	{Name: "name", Type: eos.Name("")},
 	{Name: "string", Type: ""},
 	{Name: "asset", Type: (*eos.Asset)(nil)}, // Syntax for pointer to a type, could be any struct
@@ -34,7 +35,7 @@ func (fv *FlexValue) String() string {
 	case eos.Name:
 		return string(v)
 	case int64:
-		return string(v)
+		return fmt.Sprint(v)
 	case *eos.Asset:
 		return v.String()
 	case string:

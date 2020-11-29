@@ -19,4 +19,5 @@ require (
 	golang.org/x/crypto v0.0.0-20201016220609-9e8e0b390897 // indirect
 	golang.org/x/sys v0.0.0-20201110211018-35f3e6cf4a65 // indirect
 	gotest.tools v2.2.0+incompatible
+	gotest.tools/v3 v3.0.3
 )

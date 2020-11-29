@@ -16,9 +16,8 @@ type DocumentGraph struct {
 	RootNode Document
 }
 
-// CreateDocument creates a new document on chain from the provided file
-func CreateDocument(ctx context.Context, api *eos.API,
-	contract, creator eos.AccountName,
+func newDocumentTrx(ctx context.Context, api *eos.API,
+	contract, creator eos.AccountName, actionName,
 	fileName string) (Document, error) {
 
 	data, err := ioutil.ReadFile(fileName)
@@ -26,7 +25,7 @@ func CreateDocument(ctx context.Context, api *eos.API,
 		return Document{}, fmt.Errorf("readfile %v: %v", fileName, err)
 	}
 
-	action := eos.ActN("create")
+	action := eos.ActN(actionName)
 
 	var dump map[string]interface{}
 	err = json.Unmarshal(data, &dump)
@@ -62,6 +61,32 @@ func CreateDocument(ctx context.Context, api *eos.API,
 	}
 	return lastDoc, nil
 }
+
+// CreateDocument creates a new document on chain from the provided file
+func CreateDocument(ctx context.Context, api *eos.API,
+	contract, creator eos.AccountName,
+	fileName string) (Document, error) {
+
+	return newDocumentTrx(ctx, api, contract, creator, "create", fileName)
+}
+
+// // GetOrNewNew creates a new document on chain from the provided file
+// func GetOrNewNew(ctx context.Context, api *eos.API,
+// 	contract, creator eos.AccountName,
+// 	fileName string) (Document, error) {
+
+// 	return newDocumentTrx(ctx, api, contract, creator, "getornewnew", fileName)
+
+// }
+
+// // GetOrNewGet creates a new document on chain from the provided file
+// func GetOrNewGet(ctx context.Context, api *eos.API,
+// 	contract, creator eos.AccountName,
+// 	fileName string) (Document, error) {
+
+// 	return newDocumentTrx(ctx, api, contract, creator, "getornewget", fileName)
+
+// }
 
 // LoadDocument reads a document from the blockchain and creates a Document instance
 func LoadDocument(ctx context.Context, api *eos.API,
@@ -102,6 +127,7 @@ func CreateEdge(ctx context.Context, api *eos.API,
 	edgeName eos.Name) (string, error) {
 
 	actionData := make(map[string]interface{})
+	actionData["creator"] = creator
 	actionData["from_node"] = fromNode
 	actionData["to_node"] = toNode
 	actionData["edge_name"] = edgeName
@@ -234,4 +260,26 @@ func GetLastDocument(ctx context.Context, api *eos.API, contract eos.AccountName
 		return Document{}, err
 	}
 	return docs[0], nil
+}
+
+type eraseDoc struct {
+	Hash eos.Checksum256 `json:"hash"`
+}
+
+// EraseDocument ...
+func EraseDocument(ctx context.Context, api *eos.API,
+	contract eos.AccountName,
+	hash eos.Checksum256) (string, error) {
+
+	actions := []*eos.Action{{
+		Account: contract,
+		Name:    eos.ActN("erase"),
+		Authorization: []eos.PermissionLevel{
+			{Actor: contract, Permission: eos.PN("active")},
+		},
+		ActionData: eos.NewActionData(eraseDoc{
+			Hash: hash,
+		}),
+	}}
+	return eostest.ExecTrx(ctx, api, actions)
 }

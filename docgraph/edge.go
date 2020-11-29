@@ -23,48 +23,68 @@ type RemoveEdges struct {
 	Strict   bool            `json:"strict"`
 }
 
-type removeEdgesFT struct {
+type removeEdge struct {
 	FromNode eos.Checksum256 `json:"from_node"`
 	ToNode   eos.Checksum256 `json:"to_node"`
-	Strict   bool            `json:"strict"`
+	EdgeName eos.Name        `json:"edge_name"`
+}
+
+// RemoveEdge ...
+func RemoveEdge(ctx context.Context, api *eos.API,
+	contract eos.AccountName,
+	fromHash, toHash eos.Checksum256, edgeName eos.Name) (string, error) {
+
+	actions := []*eos.Action{{
+		Account: contract,
+		Name:    eos.ActN("removeedge"),
+		Authorization: []eos.PermissionLevel{
+			{Actor: contract, Permission: eos.PN("active")},
+		},
+		ActionData: eos.NewActionData(removeEdge{
+			FromNode: fromHash,
+			ToNode:   toHash,
+			EdgeName: edgeName,
+		}),
+	}}
+	return eostest.ExecTrx(ctx, api, actions)
 }
 
 // RemoveEdgesFromAndName ...
-func RemoveEdgesFromAndName(ctx context.Context, api *eos.API,
-	contract eos.AccountName,
-	fromHash eos.Checksum256, edgeName eos.Name) (string, error) {
+// func RemoveEdgesFromAndName(ctx context.Context, api *eos.API,
+// 	contract eos.AccountName,
+// 	fromHash eos.Checksum256, edgeName eos.Name) (string, error) {
 
-	actions := []*eos.Action{{
-		Account: contract,
-		Name:    eos.ActN("remedgesfn"),
-		Authorization: []eos.PermissionLevel{
-			{Actor: contract, Permission: eos.PN("active")},
-		},
-		ActionData: eos.NewActionData(RemoveEdges{
-			FromNode: fromHash,
-			EdgeName: edgeName,
-			Strict:   true,
-		}),
-	}}
-	return eostest.ExecTrx(ctx, api, actions)
-}
+// 	actions := []*eos.Action{{
+// 		Account: contract,
+// 		Name:    eos.ActN("remedgesfn"),
+// 		Authorization: []eos.PermissionLevel{
+// 			{Actor: contract, Permission: eos.PN("active")},
+// 		},
+// 		ActionData: eos.NewActionData(RemoveEdges{
+// 			FromNode: fromHash,
+// 			EdgeName: edgeName,
+// 			Strict:   true,
+// 		}),
+// 	}}
+// 	return eostest.ExecTrx(ctx, api, actions)
+// }
 
 // RemoveEdgesFromAndTo ...
-func RemoveEdgesFromAndTo(ctx context.Context, api *eos.API,
-	contract eos.AccountName,
-	fromHash, toHash eos.Checksum256) (string, error) {
+// func RemoveEdgesFromAndTo(ctx context.Context, api *eos.API,
+// 	contract eos.AccountName,
+// 	fromHash, toHash eos.Checksum256) (string, error) {
 
-	actions := []*eos.Action{{
-		Account: contract,
-		Name:    eos.ActN("remedgesft"),
-		Authorization: []eos.PermissionLevel{
-			{Actor: contract, Permission: eos.PN("active")},
-		},
-		ActionData: eos.NewActionData(removeEdgesFT{
-			FromNode: fromHash,
-			ToNode:   toHash,
-			Strict:   true,
-		}),
-	}}
-	return eostest.ExecTrx(ctx, api, actions)
-}
+// 	actions := []*eos.Action{{
+// 		Account: contract,
+// 		Name:    eos.ActN("remedgesft"),
+// 		Authorization: []eos.PermissionLevel{
+// 			{Actor: contract, Permission: eos.PN("active")},
+// 		},
+// 		ActionData: eos.NewActionData(removeEdgesFT{
+// 			FromNode: fromHash,
+// 			ToNode:   toHash,
+// 			Strict:   true,
+// 		}),
+// 	}}
+// 	return eostest.ExecTrx(ctx, api, actions)
+// }
