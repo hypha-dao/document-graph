@@ -53,50 +53,50 @@ namespace hypha
         return false;
     }
 
-    eosio::asset ContentWrapper::getAsset(const std::string &groupLabel, const std::string &contentLabel)
-    {
-        Content::FlexValue flex = getContent(groupLabel, contentLabel).value;
-        eosio::check(std::holds_alternative<eosio::asset>(flex),
-                     "Content group: " + contentLabel + ", item: " + contentLabel +
-                         " is not of expected type");
-        return std::get<eosio::asset>(flex);
-    }
+    // eosio::asset ContentWrapper::getAsset(const std::string &groupLabel, const std::string &contentLabel)
+    // {
+    //     Content::FlexValue flex = getContent(groupLabel, contentLabel).value;
+    //     eosio::check(std::holds_alternative<eosio::asset>(flex),
+    //                  "Content group: " + contentLabel + ", item: " + contentLabel +
+    //                      " is not of expected type");
+    //     return std::get<eosio::asset>(flex);
+    // }
 
-    std::string ContentWrapper::getString(const std::string &groupLabel, const std::string &contentLabel)
-    {
-        Content::FlexValue flex = getContent(groupLabel, contentLabel).value;
-        eosio::check(std::holds_alternative<std::string>(flex),
-                     "Content group: " + contentLabel + ", item: " + contentLabel +
-                         " is not of expected type");
-        return std::get<std::string>(flex);
-    }
+    // std::string ContentWrapper::getString(const std::string &groupLabel, const std::string &contentLabel)
+    // {
+    //     Content::FlexValue flex = getContent(groupLabel, contentLabel).value;
+    //     eosio::check(std::holds_alternative<std::string>(flex),
+    //                  "Content group: " + contentLabel + ", item: " + contentLabel +
+    //                      " is not of expected type");
+    //     return std::get<std::string>(flex);
+    // }
 
-    std::int64_t ContentWrapper::getInt(const std::string &groupLabel, const std::string &contentLabel)
-    {
-        Content::FlexValue flex = getContent(groupLabel, contentLabel).value;
-        eosio::check(std::holds_alternative<std::int64_t>(flex),
-                     "Content group: " + contentLabel + ", item: " + contentLabel +
-                         " is not of expected type");
-        return std::get<std::int64_t>(flex);
-    }
+    // std::int64_t ContentWrapper::getInt(const std::string &groupLabel, const std::string &contentLabel)
+    // {
+    //     Content::FlexValue flex = getContent(groupLabel, contentLabel).value;
+    //     eosio::check(std::holds_alternative<std::int64_t>(flex),
+    //                  "Content group: " + contentLabel + ", item: " + contentLabel +
+    //                      " is not of expected type");
+    //     return std::get<std::int64_t>(flex);
+    // }
 
-    eosio::name ContentWrapper::getName(const std::string &groupLabel, const std::string &contentLabel)
-    {
-        Content::FlexValue flex = getContent(groupLabel, contentLabel).value;
-        eosio::check(std::holds_alternative<eosio::name>(flex),
-                     "Content group: " + contentLabel + ", item: " + contentLabel +
-                         " is not of expected type");
-        return std::get<eosio::name>(flex);
-    }
+    // eosio::name ContentWrapper::getName(const std::string &groupLabel, const std::string &contentLabel)
+    // {
+    //     Content::FlexValue flex = getContent(groupLabel, contentLabel).value;
+    //     eosio::check(std::holds_alternative<eosio::name>(flex),
+    //                  "Content group: " + contentLabel + ", item: " + contentLabel +
+    //                      " is not of expected type");
+    //     return std::get<eosio::name>(flex);
+    // }
 
-    eosio::checksum256 ContentWrapper::getChecksum(const std::string &groupLabel, const std::string &contentLabel)
-    {
-        Content::FlexValue flex = getContent(groupLabel, contentLabel).value;
-        eosio::check(std::holds_alternative<eosio::checksum256>(flex),
-                     "Content group: " + contentLabel + ", item: " + contentLabel +
-                         " is not of expected type");
-        return std::get<eosio::checksum256>(flex);
-    }
+    // eosio::checksum256 ContentWrapper::getChecksum(const std::string &groupLabel, const std::string &contentLabel)
+    // {
+    //     Content::FlexValue flex = getContent(groupLabel, contentLabel).value;
+    //     eosio::check(std::holds_alternative<eosio::checksum256>(flex),
+    //                  "Content group: " + contentLabel + ", item: " + contentLabel +
+    //                      " is not of expected type");
+    //     return std::get<eosio::checksum256>(flex);
+    // }
 
     // static
     ContentGroup ContentWrapper::getGroup(const ContentGroups &contentGroups, const std::string &groupLabel)
@@ -115,49 +115,49 @@ namespace hypha
     }
 
     // static
-    eosio::asset ContentWrapper::getAsset(const ContentGroups &contentGroups,
-                                               const std::string &groupLabel,
-                                               const std::string &contentLabel)
-    {
-        ContentWrapper cw (contentGroups);
-        return cw.getAsset (groupLabel, contentLabel);
-    }
+    // eosio::asset ContentWrapper::getAsset(const ContentGroups &contentGroups,
+    //                                            const std::string &groupLabel,
+    //                                            const std::string &contentLabel)
+    // {
+    //     ContentWrapper cw (contentGroups);
+    //     return cw.getAsset (groupLabel, contentLabel);
+    // }
 
-    // static
-    std::string ContentWrapper::getString(const ContentGroups &contentGroups,
-                                               const std::string &groupLabel,
-                                               const std::string &contentLabel)
-    {
-        ContentWrapper cw (contentGroups);
-        return cw.getString(groupLabel, contentLabel);
-    }
+    // // static
+    // std::string ContentWrapper::getString(const ContentGroups &contentGroups,
+    //                                            const std::string &groupLabel,
+    //                                            const std::string &contentLabel)
+    // {
+    //     ContentWrapper cw (contentGroups);
+    //     return cw.getString(groupLabel, contentLabel);
+    // }
 
-    // static
-    std::int64_t ContentWrapper::getInt(const ContentGroups &contentGroups,
-                                             const std::string &groupLabel,
-                                             const std::string &contentLabel)
-    {
-       ContentWrapper cw (contentGroups);
-       return cw.getInt(groupLabel, contentLabel);
-    }
+    // // static
+    // std::int64_t ContentWrapper::getInt(const ContentGroups &contentGroups,
+    //                                          const std::string &groupLabel,
+    //                                          const std::string &contentLabel)
+    // {
+    //    ContentWrapper cw (contentGroups);
+    //    return cw.getInt(groupLabel, contentLabel);
+    // }
 
-    // static
-    eosio::name ContentWrapper::getName(const ContentGroups &contentGroups,
-                                             const std::string &groupLabel,
-                                             const std::string &contentLabel)
-    {
-        ContentWrapper cw (contentGroups);
-        return cw.getName(groupLabel, contentLabel);
-    }
+    // // static
+    // eosio::name ContentWrapper::getName(const ContentGroups &contentGroups,
+    //                                          const std::string &groupLabel,
+    //                                          const std::string &contentLabel)
+    // {
+    //     ContentWrapper cw (contentGroups);
+    //     return cw.getName(groupLabel, contentLabel);
+    // }
 
-    // static
-    eosio::checksum256 ContentWrapper::getChecksum(const ContentGroups &contentGroups,
-                                             const std::string &groupLabel,
-                                             const std::string &contentLabel)
-    {
-        ContentWrapper cw (contentGroups);
-        return cw.getChecksum(groupLabel, contentLabel);
-    }
+    // // static
+    // eosio::checksum256 ContentWrapper::getChecksum(const ContentGroups &contentGroups,
+    //                                          const std::string &groupLabel,
+    //                                          const std::string &contentLabel)
+    // {
+    //     ContentWrapper cw (contentGroups);
+    //     return cw.getChecksum(groupLabel, contentLabel);
+    // }
 
 
 

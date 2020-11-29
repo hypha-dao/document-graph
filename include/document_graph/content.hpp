@@ -9,7 +9,7 @@ namespace hypha
 {
     struct Content
     {
-        typedef std::variant<eosio::name, std::string, eosio::asset, eosio::time_point,
+        typedef std::variant<std::monostate, eosio::name, std::string, eosio::asset, eosio::time_point,
                              std::int64_t, eosio::checksum256>
             FlexValue;
 
@@ -24,14 +24,20 @@ namespace hypha
         const std::string getLabel();
         void setLabel(std::string label);
 
+        const bool isEmpty();
+
         const std::string toString();
 
         // NOTE: not using m_ notation because this changes serialization format
         std::string label;
         FlexValue value;
 
-    private:
-        std::string toHex(const char *d, uint32_t s);
+        template <class T>
+        T getAs()
+        {
+            eosio::check(std::holds_alternative<T>(value), "Content value is not of expected type");
+            return std::get<T>(value);
+        }
 
         EOSLIB_SERIALIZE(Content, (label)(value))
     };

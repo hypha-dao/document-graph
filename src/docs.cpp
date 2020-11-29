@@ -43,7 +43,7 @@ namespace hypha {
                               const asset& contentValue)
    {
       Document document (get_self(), hash);
-      asset readValue = ContentWrapper::getAsset (document.content_groups, groupLabel, contentLabel);
+      asset readValue = ContentWrapper::getContent (document.content_groups, groupLabel, contentLabel).getAs<eosio::asset>();
       eosio::check (readValue == contentValue, "read value does not equal content value. read value: " + 
          readValue.to_string() + " expected value: " + contentValue.to_string());
    }

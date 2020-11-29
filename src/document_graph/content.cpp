@@ -1,4 +1,5 @@
 #include <document_graph/content.hpp>
+#include <document_graph/util.hpp>
 
 namespace hypha
 {
@@ -27,8 +28,18 @@ namespace hypha
         value = value;
     }
 
+    const bool Content::isEmpty () 
+    {
+        if (std::holds_alternative<std::monostate>(value)) {
+            return true;
+        }
+        return false;
+    }
+
     const std::string Content::toString()
     {
+        if (isEmpty()) return "";
+        
         std::string str = "{" + std::string(label) + "=";
         if (std::holds_alternative<std::int64_t>(value))
         {
@@ -50,7 +61,7 @@ namespace hypha
         {
             eosio::checksum256 cs_value = std::get<eosio::checksum256>(value);
             auto arr = cs_value.extract_as_byte_array();
-            std::string str_value = Content::toHex((const char *)arr.data(), arr.size());
+            std::string str_value = toHex((const char *)arr.data(), arr.size());
             str += "[checksum256," + str_value + "]";
         }
         else
@@ -60,15 +71,4 @@ namespace hypha
         str += "}";
         return str;
     }
-
-    std::string Content::toHex(const char *d, uint32_t s)
-    {
-        std::string r;
-        const char *to_hex = "0123456789abcdef";
-        auto c = reinterpret_cast<const uint8_t *>(d);
-        for (auto i = 0; i < s; ++i)
-            (r += to_hex[(c[i] >> 4)]) += to_hex[(c[i] & 0x0f)];
-        return r;
-    }
-
 } // namespace hypha

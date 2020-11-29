@@ -11,15 +11,11 @@ namespace hypha
                 const eosio::checksum256 &to_node, 
                 const eosio::name &edge_name) 
         : contract {contract}, creator {creator}, from_node {from_node}, to_node {to_node}, edge_name{edge_name}
-    {
-        id = concatHash (from_node, to_node, edge_name);
-        from_node_edge_name_index = concatHash(from_node, edge_name);
-        from_node_to_node_index = concatHash(from_node, to_node);
-        to_node_edge_name_index = concatHash(to_node, edge_name);        
-    }
+    { }
 
     Edge::~Edge(){}
 
+    // static getter
     Edge Edge::get (const eosio::name &_contract,
                     const eosio::checksum256 &_from_node, 
                     const eosio::checksum256 &_to_node, 
@@ -34,6 +30,23 @@ namespace hypha
         return *itr;
     }
 
+    // static getter
+    Edge Edge::get (const eosio::name &_contract,
+                    const eosio::checksum256 &_from_node, 
+                    const eosio::name &_edge_name)
+    {
+        edge_table e_t (_contract, _contract.value);
+        auto fromEdgeIndex = e_t.get_index<eosio::name("byfromname")>();
+        auto index = concatHash (_from_node, _edge_name);
+        auto itr = fromEdgeIndex.find (index);
+
+        eosio::check (itr != fromEdgeIndex.end() && itr->from_node_edge_name_index == index, "edge does not exist: from " + readableHash(_from_node) 
+                + " with edge name of " + _edge_name.to_string());
+
+        return *itr;
+    }
+
+    // static getter
     bool Edge::exists (const eosio::name &_contract,
                         const eosio::checksum256 &_from_node, 
                         const eosio::checksum256 &_to_node, 
@@ -48,6 +61,12 @@ namespace hypha
     void Edge::emplace () 
     {
         require_auth (creator);
+
+        // update indexes prior to save
+        id = concatHash (from_node, to_node, edge_name);
+        from_node_edge_name_index = concatHash(from_node, edge_name);
+        from_node_to_node_index = concatHash(from_node, to_node);
+        to_node_edge_name_index = concatHash(to_node, edge_name);        
 
         edge_table e_t(contract, contract.value);
         e_t.emplace(contract, [&](auto &e) {

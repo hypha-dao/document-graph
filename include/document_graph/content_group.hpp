@@ -48,25 +48,25 @@ namespace hypha
         //              const std::string &groupLabel,
         //              const std::string &contentLabel);
 
-        static eosio::asset getAsset(const ContentGroups &contentGroups,
-                                     const std::string &groupLabel,
-                                     const std::string &contentLabel);
+        // static eosio::asset getAsset(const ContentGroups &contentGroups,
+        //                              const std::string &groupLabel,
+        //                              const std::string &contentLabel);
 
-        static std::string getString(const ContentGroups &contentGroups,
-                                     const std::string &groupLabel,
-                                     const std::string &contentLabel);
+        // static std::string getString(const ContentGroups &contentGroups,
+        //                              const std::string &groupLabel,
+        //                              const std::string &contentLabel);
 
-        static eosio::name getName(const ContentGroups &contentGroups,
-                                   const std::string &groupLabel,
-                                   const std::string &contentLabel);
+        // static eosio::name getName(const ContentGroups &contentGroups,
+        //                            const std::string &groupLabel,
+        //                            const std::string &contentLabel);
 
-        static std::int64_t getInt(const ContentGroups &contentGroups,
-                                   const std::string &groupLabel,
-                                   const std::string &contentLabel);
+        // static std::int64_t getInt(const ContentGroups &contentGroups,
+        //                            const std::string &groupLabel,
+        //                            const std::string &contentLabel);
 
-        static eosio::checksum256 getChecksum(const ContentGroups &contentGroups,
-                                   const std::string &groupLabel,
-                                   const std::string &contentLabel);
+        // static eosio::checksum256 getChecksum(const ContentGroups &contentGroups,
+        //                            const std::string &groupLabel,
+        //                            const std::string &contentLabel);
 
         // prior version of getters used the std::pair as a return type
         // std::pair<int64_t, Content*> get (const std::string &label);
