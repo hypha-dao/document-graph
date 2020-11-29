@@ -18,12 +18,6 @@ namespace hypha
         Content(std::string label, FlexValue value);
         ~Content();
 
-        const FlexValue getValue();
-        void setValue(FlexValue value);
-
-        const std::string getLabel();
-        void setLabel(std::string label);
-
         const bool isEmpty();
 
         const std::string toString();

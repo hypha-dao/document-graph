@@ -17,30 +17,34 @@ namespace hypha
     class DocumentGraph
     {
     public:
+        DocumentGraph(const eosio::name &contract) : m_contract(contract) {}
+        ~DocumentGraph() {}
 
-        DocumentGraph(const eosio::name &contract) : m_contract(contract){}
-        ~DocumentGraph(){}
- 
-        void removeEdges (const eosio::checksum256 &node);
+        void removeEdges(const eosio::checksum256 &node);
 
-        std::vector<Edge> getEdges (const eosio::checksum256 &fromNode, const eosio::checksum256 &toNode);
-        std::vector<Edge> getEdgesOrFail (const eosio::checksum256 &fromNode, const eosio::checksum256 &toNode);
+        std::vector<Edge> getEdges(const eosio::checksum256 &fromNode, const eosio::checksum256 &toNode);
+        std::vector<Edge> getEdgesOrFail(const eosio::checksum256 &fromNode, const eosio::checksum256 &toNode);
 
-        std::vector<Edge> getEdgesFrom (const eosio::checksum256 &fromNode, const eosio::name &edgeName);
-        std::vector<Edge> getEdgesFromOrFail (const eosio::checksum256 &fromNode, const eosio::name &edgeName);
+        std::vector<Edge> getEdgesFrom(const eosio::checksum256 &fromNode, const eosio::name &edgeName);
+        std::vector<Edge> getEdgesFromOrFail(const eosio::checksum256 &fromNode, const eosio::name &edgeName);
 
-        std::vector<Edge> getEdgesTo (const eosio::checksum256 &toNode, const eosio::name &edgeName);
-        std::vector<Edge> getEdgesToOrFail (const eosio::checksum256 &toNode, const eosio::name &edgeName);
+        std::vector<Edge> getEdgesTo(const eosio::checksum256 &toNode, const eosio::name &edgeName);
+        std::vector<Edge> getEdgesToOrFail(const eosio::checksum256 &toNode, const eosio::name &edgeName);
 
-        Edge createEdge (eosio::name &creator, const eosio::checksum256 &fromNode, const eosio::checksum256 &toNode, const eosio::name &edgeName);
+        Edge createEdge(eosio::name &creator, const eosio::checksum256 &fromNode, const eosio::checksum256 &toNode, const eosio::name &edgeName);
 
+        Document updateDocument(const eosio::name &updater,
+                                const eosio::checksum256 &doc_hash,
+                                ContentGroups content_groups);
+
+        void replaceNode(const eosio::checksum256 &oldNode, const eosio::checksum256 &newNode);
         void eraseDocument(const eosio::checksum256 &document_hash);
+        void eraseDocument(const eosio::checksum256 &document_hash, const bool includeEdges);
 
     private:
         eosio::name m_contract;
     };
 }; // namespace hypha
-
 
 // #define DECLARE_DOCUMENT(contract)\
 // using flexvalue = hypha::document_graph::flexvalue;\

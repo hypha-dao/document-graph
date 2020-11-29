@@ -6,7 +6,7 @@
 
 namespace hypha
 {
-
+    // TODO: need to move the contract ABI generator tag to a Macro
     struct [[eosio::table, eosio::contract("docs")]] Edge
     {
         Edge();
@@ -14,35 +14,43 @@ namespace hypha
              const eosio::checksum256 &toNode, const eosio::name &edgeName);
         ~Edge();
 
-        void emplace ();
-        void erase ();
+        void emplace();
+        void erase();
 
-        static Edge get (const eosio::name &contract,
-                        const eosio::checksum256 &from_node, 
-                        const eosio::checksum256 &to_node, 
+        const eosio::checksum256 &getFromNode() { return from_node; }
+        const eosio::checksum256 &getToNode() { return to_node; }
+        const eosio::name &getEdgeName() { return edge_name; }
+        const eosio::time_point &getCreated() { return created_date; }
+        const eosio::name &getCreator() { return creator; }
+
+        static Edge get(const eosio::name &contract,
+                        const eosio::checksum256 &from_node,
+                        const eosio::checksum256 &to_node,
                         const eosio::name &edge_name);
 
-        static Edge get (const eosio::name &contract,
-                        const eosio::checksum256 &from_node, 
+        static Edge get(const eosio::name &contract,
+                        const eosio::checksum256 &from_node,
                         const eosio::name &edge_name);
-        
-        static bool exists (const eosio::name &_contract,
-                        const eosio::checksum256 &_from_node, 
-                        const eosio::checksum256 &_to_node, 
-                        const eosio::name &_edge_name);
 
-        uint64_t id;
+        static bool exists(const eosio::name &_contract,
+                           const eosio::checksum256 &_from_node,
+                           const eosio::checksum256 &_to_node,
+                           const eosio::name &_edge_name);
+
+        uint64_t id; // hash of from_node, to_node, and edge_name
 
         // these three additional indexes allow isolating/querying edges more precisely (less iteration)
         uint64_t from_node_edge_name_index;
         uint64_t from_node_to_node_index;
         uint64_t to_node_edge_name_index;
 
+        // these members should be private, but they are used in DocumentGraph for edge replacement logic
         eosio::checksum256 from_node;
         eosio::checksum256 to_node;
         eosio::name edge_name;
         eosio::time_point created_date;
         eosio::name creator;
+        eosio::name contract;
 
         uint64_t primary_key() const;
         uint64_t by_from_node_edge_name_index() const;
@@ -54,6 +62,8 @@ namespace hypha
         eosio::checksum256 by_from() const;
         eosio::checksum256 by_to() const;
 
+        EOSLIB_SERIALIZE(Edge, (id)(from_node_edge_name_index)(from_node_to_node_index)(to_node_edge_name_index)(from_node)(to_node)(edge_name)(created_date)(creator)(contract))
+
         typedef eosio::multi_index<eosio::name("edges"), Edge,
                                    eosio::indexed_by<eosio::name("fromnode"), eosio::const_mem_fun<Edge, eosio::checksum256, &Edge::by_from>>,
                                    eosio::indexed_by<eosio::name("tonode"), eosio::const_mem_fun<Edge, eosio::checksum256, &Edge::by_to>>,
@@ -64,12 +74,6 @@ namespace hypha
                                    eosio::indexed_by<eosio::name("bycreated"), eosio::const_mem_fun<Edge, uint64_t, &Edge::by_created>>,
                                    eosio::indexed_by<eosio::name("bycreator"), eosio::const_mem_fun<Edge, uint64_t, &Edge::by_creator>>>
             edge_table;
-
-    private:
-        eosio::name contract;
-        uint64_t createID(const eosio::checksum256 &from_node, const eosio::checksum256 &to_node, const eosio::name &edge_name);
-
-        EOSLIB_SERIALIZE(Edge, (id)(from_node_edge_name_index)(from_node_to_node_index)(to_node_edge_name_index)(from_node)(to_node)(edge_name)(created_date)(creator)(contract))
     };
 
 } // namespace hypha

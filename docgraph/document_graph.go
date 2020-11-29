@@ -261,3 +261,25 @@ func GetLastDocument(ctx context.Context, api *eos.API, contract eos.AccountName
 	}
 	return docs[0], nil
 }
+
+type eraseDoc struct {
+	Hash eos.Checksum256 `json:"hash"`
+}
+
+// EraseDocument ...
+func EraseDocument(ctx context.Context, api *eos.API,
+	contract eos.AccountName,
+	hash eos.Checksum256) (string, error) {
+
+	actions := []*eos.Action{{
+		Account: contract,
+		Name:    eos.ActN("erase"),
+		Authorization: []eos.PermissionLevel{
+			{Actor: contract, Permission: eos.PN("active")},
+		},
+		ActionData: eos.NewActionData(eraseDoc{
+			Hash: hash,
+		}),
+	}}
+	return eostest.ExecTrx(ctx, api, actions)
+}

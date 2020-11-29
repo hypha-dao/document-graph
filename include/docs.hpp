@@ -18,21 +18,23 @@ namespace hypha
       ~docs();
 
       // DECLARE_DOCUMENT(docs)
-    
+
       // Any account/member can creator a new document
-      ACTION create(eosio::name &creator, ContentGroups &content_groups);
+      ACTION create(eosio::name & creator, ContentGroups & content_groups);
 
       ACTION getornewget(const name &creator, const ContentGroups &content_groups);
       ACTION getornewnew(const name &creator, const ContentGroups &content_groups);
 
-      ACTION newedge(eosio::name &creator, const checksum256 &from_node, const checksum256 &to_node, const name &edge_name);
+      ACTION newedge(eosio::name & creator, const checksum256 &from_node, const checksum256 &to_node, const name &edge_name);
 
       ACTION removeedge(const checksum256 &from_node, const checksum256 &to_node, const name &edge_name);
 
-      ACTION testgetasset (const checksum256& hash, 
-                           const string &groupLabel, 
-                           const string &contentLabel, 
-                           const asset& contentValue);
+      ACTION erase(const checksum256 &hash);
+
+      ACTION testgetasset(const checksum256 &hash,
+                          const string &groupLabel,
+                          const string &contentLabel,
+                          const asset &contentValue);
       // // Fork creates a new document (node in a graph) from an existing document.
       // // The forked content should contain only new or updated entries to avoid data duplication. (lazily enforced?)
       // ACTION fork(const checksum256 &hash, const name &creator, const vector<document_graph::content_group> &content_groups);
@@ -46,6 +48,6 @@ namespace hypha
       // ACTION reset();
 
    private:
-      DocumentGraph m_dg = DocumentGraph (get_self());
+      DocumentGraph m_dg = DocumentGraph(get_self());
    };
 } // namespace hypha

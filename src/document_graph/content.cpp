@@ -8,26 +8,6 @@ namespace hypha
     Content::Content() {}
     Content::~Content() {}
 
-    const std::string Content::getLabel()
-    {
-        return label;
-    }
-
-    void Content::setLabel(std::string label)
-    {
-        label = label;
-    }
-
-    const Content::FlexValue Content::getValue()
-    {
-        return value;
-    }
-
-    void Content::setValue(Content::FlexValue value)
-    {
-        value = value;
-    }
-
     const bool Content::isEmpty () 
     {
         if (std::holds_alternative<std::monostate>(value)) {

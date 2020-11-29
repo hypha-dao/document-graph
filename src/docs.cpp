@@ -1,51 +1,58 @@
 #include <docs.hpp>
 
-namespace hypha {
+namespace hypha
+{
 
    docs::docs(name self, name code, datastream<const char *> ds) : contract(self, code, ds) {}
    docs::~docs() {}
 
    void docs::create(name &creator, ContentGroups &content_groups)
    {
-      Document document (get_self(), creator, content_groups);
-      document.emplace ();
+      Document document(get_self(), creator, content_groups);
+      document.emplace();
    }
 
    void docs::getornewget(const name &creator, const ContentGroups &content_groups)
    {
       Document document = Document::getOrNew(get_self(), creator, content_groups);
-      eosio::check (document.created_date.sec_since_epoch() > 0, "created new instead of reading from existing");
+      eosio::check(document.getCreated().sec_since_epoch() > 0, "created new instead of reading from existing");
    }
 
    void docs::getornewnew(const name &creator, const ContentGroups &content_groups)
    {
       Document document = Document::getOrNew(get_self(), creator, content_groups);
-      eosio::check (document.created_date.sec_since_epoch() == 0, "read from existing instead of creating new");
-      document.emplace ();
-      eosio::check (document.created_date.sec_since_epoch() > 0, "created_date not populated when saved");
+      eosio::check(document.getCreated().sec_since_epoch() == 0, "read from existing instead of creating new");
+      document.emplace();
+      eosio::check(document.getCreated().sec_since_epoch() > 0, "created_date not populated when saved");
    }
 
-   void docs::newedge (name &creator, const checksum256 &from_node, const checksum256 &to_node, const name &edge_name)
+   void docs::newedge(name &creator, const checksum256 &from_node, const checksum256 &to_node, const name &edge_name)
    {
-      Edge edge (get_self(), creator, from_node, to_node, edge_name);
+      Edge edge(get_self(), creator, from_node, to_node, edge_name);
       edge.emplace();
    }
 
-   void docs::removeedge (const checksum256 &from_node, const checksum256 &to_node, const name &edge_name)
+   void docs::removeedge(const checksum256 &from_node, const checksum256 &to_node, const name &edge_name)
    {
       Edge edge = Edge::get(get_self(), from_node, to_node, edge_name);
       edge.erase();
    }
 
-   void docs::testgetasset (const checksum256& hash, 
-                              const string &groupLabel, 
-                              const string &contentLabel, 
-                              const asset& contentValue)
+   void docs::erase(const checksum256 &hash)
    {
-      Document document (get_self(), hash);
-      asset readValue = ContentWrapper::getContent (document.content_groups, groupLabel, contentLabel).getAs<eosio::asset>();
-      eosio::check (readValue == contentValue, "read value does not equal content value. read value: " + 
-         readValue.to_string() + " expected value: " + contentValue.to_string());
+      DocumentGraph dg(get_self());
+      dg.eraseDocument(hash);
+   }
+
+   void docs::testgetasset(const checksum256 &hash,
+                           const string &groupLabel,
+                           const string &contentLabel,
+                           const asset &contentValue)
+   {
+      Document document(get_self(), hash);
+      asset readValue = ContentWrapper::getContent(document.getContentGroups(), groupLabel, contentLabel).getAs<eosio::asset>();
+      eosio::check(readValue == contentValue, "read value does not equal content value. read value: " +
+                                                  readValue.to_string() + " expected value: " + contentValue.to_string());
    }
 
    // void docs::fork (const checksum256 &hash, const name &creator, const vector<document_graph::content_group> &content_groups )
@@ -76,4 +83,4 @@ namespace hypha {
    //       e_itr = e_t.erase(e_itr);
    //    }
    // }
-}
+} // namespace hypha

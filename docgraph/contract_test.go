@@ -11,7 +11,7 @@ import (
 
 	eos "github.com/eoscanada/eos-go"
 	"github.com/hypha-dao/document/docgraph"
-	"gotest.tools/assert"
+	"gotest.tools/v3/assert"
 )
 
 const testingEndpoint = "http://localhost:8888"
@@ -360,4 +360,23 @@ func TestGetOrNewGet(t *testing.T) {
 	assert.NilError(t, err)
 
 	assert.Equal(t, randomDoc.Hash.String(), sameRandomDoc.Hash.String())
+}
+
+func TestEraseDocument(t *testing.T) {
+
+	teardownTestCase := setupTestCase(t)
+	defer teardownTestCase(t)
+
+	// var env Environment
+	env = SetupEnvironment(t)
+	t.Log("\nEnvironment Setup complete\n")
+
+	randomDoc, err := CreateRandomDocument(env.ctx, &env.api, env.Docs, env.Creators[1])
+	assert.NilError(t, err)
+
+	_, err = docgraph.EraseDocument(env.ctx, &env.api, env.Docs, randomDoc.Hash)
+	assert.NilError(t, err)
+
+	_, err = docgraph.LoadDocument(env.ctx, &env.api, env.Docs, randomDoc.Hash.String())
+	assert.ErrorContains(t, err, "document not found")
 }
