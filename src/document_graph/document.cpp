@@ -242,7 +242,7 @@ namespace hypha
     {
         ContentGroup contentGroup;
         contentGroup.push_back(content);
-        return rollup(content);
+        return rollup(contentGroup);
     }
 
 } // namespace hypha
