@@ -25,7 +25,7 @@ namespace hypha
     };
 
     // TODO: need to move the contract ABI generator tag to a Macro
-    struct [[eosio::table, eosio::contract("docs")]] Document
+    struct Document
     {
     public:
         Document();
@@ -62,6 +62,11 @@ namespace hypha
         const eosio::time_point &getCreated() const { return created_date; }
         const eosio::name &getCreator() const { return creator; }
 
+        //This has to be public in order to be reachable by the abi-generator macro
+        // indexes for table
+        uint64_t by_created() const { return created_date.sec_since_epoch(); }
+        uint64_t by_creator() const { return creator.value; }
+        eosio::checksum256 by_hash() const { return hash; }
     private:
         // members, with names as serialized - these must be public for EOSIO tables
         std::uint64_t id;
@@ -72,10 +77,6 @@ namespace hypha
         eosio::time_point created_date;
         eosio::name contract;
 
-        // indexes for table
-        uint64_t by_created() const { return created_date.sec_since_epoch(); }
-        uint64_t by_creator() const { return creator.value; }
-        eosio::checksum256 by_hash() const { return hash; }
 
         // toString iterates through all content, all levels, concatenating all values
         // the resulting string is used for fingerprinting and hashing
