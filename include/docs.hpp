@@ -17,7 +17,7 @@ namespace hypha
       docs(name self, name code, datastream<const char *> ds);
       ~docs();
 
-      // DECLARE_DOCUMENT(docs)
+      DECLARE_DOCUMENT_GRAPH(docs)
 
       // Any account/member can creator a new document
       ACTION create(eosio::name & creator, ContentGroups & content_groups);

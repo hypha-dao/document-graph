@@ -7,7 +7,7 @@
 namespace hypha
 {
     // TODO: need to move the contract ABI generator tag to a Macro
-    struct [[eosio::table, eosio::contract("docs")]] Edge
+    struct Edge
     {
         Edge();
         Edge(const eosio::name &contract, const eosio::name &creator, const eosio::checksum256 &fromNode,
