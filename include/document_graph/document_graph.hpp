@@ -51,19 +51,19 @@ using FlexValue = hypha::Content::FlexValue;\
 using root_doc = hypha::Document;\
 TABLE contract##_document : public root_doc {};\
 using contract_document = contract##_document;\
-using document_table =  multi_index<name("documents"), contract_document,\
-                            indexed_by<name("idhash"), const_mem_fun<root_doc, checksum256, &root_doc::by_hash>>,\
-                            indexed_by<name("bycreator"), const_mem_fun<root_doc, uint64_t, &root_doc::by_creator>>,\
-                            indexed_by<name("bycreated"), const_mem_fun<root_doc, uint64_t, &root_doc::by_created>>>;\
+using document_table =  eosio::multi_index<eosio::name("documents"), contract_document,\
+                            eosio::indexed_by<name("idhash"), eosio::const_mem_fun<root_doc, eosio::checksum256, &root_doc::by_hash>>,\
+                            eosio::indexed_by<name("bycreator"), eosio::const_mem_fun<root_doc, uint64_t, &root_doc::by_creator>>,\
+                            eosio::indexed_by<name("bycreated"), eosio::const_mem_fun<root_doc, uint64_t, &root_doc::by_created>>>;\
 using root_edge = hypha::Edge;\
 TABLE contract##_edge : public root_edge {};\
 using contract_edge = contract##_edge;\
-using edge_table = multi_index<name("edges"), contract_edge,\
-            indexed_by<name("fromnode"), const_mem_fun<root_edge, checksum256, &root_edge::by_from>>,\
-            indexed_by<name("tonode"), const_mem_fun<root_edge, checksum256, &root_edge::by_to>>,\
-            indexed_by<name("edgename"), const_mem_fun<root_edge, uint64_t, &root_edge::by_edge_name>>,\
-            indexed_by<name("byfromname"), const_mem_fun<root_edge, uint64_t, &root_edge::by_from_node_edge_name_index>>,\
-            indexed_by<name("byfromto"), const_mem_fun<root_edge, uint64_t, &root_edge::by_from_node_to_node_index>>,\
-            indexed_by<name("bytoname"), const_mem_fun<root_edge, uint64_t, &root_edge::by_to_node_edge_name_index>>,\
-            indexed_by<name("bycreated"), const_mem_fun<root_edge, uint64_t, &root_edge::by_created>>,\
-            indexed_by<name("bycreator"), const_mem_fun<root_edge, uint64_t, &root_edge::by_creator>>>;
+using edge_table = eosio::multi_index<eosio::name("edges"), contract_edge,\
+            eosio::indexed_by<eosio::name("fromnode"), eosio::const_mem_fun<root_edge, eosio::checksum256, &root_edge::by_from>>,\
+            eosio::indexed_by<eosio::name("tonode"), eosio::const_mem_fun<root_edge, eosio::checksum256, &root_edge::by_to>>,\
+            eosio::indexed_by<eosio::name("edgename"), eosio::const_mem_fun<root_edge, uint64_t, &root_edge::by_edge_name>>,\
+            eosio::indexed_by<eosio::name("byfromname"), eosio::const_mem_fun<root_edge, uint64_t, &root_edge::by_from_node_edge_name_index>>,\
+            eosio::indexed_by<eosio::name("byfromto"), eosio::const_mem_fun<root_edge, uint64_t, &root_edge::by_from_node_to_node_index>>,\
+            eosio::indexed_by<eosio::name("bytoname"), eosio::const_mem_fun<root_edge, uint64_t, &root_edge::by_to_node_edge_name_index>>,\
+            eosio::indexed_by<eosio::name("bycreated"), eosio::const_mem_fun<root_edge, uint64_t, &root_edge::by_created>>,\
+            eosio::indexed_by<eosio::name("bycreator"), eosio::const_mem_fun<root_edge, uint64_t, &root_edge::by_creator>>>;

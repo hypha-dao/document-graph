@@ -6,7 +6,6 @@
 
 namespace hypha
 {
-    // TODO: need to move the contract ABI generator tag to a Macro
     struct Edge
     {
         Edge();

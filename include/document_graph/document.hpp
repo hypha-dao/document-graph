@@ -24,7 +24,6 @@ namespace hypha
         EOSLIB_SERIALIZE(Certificate, (certifier)(notes)(certification_date))
     };
 
-    // TODO: need to move the contract ABI generator tag to a Macro
     struct Document
     {
     public:
