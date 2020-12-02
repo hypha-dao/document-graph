@@ -380,3 +380,18 @@ func TestEraseDocument(t *testing.T) {
 	_, err = docgraph.LoadDocument(env.ctx, &env.api, env.Docs, randomDoc.Hash.String())
 	assert.ErrorContains(t, err, "document not found")
 }
+
+func TestCreateRoot(t *testing.T) {
+
+	teardownTestCase := setupTestCase(t)
+	defer teardownTestCase(t)
+
+	// var env Environment
+	env = SetupEnvironment(t)
+	t.Log("\nEnvironment Setup complete\n")
+
+	rootDoc, err := CreateRoot(env.ctx, &env.api, env.Docs, env.Docs)
+	assert.NilError(t, err)
+
+	t.Log("Root Document hash: ", rootDoc.Hash.String())
+}

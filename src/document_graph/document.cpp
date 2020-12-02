@@ -16,19 +16,16 @@ namespace hypha
     }
 
     Document::Document(eosio::name contract, eosio::name creator, ContentGroup contentGroup)
-    {
-        Document(contract, creator, rollup(contentGroup));
-    }
+    : Document(contract, creator, rollup(contentGroup))
+    { }
 
-    Document::Document(eosio::name contract, eosio::name creator, Content content)
-    {
-        Document(contract, creator, rollup(content));
-    }
+    Document::Document(eosio::name contract, eosio::name creator, Content content) 
+    : Document(contract, creator, rollup(content))
+    { }
 
     Document::Document(eosio::name contract, eosio::name creator, const std::string &label, const Content::FlexValue &value)
-    {
-        Document(contract, creator, rollup(Content(label, value)));
-    }
+    : Document(contract, creator, rollup(Content(label, value)))
+    { }
 
     Document::Document(eosio::name contract, const eosio::checksum256 &_hash) : contract{contract}
     {

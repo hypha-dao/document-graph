@@ -79,6 +79,8 @@ github.com/hpcloud/tail v1.0.0/go.mod h1:ab1qPbhIpdTxEkNHXyeSf5vhxWSCs/tWer42PpO
 github.com/huin/goupnp v0.0.0-20161224104101-679507af18f3/go.mod h1:MZ2ZmwcBpvOoJ22IJsc7va19ZwoheaBk43rKg12SKag=
 github.com/hypha-dao/document v0.0.0-20201028155212-c5aa9cf5eb66 h1:tiZDHaMWLAuu08l/8l1PFudayczsr9kB5vy/KcueIXE=
 github.com/hypha-dao/document v0.0.0-20201122195158-2f86cab0ca04 h1:Aer+PvvYpvRlZ+sJo06U32wsEt2qE/4BRsAQmwmdXpA=
+github.com/hypha-dao/document v0.0.0-20201130185206-301e14671e9b h1:V01ozBykxd1K5Cpf5PrdLr8G9PKRVM7pMPBcGuKkE1Q=
+github.com/hypha-dao/document v0.0.0-20201202181832-34b0a5cb19f7 h1:sSFdbGU1C5WXnhQtZcUudACjtsRMrfD19PUkGdPOe/w=
 github.com/inconshreveable/mousetrap v1.0.0/go.mod h1:PxqpIevigyE2G7u3NXJIT2ANytuPF1OarO4DADm73n8=
 github.com/influxdata/influxdb v1.2.3-0.20180221223340-01288bdb0883/go.mod h1:qZna6X/4elxqT3yI9iZYdZrWWdeFOOprn86kgg4+IzY=
 github.com/jackpal/go-nat-pmp v1.0.2-0.20160603034137-1fa385a6f458/go.mod h1:QPH045xvCAeXUZOxsnwmrtiCoxIr9eob+4orBN1SBKc=

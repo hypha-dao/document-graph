@@ -21,6 +21,7 @@ namespace hypha
 
       // Any account/member can creator a new document
       ACTION create(eosio::name & creator, ContentGroups & content_groups);
+      ACTION createroot (const std::string &notes);
 
       ACTION getornewget(const name &creator, const ContentGroups &content_groups);
       ACTION getornewnew(const name &creator, const ContentGroups &content_groups);

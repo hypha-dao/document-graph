@@ -55,6 +55,24 @@ namespace hypha
                                                   readValue.to_string() + " expected value: " + contentValue.to_string());
    }
 
+   void docs::createroot(const std::string &notes)
+   {
+      require_auth(get_self());
+
+      Document rootDoc(get_self(), get_self(), Content("root_node", get_self()));
+      rootDoc.emplace();
+
+      // //Create the settings document as well and add an edge to it
+      // ContentGroups settingCgs{{Content(CONTENT_GROUP_LABEL, common::SETTINGS),
+      //                           Content(common::ROOT_NODE, readableHash(rootDoc.getHash()))}};
+
+      // Document settingsDoc(get_self(), get_self(), std::move(settingCgs));
+      // settingsDoc.emplace();
+
+      // Edge rootToSettings(get_self(), get_self(), rootDoc.getHash(), settingsDoc.getHash(), common::SETTINGS_EDGE);
+      // rootToSettings.emplace();
+   }
+
    // void docs::fork (const checksum256 &hash, const name &creator, const vector<document_graph::content_group> &content_groups )
    // {
    //    _document_graph.fork_document(hash, creator, content_groups);

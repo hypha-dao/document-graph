@@ -22,6 +22,10 @@ type createDoc struct {
 	ContentGroups []docgraph.ContentGroup `json:"content_groups"`
 }
 
+type createRoot struct {
+	Notes string `json:"notes"`
+}
+
 var seededRand *rand.Rand = rand.New(
 	rand.NewSource(time.Now().UnixNano()))
 
@@ -82,6 +86,29 @@ func GetOrNewGet(ctx context.Context, api *eos.API, contract, creator eos.Accoun
 	_, err := eostest.ExecTrx(ctx, api, actions)
 	if err != nil {
 		return docgraph.Document{}, fmt.Errorf("execute transaction getornewnew: %v", err)
+	}
+
+	lastDoc, err := docgraph.GetLastDocument(ctx, api, contract)
+	if err != nil {
+		return docgraph.Document{}, fmt.Errorf("get last document: %v", err)
+	}
+	return lastDoc, nil
+}
+
+func CreateRoot(ctx context.Context, api *eos.API, contract, creator eos.AccountName) (docgraph.Document, error) {
+	actions := []*eos.Action{{
+		Account: contract,
+		Name:    eos.ActN("createroot"),
+		Authorization: []eos.PermissionLevel{
+			{Actor: creator, Permission: eos.PN("active")},
+		},
+		ActionData: eos.NewActionData(createRoot{
+			Notes: "notes",
+		}),
+	}}
+	_, err := eostest.ExecTrx(ctx, api, actions)
+	if err != nil {
+		return docgraph.Document{}, fmt.Errorf("execute create root: %v", err)
 	}
 
 	lastDoc, err := docgraph.GetLastDocument(ctx, api, contract)
