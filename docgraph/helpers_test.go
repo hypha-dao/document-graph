@@ -4,14 +4,13 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"math/rand"
 	"testing"
 	"time"
 
 	eostest "github.com/digital-scarcity/eos-go-test"
 	eos "github.com/eoscanada/eos-go"
-	"github.com/hypha-dao/document/docgraph"
+	"github.com/hypha-dao/document-graph/docgraph"
 	"github.com/k0kubun/go-ansi"
 	"github.com/schollz/progressbar/v3"
 	"gotest.tools/assert"
@@ -156,29 +155,6 @@ func CreateRandomDocument(ctx context.Context, api *eos.API, contract, creator e
 		return docgraph.Document{}, fmt.Errorf("get last document: %v", err)
 	}
 	return lastDoc, nil
-}
-
-// GetAllEdges retrieves all edges from table
-func GetAllEdges(ctx context.Context, api *eos.API, contract eos.AccountName) ([]docgraph.Edge, error) {
-	var edges []docgraph.Edge
-	var request eos.GetTableRowsRequest
-	request.Code = string(contract)
-	request.Scope = string(contract)
-	request.Table = "edges"
-	request.Limit = 1000
-	request.JSON = true
-	response, err := api.GetTableRows(ctx, request)
-	if err != nil {
-		log.Println("Error with GetTableRows: ", err)
-		return []docgraph.Edge{}, err
-	}
-
-	err = response.JSONToStructs(&edges)
-	if err != nil {
-		log.Println("Error with JSONToStructs: ", err)
-		return []docgraph.Edge{}, err
-	}
-	return edges, nil
 }
 
 func pause(t *testing.T, seconds time.Duration, headline, prefix string) {

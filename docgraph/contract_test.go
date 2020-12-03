@@ -10,7 +10,7 @@ import (
 	"time"
 
 	eos "github.com/eoscanada/eos-go"
-	"github.com/hypha-dao/document/docgraph"
+	"github.com/hypha-dao/document-graph/docgraph"
 	"gotest.tools/v3/assert"
 )
 
@@ -162,7 +162,7 @@ func TestEdges(t *testing.T) {
 			assert.NilError(t, err)
 
 			// test number of edges
-			edges, err := GetAllEdges(env.ctx, &env.api, env.Docs)
+			edges, err := docgraph.GetAllEdges(env.ctx, &env.api, env.Docs)
 			assert.NilError(t, err)
 			assert.Equal(t, testIndex+1, len(edges))
 
@@ -244,7 +244,7 @@ func TestRemoveEdges(t *testing.T) {
 		pause(t, chainResponsePause, "Build block...", "")
 	}
 
-	allEdges, err := GetAllEdges(env.ctx, &env.api, env.Docs)
+	allEdges, err := docgraph.GetAllEdges(env.ctx, &env.api, env.Docs)
 	assert.NilError(t, err)
 	assert.Equal(t, len(allEdges), 5)
 
@@ -254,7 +254,7 @@ func TestRemoveEdges(t *testing.T) {
 		assert.NilError(t, err)
 	}
 
-	allEdges, err = GetAllEdges(env.ctx, &env.api, env.Docs)
+	allEdges, err = docgraph.GetAllEdges(env.ctx, &env.api, env.Docs)
 	assert.NilError(t, err)
 	assert.Equal(t, len(allEdges), 0)
 	// *****************************  END
@@ -394,4 +394,27 @@ func TestCreateRoot(t *testing.T) {
 	assert.NilError(t, err)
 
 	t.Log("Root Document hash: ", rootDoc.Hash.String())
+}
+
+func TestGetLastDocOfEdgeName(t *testing.T) {
+
+	teardownTestCase := setupTestCase(t)
+	defer teardownTestCase(t)
+
+	// var env Environment
+	env = SetupEnvironment(t)
+	t.Log("\nEnvironment Setup complete\n")
+
+	randomDoc1, err := CreateRandomDocument(env.ctx, &env.api, env.Docs, env.Creators[1])
+	assert.NilError(t, err)
+
+	randomDoc2, err := CreateRandomDocument(env.ctx, &env.api, env.Docs, env.Creators[1])
+	assert.NilError(t, err)
+
+	_, err = docgraph.CreateEdge(env.ctx, &env.api, env.Docs, env.Creators[1], randomDoc1.Hash, randomDoc2.Hash, "testlastedge")
+	assert.NilError(t, err)
+
+	lastDocument, err := docgraph.GetLastDocumentOfEdge(env.ctx, &env.api, env.Docs, "testlastedge")
+	assert.NilError(t, err)
+	assert.Equal(t, randomDoc2.Hash.String(), lastDocument.Hash.String())
 }
