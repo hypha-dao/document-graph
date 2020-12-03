@@ -252,6 +252,7 @@ func GetLastDocumentOfEdge(ctx context.Context, api *eos.API, contract eos.Accou
 	request.Code = string(contract)
 	request.Scope = string(contract)
 	request.Table = "edges"
+	request.Reverse = true
 	request.Index = "8"
 	request.KeyType = "i64"
 	request.Limit = 1000
