@@ -151,23 +151,6 @@ func CreateEdge(ctx context.Context, api *eos.API,
 	return eostest.ExecTrx(ctx, api, actions)
 }
 
-// EdgeExists checks to see if the edge exists
-func EdgeExists(ctx context.Context, api *eos.API, contract eos.AccountName,
-	fromNode, toNode Document, edgeName eos.Name) (bool, error) {
-
-	edges, err := fromNode.GetEdgesFromByName(ctx, api, contract, edgeName)
-	if err != nil {
-		return false, fmt.Errorf("get edges from by name doc: %v err: %v", fromNode.Hash, err)
-	}
-
-	for _, edge := range edges {
-		if edge.ToNode.String() == toNode.Hash.String() {
-			return true, nil
-		}
-	}
-	return false, nil
-}
-
 func (d *Document) getEdgesIndex(ctx context.Context, api *eos.API, contract eos.AccountName, edgeIndex string) ([]Edge, error) {
 	var edges []Edge
 	var request eos.GetTableRowsRequest
@@ -260,6 +243,36 @@ func GetLastDocument(ctx context.Context, api *eos.API, contract eos.AccountName
 		return Document{}, err
 	}
 	return docs[0], nil
+}
+
+// GetLastDocumentOfEdge ...
+func GetLastDocumentOfEdge(ctx context.Context, api *eos.API, contract eos.AccountName, edgeName eos.Name) (Document, error) {
+	var edges []Edge
+	var request eos.GetTableRowsRequest
+	request.Code = string(contract)
+	request.Scope = string(contract)
+	request.Table = "edges"
+	request.Index = "8"
+	request.KeyType = "i64"
+	request.Limit = 1000
+	request.JSON = true
+	response, err := api.GetTableRows(ctx, request)
+	if err != nil {
+		return Document{}, fmt.Errorf("json to struct: %v", err)
+	}
+
+	err = response.JSONToStructs(&edges)
+	if err != nil {
+		return Document{}, fmt.Errorf("json to struct: %v", err)
+	}
+
+	for _, edge := range edges {
+		if edge.EdgeName == edgeName {
+			return LoadDocument(ctx, api, contract, edge.ToNode.String())
+		}
+	}
+
+	return Document{}, fmt.Errorf("no proposal found")
 }
 
 type eraseDoc struct {

@@ -2,6 +2,8 @@ package docgraph
 
 import (
 	"context"
+	"fmt"
+	"log"
 
 	eostest "github.com/digital-scarcity/eos-go-test"
 	eos "github.com/eoscanada/eos-go"
@@ -47,6 +49,48 @@ func RemoveEdge(ctx context.Context, api *eos.API,
 		}),
 	}}
 	return eostest.ExecTrx(ctx, api, actions)
+}
+
+// GetAllEdges retrieves all edges from table
+func GetAllEdges(ctx context.Context, api *eos.API, contract eos.AccountName) ([]Edge, error) {
+	var edges []Edge
+	var request eos.GetTableRowsRequest
+	request.Code = string(contract)
+	request.Scope = string(contract)
+	request.Table = "edges"
+	request.Limit = 1000
+	request.JSON = true
+	response, err := api.GetTableRows(ctx, request)
+	if err != nil {
+		log.Println("Error with GetTableRows: ", err)
+		return []Edge{}, err
+	}
+
+	err = response.JSONToStructs(&edges)
+	if err != nil {
+		log.Println("Error with JSONToStructs: ", err)
+		return []Edge{}, err
+	}
+	return edges, nil
+}
+
+// EdgeExists checks to see if the edge exists
+func EdgeExists(ctx context.Context, api *eos.API, contract eos.AccountName,
+	fromNode, toNode Document, edgeName eos.Name) (bool, error) {
+
+	edges, err := GetAllEdges(ctx, api, contract)
+	if err != nil {
+		return false, fmt.Errorf("get edges from by name doc: %v err: %v", fromNode.Hash, err)
+	}
+
+	for _, edge := range edges {
+		if edge.ToNode.String() == toNode.Hash.String() &&
+			edge.FromNode.String() == fromNode.Hash.String() &&
+			edge.EdgeName == edgeName {
+			return true, nil
+		}
+	}
+	return false, nil
 }
 
 // RemoveEdgesFromAndName ...

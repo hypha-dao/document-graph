@@ -162,7 +162,7 @@ func TestEdges(t *testing.T) {
 			assert.NilError(t, err)
 
 			// test number of edges
-			edges, err := GetAllEdges(env.ctx, &env.api, env.Docs)
+			edges, err := docgraph.GetAllEdges(env.ctx, &env.api, env.Docs)
 			assert.NilError(t, err)
 			assert.Equal(t, testIndex+1, len(edges))
 
@@ -244,7 +244,7 @@ func TestRemoveEdges(t *testing.T) {
 		pause(t, chainResponsePause, "Build block...", "")
 	}
 
-	allEdges, err := GetAllEdges(env.ctx, &env.api, env.Docs)
+	allEdges, err := docgraph.GetAllEdges(env.ctx, &env.api, env.Docs)
 	assert.NilError(t, err)
 	assert.Equal(t, len(allEdges), 5)
 
@@ -254,7 +254,7 @@ func TestRemoveEdges(t *testing.T) {
 		assert.NilError(t, err)
 	}
 
-	allEdges, err = GetAllEdges(env.ctx, &env.api, env.Docs)
+	allEdges, err = docgraph.GetAllEdges(env.ctx, &env.api, env.Docs)
 	assert.NilError(t, err)
 	assert.Equal(t, len(allEdges), 0)
 	// *****************************  END
