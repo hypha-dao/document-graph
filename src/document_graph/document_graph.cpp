@@ -141,13 +141,8 @@ namespace hypha
                                            const eosio::checksum256 &documentHash,
                                            ContentGroups contentGroups)
     {
-        // removing this under guiding principle that "all authentication checks
-        // should take place in contract proper and not DocumentGraph"ß
-        // require_auth(updater);
-
         Document currentDocument(m_contract, documentHash);
         Document newDocument(m_contract, updater, contentGroups);
-        newDocument.emplace();
 
         replaceNode(documentHash, newDocument.getHash());
         eraseDocument(documentHash, false);

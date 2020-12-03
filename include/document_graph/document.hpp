@@ -76,7 +76,6 @@ namespace hypha
         eosio::time_point created_date;
         eosio::name contract;
 
-
         // toString iterates through all content, all levels, concatenating all values
         // the resulting string is used for fingerprinting and hashing
         const std::string toString();

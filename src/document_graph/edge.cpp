@@ -60,8 +60,6 @@ namespace hypha
 
     void Edge::emplace () 
     {
-        require_auth (creator);
-
         // update indexes prior to save
         id = concatHash (from_node, to_node, edge_name);
         from_node_edge_name_index = concatHash(from_node, edge_name);

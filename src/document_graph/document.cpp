@@ -12,7 +12,8 @@ namespace hypha
     Document::Document(eosio::name contract, eosio::name creator, ContentGroups contentGroups)
         : contract{contract}, creator{creator}, content_groups{std::move(contentGroups)}
     {
-        hashContents();
+        // TODO: is there any reason not to emplace from this constructor?
+        emplace ();
     }
 
     Document::Document(eosio::name contract, eosio::name creator, ContentGroup contentGroup)
@@ -76,6 +77,7 @@ namespace hypha
         // if this content exists already, return this one
         if (h_itr != hash_index.end())
         {
+            document.contract = _contract;
             document.creator = h_itr->creator;
             document.created_date = h_itr->created_date;
             document.certificates = h_itr->certificates;
