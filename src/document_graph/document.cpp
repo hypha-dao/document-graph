@@ -92,6 +92,7 @@ namespace hypha
         // if this content exists already, return this one
         if (h_itr != hash_index.end())
         {
+            document.contract = _contract;
             document.creator = h_itr->creator;
             document.created_date = h_itr->created_date;
             document.certificates = h_itr->certificates;
