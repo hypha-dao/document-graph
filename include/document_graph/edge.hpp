@@ -29,6 +29,12 @@ namespace hypha
                              const eosio::checksum256 &to_node,
                              const eosio::name &edge_name);
 
+        static void write(const eosio::name &_contract,
+                          const eosio::name &_creator,
+                          const eosio::checksum256 &_from_node,
+                          const eosio::checksum256 &_to_node,
+                          const eosio::name &_edge_name);
+
         static Edge get(const eosio::name &contract,
                         const eosio::checksum256 &from_node,
                         const eosio::checksum256 &to_node,

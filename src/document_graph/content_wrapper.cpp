@@ -36,6 +36,11 @@ namespace hypha
         return contentGroup;
     }
 
+    ContentGroup *ContentWrapper::getGroupOrFail(const std::string &groupLabel)
+    {
+        return getGroupOrFail(groupLabel, "group: " + groupLabel + " is required but not found");
+    }
+
     std::pair<int64_t, Content *> ContentWrapper::get(const std::string &groupLabel, const std::string &contentLabel)
     {
         auto [idx, contentGroup] = getGroup(groupLabel);
@@ -63,6 +68,12 @@ namespace hypha
             eosio::check(false, error);
         }
         return item;
+    }
+
+    Content *ContentWrapper::getOrFail(const std::string &groupLabel, const std::string &contentLabel)
+    {
+        return getOrFail(groupLabel, contentLabel, "group: " + groupLabel + "; content: " + contentLabel + 
+            " is required but not found");
     }
 
     bool ContentWrapper::exists(const std::string &groupLabel, const std::string &contentLabel)
