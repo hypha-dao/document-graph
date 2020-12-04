@@ -49,7 +49,7 @@ namespace hypha
                            const asset &contentValue)
    {
       Document document(get_self(), hash);
-      
+
       eosio::print(" testgetasset:: looking for groupLabel: " + groupLabel + "\n");
       eosio::print(" testgetasset:: looking for contentLabel: " + contentLabel + "\n");
       asset readValue = document.getOrFail(groupLabel, contentLabel, "contentGroup or contentLabel does not exist")->getAs<eosio::asset>();
