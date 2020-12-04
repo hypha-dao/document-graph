@@ -1,10 +1,14 @@
 package docgraph
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"strings"
 
+	eostest "github.com/digital-scarcity/eos-go-test"
 	eos "github.com/eoscanada/eos-go"
 )
 
@@ -130,6 +134,60 @@ type Document struct {
 	CreatedDate eos.BlockTimestamp `json:"created_date"`
 }
 
+func newDocumentTrx(ctx context.Context, api *eos.API,
+	contract, creator eos.AccountName, actionName,
+	fileName string) (Document, error) {
+
+	data, err := ioutil.ReadFile(fileName)
+	if err != nil {
+		return Document{}, fmt.Errorf("readfile %v: %v", fileName, err)
+	}
+
+	action := eos.ActN(actionName)
+
+	var dump map[string]interface{}
+	err = json.Unmarshal(data, &dump)
+	if err != nil {
+		return Document{}, fmt.Errorf("unmarshal %v: %v", fileName, err)
+	}
+
+	dump["creator"] = creator
+
+	actionBinary, err := api.ABIJSONToBin(ctx, contract, eos.Name(action), dump)
+	if err != nil {
+		return Document{}, fmt.Errorf("api json to bin %v: %v", fileName, err)
+	}
+
+	actions := []*eos.Action{
+		{
+			Account: contract,
+			Name:    action,
+			Authorization: []eos.PermissionLevel{
+				{Actor: creator, Permission: eos.PN("active")},
+			},
+			ActionData: eos.NewActionDataFromHexData([]byte(actionBinary)),
+		}}
+
+	_, err = eostest.ExecTrx(ctx, api, actions)
+	if err != nil {
+		return Document{}, fmt.Errorf("execute transaction %v: %v", fileName, err)
+	}
+
+	lastDoc, err := GetLastDocument(ctx, api, contract)
+	if err != nil {
+		return Document{}, fmt.Errorf("get last document %v: %v", fileName, err)
+	}
+	return lastDoc, nil
+}
+
+// CreateDocument creates a new document on chain from the provided file
+func CreateDocument(ctx context.Context, api *eos.API,
+	contract, creator eos.AccountName,
+	fileName string) (Document, error) {
+
+	return newDocumentTrx(ctx, api, contract, creator, "create", fileName)
+}
+
 // GetContent returns a FlexValue of the content with the matching label
 // or an instance of ContentNotFoundError
 func (d *Document) GetContent(label string) (*FlexValue, error) {
@@ -177,4 +235,58 @@ func (d *Document) IsEqual(d2 Document) bool {
 
 	// if we got through all the above checks, the documents are equal
 	return true
+}
+
+// LoadDocument reads a document from the blockchain and creates a Document instance
+func LoadDocument(ctx context.Context, api *eos.API,
+	contract eos.AccountName,
+	hash string) (Document, error) {
+
+	var documents []Document
+	var request eos.GetTableRowsRequest
+	request.Code = string(contract)
+	request.Scope = string(contract)
+	request.Table = "documents"
+	request.Index = "2"
+	request.KeyType = "sha256"
+	request.LowerBound = hash
+	request.UpperBound = hash
+	request.Limit = 1
+	request.JSON = true
+	response, err := api.GetTableRows(ctx, request)
+	if err != nil {
+		return Document{}, fmt.Errorf("get table rows %v: %v", hash, err)
+	}
+
+	err = response.JSONToStructs(&documents)
+	if err != nil {
+		return Document{}, fmt.Errorf("json to structs %v: %v", hash, err)
+	}
+
+	if len(documents) == 0 {
+		return Document{}, fmt.Errorf("document not found %v: %v", hash, err)
+	}
+	return documents[0], nil
+}
+
+type eraseDoc struct {
+	Hash eos.Checksum256 `json:"hash"`
+}
+
+// EraseDocument ...
+func EraseDocument(ctx context.Context, api *eos.API,
+	contract eos.AccountName,
+	hash eos.Checksum256) (string, error) {
+
+	actions := []*eos.Action{{
+		Account: contract,
+		Name:    eos.ActN("erase"),
+		Authorization: []eos.PermissionLevel{
+			{Actor: contract, Permission: eos.PN("active")},
+		},
+		ActionData: eos.NewActionData(eraseDoc{
+			Hash: hash,
+		}),
+	}}
+	return eostest.ExecTrx(ctx, api, actions)
 }

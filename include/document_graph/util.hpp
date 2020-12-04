@@ -1,4 +1,5 @@
 #pragma once
+
 #include <string>
 #include <eosio/crypto.hpp>
 #include <eosio/name.hpp>

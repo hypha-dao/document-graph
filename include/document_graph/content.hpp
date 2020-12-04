@@ -1,5 +1,7 @@
 #pragma once
+
 #include <variant>
+
 #include <eosio/name.hpp>
 #include <eosio/asset.hpp>
 #include <eosio/time.hpp>

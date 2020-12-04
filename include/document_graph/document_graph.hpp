@@ -1,12 +1,13 @@
 #pragma once
 
+#include <cstring>
+
 #include <eosio/eosio.hpp>
 #include <eosio/asset.hpp>
 #include <eosio/transaction.hpp>
 #include <eosio/crypto.hpp>
 #include <eosio/multi_index.hpp>
 #include <eosio/name.hpp>
-#include <cstring>
 
 #include <document_graph/content.hpp>
 #include <document_graph/document.hpp>

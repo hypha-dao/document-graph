@@ -31,6 +31,37 @@ type removeEdge struct {
 	EdgeName eos.Name        `json:"edge_name"`
 }
 
+// CreateEdge creates an edge from one document node to another with the specified name
+func CreateEdge(ctx context.Context, api *eos.API,
+	contract, creator eos.AccountName,
+	fromNode, toNode eos.Checksum256,
+	edgeName eos.Name) (string, error) {
+
+	actionData := make(map[string]interface{})
+	actionData["creator"] = creator
+	actionData["from_node"] = fromNode
+	actionData["to_node"] = toNode
+	actionData["edge_name"] = edgeName
+
+	actionBinary, err := api.ABIJSONToBin(ctx, contract, eos.Name("newedge"), actionData)
+	if err != nil {
+		log.Println("Error with ABIJSONToBin: ", err)
+		return "error", err
+	}
+
+	actions := []*eos.Action{
+		{
+			Account: contract,
+			Name:    eos.ActN("newedge"),
+			Authorization: []eos.PermissionLevel{
+				{Actor: creator, Permission: eos.PN("active")},
+			},
+			ActionData: eos.NewActionDataFromHexData([]byte(actionBinary)),
+		}}
+
+	return eostest.ExecTrx(ctx, api, actions)
+}
+
 // RemoveEdge ...
 func RemoveEdge(ctx context.Context, api *eos.API,
 	contract eos.AccountName,

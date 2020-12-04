@@ -1,16 +1,22 @@
 #pragma once
-#include <eosio/multi_index.hpp>
+
 #include <variant>
+
+#include <eosio/multi_index.hpp>
 #include <eosio/name.hpp>
 #include <eosio/asset.hpp>
 #include <eosio/transaction.hpp>
 #include <eosio/crypto.hpp>
 
 #include <document_graph/content.hpp>
-#include <document_graph/content_group.hpp>
 
 namespace hypha
 {
+    using ContentGroup = std::vector<Content>;
+    using ContentGroups = std::vector<ContentGroup>;
+
+    static const std::string CONTENT_GROUP_LABEL = std::string("content_group_label");
+
     // unused for now, but leaving in the data structure for the future
     struct Certificate
     {
@@ -29,7 +35,7 @@ namespace hypha
     public:
         Document();
 
-        // these constructors populate a Document instance without saving
+        // these constructors populate a Document instance and emplace
         Document(eosio::name contract, eosio::name creator, ContentGroups contentGroups);
         Document(eosio::name contract, eosio::name creator, ContentGroup contentGroup);
         Document(eosio::name contract, eosio::name creator, Content content);
@@ -41,22 +47,36 @@ namespace hypha
 
         void emplace();
 
+        // returns a document, saves to RAM if it doesn't already exist
         static Document getOrNew(eosio::name contract, eosio::name creator, ContentGroups contentGroups);
         static Document getOrNew(eosio::name contract, eosio::name creator, ContentGroup contentGroup);
         static Document getOrNew(eosio::name contract, eosio::name creator, Content content);
         static Document getOrNew(eosio::name contract, eosio::name creator, const std::string &label, const Content::FlexValue &value);
+
+        static bool exists(eosio::name contract, const eosio::checksum256 &hash);
 
         // certificates are not yet used
         void certify(const eosio::name &certifier, const std::string &notes);
 
         const void hashContents();
 
-        // static version for use without creating an instance, useful for just checking a hash
-        static const eosio::checksum256 hashContents(ContentGroups & contentGroups);
+        // static helpers
+        static const eosio::checksum256 hashContents(ContentGroups &contentGroups);
         static ContentGroups rollup(ContentGroup contentGroup);
         static ContentGroups rollup(Content content);
+        static void insertOrReplace(ContentGroup &contentGroup, Content &newContent);
 
-        const ContentGroups &getContentGroups() const { return content_groups; } // should this be const?
+        // Content checkers and accessors
+        std::pair<int64_t, ContentGroup *> getGroup(const std::string &label);
+        ContentGroup *getGroupOrFail(const std::string &label, const std::string &error);
+
+        std::pair<int64_t, Content *> get(const std::string &groupLabel, const std::string &contentLabel);
+        Content *getOrFail(const std::string &groupLabel, const std::string &contentLabel, const std::string &error);
+
+        bool contentExists(const std::string &groupLabel, const std::string &contentLabel);
+
+        // vanilla accessors
+        ContentGroups &getContentGroups() { return content_groups; }
         const eosio::checksum256 &getHash() const { return hash; }
         const eosio::time_point &getCreated() const { return created_date; }
         const eosio::name &getCreator() const { return creator; }
@@ -66,6 +86,7 @@ namespace hypha
         uint64_t by_created() const { return created_date.sec_since_epoch(); }
         uint64_t by_creator() const { return creator.value; }
         eosio::checksum256 by_hash() const { return hash; }
+
     private:
         // members, with names as serialized - these must be public for EOSIO tables
         std::uint64_t id;
@@ -79,8 +100,8 @@ namespace hypha
         // toString iterates through all content, all levels, concatenating all values
         // the resulting string is used for fingerprinting and hashing
         const std::string toString();
-        static const std::string toString(ContentGroups & contentGroups);
-        static const std::string toString(ContentGroup & contentGroup);
+        static const std::string toString(ContentGroups &contentGroups);
+        static const std::string toString(ContentGroup &contentGroup);
 
         EOSLIB_SERIALIZE(Document, (id)(hash)(creator)(content_groups)(certificates)(created_date)(contract))
 

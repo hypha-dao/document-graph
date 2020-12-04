@@ -94,6 +94,54 @@ func GetOrNewGet(ctx context.Context, api *eos.API, contract, creator eos.Accoun
 	return lastDoc, nil
 }
 
+type getAsset struct {
+	Hash         eos.Checksum256 `json:"hash"`
+	GroupLabel   string          `json:"groupLabel"`
+	ContentLabel string          `json:"contentLabel"`
+	ContentValue eos.Asset       `json:"contentValue"`
+}
+
+// GetAssetTest creates a document with a single random value
+func GetAssetTest(ctx context.Context, api *eos.API, contract eos.AccountName, d docgraph.Document,
+	groupLabel, contentLabel string, contentValue eos.Asset) (string, error) {
+
+	actions := []*eos.Action{{
+		Account: contract,
+		Name:    eos.ActN("testgetasset"),
+		Authorization: []eos.PermissionLevel{
+			{Actor: contract, Permission: eos.PN("active")},
+		},
+		ActionData: eos.NewActionData(getAsset{
+			Hash:         d.Hash,
+			GroupLabel:   groupLabel,
+			ContentLabel: contentLabel,
+			ContentValue: contentValue,
+		}),
+	}}
+	return eostest.ExecTrx(ctx, api, actions)
+}
+
+type getGroup struct {
+	Hash       eos.Checksum256 `json:"hash"`
+	GroupLabel string          `json:"groupLabel"`
+}
+
+func GetGroupTest(ctx context.Context, api *eos.API, contract eos.AccountName, d docgraph.Document, groupLabel string) (string, error) {
+
+	actions := []*eos.Action{{
+		Account: contract,
+		Name:    eos.ActN("testgetgroup"),
+		Authorization: []eos.PermissionLevel{
+			{Actor: contract, Permission: eos.PN("active")},
+		},
+		ActionData: eos.NewActionData(getAsset{
+			Hash:       d.Hash,
+			GroupLabel: groupLabel,
+		}),
+	}}
+	return eostest.ExecTrx(ctx, api, actions)
+}
+
 func CreateRoot(ctx context.Context, api *eos.API, contract, creator eos.AccountName) (docgraph.Document, error) {
 	actions := []*eos.Action{{
 		Account: contract,
