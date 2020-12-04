@@ -1,7 +1,6 @@
-
-#include <document_graph/util.hpp>
 #include <document_graph/document_graph.hpp>
 #include <document_graph/document.hpp>
+#include <document_graph/util.hpp>
 
 namespace hypha
 {
@@ -117,7 +116,6 @@ namespace hypha
         {
             // create the new edge record
             Edge newEdge(m_contract, m_contract, newNode, from_itr->to_node, from_itr->edge_name);
-            newEdge.emplace();
 
             // erase the old edge record
             from_itr = from_node_index.erase(from_itr);
@@ -130,7 +128,6 @@ namespace hypha
         {
             // create the new edge record
             Edge newEdge(m_contract, m_contract, to_itr->from_node, newNode, to_itr->edge_name);
-            newEdge.emplace();
 
             // erase the old edge record
             to_itr = to_node_index.erase(to_itr);
@@ -147,7 +144,6 @@ namespace hypha
 
         Document currentDocument(m_contract, documentHash);
         Document newDocument(m_contract, updater, contentGroups);
-        newDocument.emplace();
 
         replaceNode(documentHash, newDocument.getHash());
         eraseDocument(documentHash, false);

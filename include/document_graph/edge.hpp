@@ -1,4 +1,5 @@
 #pragma once
+
 #include <eosio/name.hpp>
 #include <eosio/time.hpp>
 #include <eosio/multi_index.hpp>
@@ -21,6 +22,12 @@ namespace hypha
         const eosio::name &getEdgeName() { return edge_name; }
         const eosio::time_point &getCreated() { return created_date; }
         const eosio::name &getCreator() { return creator; }
+
+        static Edge getOrNew(const eosio::name &contract,
+                             const eosio::name &creator,
+                             const eosio::checksum256 &from_node,
+                             const eosio::checksum256 &to_node,
+                             const eosio::name &edge_name);
 
         static Edge get(const eosio::name &contract,
                         const eosio::checksum256 &from_node,

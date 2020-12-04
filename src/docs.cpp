@@ -9,27 +9,26 @@ namespace hypha
    void docs::create(name &creator, ContentGroups &content_groups)
    {
       Document document(get_self(), creator, content_groups);
-      document.emplace();
    }
 
-   void docs::getornewget(const name &creator, const ContentGroups &content_groups)
+   void docs::getornewget(const name &creator, ContentGroups &content_groups)
    {
       Document document = Document::getOrNew(get_self(), creator, content_groups);
       eosio::check(document.getCreated().sec_since_epoch() > 0, "created new instead of reading from existing");
    }
 
-   void docs::getornewnew(const name &creator, const ContentGroups &content_groups)
+   void docs::getornewnew(const name &creator, ContentGroups &content_groups)
    {
+      bool docExists = Document::exists(get_self(), Document::hashContents(content_groups));
+      check(!docExists, "document already exists");
+
       Document document = Document::getOrNew(get_self(), creator, content_groups);
-      eosio::check(document.getCreated().sec_since_epoch() == 0, "read from existing instead of creating new");
-      document.emplace();
       eosio::check(document.getCreated().sec_since_epoch() > 0, "created_date not populated when saved");
    }
 
    void docs::newedge(name &creator, const checksum256 &from_node, const checksum256 &to_node, const name &edge_name)
    {
       Edge edge(get_self(), creator, from_node, to_node, edge_name);
-      edge.emplace();
    }
 
    void docs::removeedge(const checksum256 &from_node, const checksum256 &to_node, const name &edge_name)
@@ -45,14 +44,29 @@ namespace hypha
    }
 
    void docs::testgetasset(const checksum256 &hash,
-                           const string &groupLabel,
-                           const string &contentLabel,
+                           const std::string &groupLabel,
+                           const std::string &contentLabel,
                            const asset &contentValue)
    {
       Document document(get_self(), hash);
-      asset readValue = ContentWrapper::getContent(document.getContentGroups(), groupLabel, contentLabel).getAs<eosio::asset>();
+      
+      eosio::print(" testgetasset:: looking for groupLabel: " + groupLabel + "\n");
+      eosio::print(" testgetasset:: looking for contentLabel: " + contentLabel + "\n");
+      asset readValue = document.getOrFail(groupLabel, contentLabel, "contentGroup or contentLabel does not exist")->getAs<eosio::asset>();
+
       eosio::check(readValue == contentValue, "read value does not equal content value. read value: " +
                                                   readValue.to_string() + " expected value: " + contentValue.to_string());
+      eosio::print(" testgetasset:: asset found: " + readValue.to_string() + "\n");
+   }
+
+   void docs::testgetgroup(const checksum256 &hash,
+                           const std::string &groupLabel)
+   {
+      Document document(get_self(), hash);
+      eosio::print(" testgetasset:: looking for groupLabel: " + groupLabel + "\n");
+
+      auto [idx, contentGroup] = document.getGroup(groupLabel);
+      check(idx > -1, "group was not found");
    }
 
    void docs::createroot(const std::string &notes)
@@ -60,17 +74,6 @@ namespace hypha
       require_auth(get_self());
 
       Document rootDoc(get_self(), get_self(), Content("root_node", get_self()));
-      rootDoc.emplace();
-
-      // //Create the settings document as well and add an edge to it
-      // ContentGroups settingCgs{{Content(CONTENT_GROUP_LABEL, common::SETTINGS),
-      //                           Content(common::ROOT_NODE, readableHash(rootDoc.getHash()))}};
-
-      // Document settingsDoc(get_self(), get_self(), std::move(settingCgs));
-      // settingsDoc.emplace();
-
-      // Edge rootToSettings(get_self(), get_self(), rootDoc.getHash(), settingsDoc.getHash(), common::SETTINGS_EDGE);
-      // rootToSettings.emplace();
    }
 
    // void docs::fork (const checksum256 &hash, const name &creator, const vector<document_graph::content_group> &content_groups )

@@ -1,119 +1,13 @@
 package docgraph_test
 
 import (
-	"encoding/json"
-	"io/ioutil"
 	"log"
-	"os"
-	"os/exec"
 	"testing"
-	"time"
 
 	eos "github.com/eoscanada/eos-go"
 	"github.com/hypha-dao/document-graph/docgraph"
 	"gotest.tools/v3/assert"
 )
-
-const testingEndpoint = "http://localhost:8888"
-
-var env *Environment
-var chainResponsePause time.Duration
-
-func setupTestCase(t *testing.T) func(t *testing.T) {
-	t.Log("Bootstrapping testing environment ...")
-
-	_, err := exec.Command("sh", "-c", "pkill -SIGINT nodeos").Output()
-	if err == nil {
-		pause(t, time.Second, "Killing nodeos ...", "")
-	}
-
-	t.Log("Starting nodeos from 'nodeos.sh' script ...")
-	cmd := exec.Command("./nodeos.sh")
-	cmd.Stdout = os.Stdout
-	err = cmd.Start()
-	assert.NilError(t, err)
-	chainResponsePause = time.Second
-
-	t.Log("nodeos PID: ", cmd.Process.Pid)
-
-	pause(t, 500*time.Millisecond, "", "")
-
-	return func(t *testing.T) {
-		folderName := "test_results"
-		t.Log("Saving graph to : ", folderName)
-		err := SaveGraph(env.ctx, &env.api, env.Docs, folderName)
-		assert.NilError(t, err)
-	}
-}
-
-func TestDocuments(t *testing.T) {
-
-	teardownTestCase := setupTestCase(t)
-	defer teardownTestCase(t)
-
-	// var env Environment
-	env = SetupEnvironment(t)
-	t.Log("\nEnvironment Setup complete\n")
-
-	t.Run("Test Documents", func(t *testing.T) {
-
-		tests := []struct {
-			name  string
-			input string
-		}{
-			{
-				name:  "simplest",
-				input: "../test/examples/simplest.json",
-			},
-			{
-				name:  "each-type",
-				input: "../test/examples/each-type.json",
-			},
-			{
-				name:  "contribution",
-				input: "../test/examples/contribution.json",
-			},
-		}
-
-		for _, test := range tests {
-			t.Run(test.name, func(t *testing.T) {
-
-				lastDoc, err := docgraph.CreateDocument(env.ctx, &env.api, env.Docs, env.Creators[0], test.input)
-				assert.NilError(t, err)
-
-				// unmarshal JSON into a Document
-				data, err := ioutil.ReadFile(test.input)
-				assert.NilError(t, err)
-				var documentFromFile docgraph.Document
-				err = json.Unmarshal(data, &documentFromFile)
-				assert.NilError(t, err)
-
-				// compare document from chain to document from file
-				assert.Assert(t, lastDoc.IsEqual(documentFromFile))
-			})
-		}
-	})
-}
-
-func TestLoadDocument(t *testing.T) {
-
-	teardownTestCase := setupTestCase(t)
-	defer teardownTestCase(t)
-
-	env = SetupEnvironment(t)
-	t.Log("\nEnvironment Setup complete\n")
-
-	doc, err := docgraph.CreateDocument(env.ctx, &env.api, env.Docs, env.Creators[1], "../test/examples/simplest.json")
-	assert.NilError(t, err)
-
-	loadedDoc, err := docgraph.LoadDocument(env.ctx, &env.api, env.Docs, doc.Hash.String())
-	assert.NilError(t, err)
-	assert.Equal(t, doc.Hash.String(), loadedDoc.Hash.String())
-	assert.Equal(t, doc.Creator, loadedDoc.Creator)
-
-	_, err = docgraph.LoadDocument(env.ctx, &env.api, env.Docs, "ahashthatwillnotexist")
-	assert.ErrorContains(t, err, "Internal Service Error")
-}
 
 func TestEdges(t *testing.T) {
 
@@ -167,7 +61,7 @@ func TestEdges(t *testing.T) {
 			assert.Equal(t, testIndex+1, len(edges))
 
 			// there should be 1 edge from doc1 to doc2, named edgeName
-			edgesFrom, err := test.fromDoc.GetEdgesFrom(env.ctx, &env.api, env.Docs)
+			edgesFrom, err := docgraph.GetEdgesFromDocument(env.ctx, &env.api, env.Docs, test.fromDoc)
 			assert.NilError(t, err)
 			assert.Equal(t, 1, len(edgesFrom))
 			assert.Equal(t, edgesFrom[0].EdgeName, test.edgeName)
@@ -175,7 +69,7 @@ func TestEdges(t *testing.T) {
 			assert.Equal(t, edgesFrom[0].ToNode.String(), test.toDoc.Hash.String())
 
 			// there should be 0 edges from doc2 to doc1
-			edgesTo, err := test.toDoc.GetEdgesTo(env.ctx, &env.api, env.Docs)
+			edgesTo, err := docgraph.GetEdgesToDocument(env.ctx, &env.api, env.Docs, test.toDoc)
 			assert.NilError(t, err)
 			assert.Equal(t, 1, len(edgesTo))
 			assert.Equal(t, edgesTo[0].EdgeName, test.edgeName)
@@ -183,7 +77,7 @@ func TestEdges(t *testing.T) {
 			assert.Equal(t, edgesTo[0].ToNode.String(), test.toDoc.Hash.String())
 
 			// there should be 1 edge from doc1 to doc2, named edgeName
-			edgesFromByName, err := test.fromDoc.GetEdgesFromByName(env.ctx, &env.api, env.Docs, test.edgeName)
+			edgesFromByName, err := docgraph.GetEdgesFromDocumentWithEdge(env.ctx, &env.api, env.Docs, test.fromDoc, test.edgeName)
 			assert.NilError(t, err)
 			assert.Equal(t, 1, len(edgesFromByName))
 			assert.Equal(t, edgesFromByName[0].EdgeName, test.edgeName)
@@ -191,7 +85,7 @@ func TestEdges(t *testing.T) {
 			assert.Equal(t, edgesFromByName[0].ToNode.String(), test.toDoc.Hash.String())
 
 			// there should be 1 edge from doc1 to doc2, named edgeName
-			edgesToByName, err := test.toDoc.GetEdgesToByName(env.ctx, &env.api, env.Docs, test.edgeName)
+			edgesToByName, err := docgraph.GetEdgesToDocumentWithEdge(env.ctx, &env.api, env.Docs, test.toDoc, test.edgeName)
 			assert.NilError(t, err)
 			assert.Equal(t, 1, len(edgesToByName))
 			assert.Equal(t, edgesToByName[0].EdgeName, test.edgeName)
@@ -199,12 +93,12 @@ func TestEdges(t *testing.T) {
 			assert.Equal(t, edgesToByName[0].ToNode.String(), test.toDoc.Hash.String())
 
 			// there should be 0 edge from doc1 to doc2, named wrongedge
-			edgesFromByName, err = test.fromDoc.GetEdgesFromByName(env.ctx, &env.api, env.Docs, eos.Name("wrongedge"))
+			edgesFromByName, err = docgraph.GetEdgesFromDocumentWithEdge(env.ctx, &env.api, env.Docs, test.fromDoc, eos.Name("wrongedge"))
 			assert.NilError(t, err)
 			assert.Equal(t, 0, len(edgesFromByName))
 
 			// there should be 0 edge from doc1 to doc2, named edgeName
-			edgesToByName, err = test.toDoc.GetEdgesToByName(env.ctx, &env.api, env.Docs, eos.Name("wrongedge"))
+			edgesToByName, err = docgraph.GetEdgesToDocumentWithEdge(env.ctx, &env.api, env.Docs, test.toDoc, eos.Name("wrongedge"))
 			assert.NilError(t, err)
 			assert.Equal(t, 0, len(edgesToByName))
 
@@ -308,113 +202,4 @@ func TestRemoveEdges(t *testing.T) {
 	// assert.NilError(t, err)
 	// assert.Equal(t, len(allEdges), 0)
 	// // *****************************  END
-}
-
-func TestGetOrNewNew(t *testing.T) {
-
-	teardownTestCase := setupTestCase(t)
-	defer teardownTestCase(t)
-
-	// var env Environment
-	env = SetupEnvironment(t)
-	t.Log("\nEnvironment Setup complete\n")
-
-	_, err := CreateRandomDocument(env.ctx, &env.api, env.Docs, env.Creators[1])
-	assert.NilError(t, err)
-
-	var ci docgraph.ContentItem
-	ci.Label = randomString()
-	ci.Value = &docgraph.FlexValue{
-		BaseVariant: eos.BaseVariant{
-			TypeID: docgraph.FlexValueVariant.TypeID("name"),
-			Impl:   randomString(),
-		},
-	}
-
-	cg := make([]docgraph.ContentItem, 1)
-	cg[0] = ci
-	cgs := make([]docgraph.ContentGroup, 1)
-	cgs[0] = cg
-	var randomDoc docgraph.Document
-	randomDoc.ContentGroups = cgs
-
-	// should be a legit new document
-	_, err = GetOrNewNew(env.ctx, &env.api, env.Docs, env.Creators[1], randomDoc)
-	assert.NilError(t, err)
-}
-
-func TestGetOrNewGet(t *testing.T) {
-
-	teardownTestCase := setupTestCase(t)
-	defer teardownTestCase(t)
-
-	// var env Environment
-	env = SetupEnvironment(t)
-	t.Log("\nEnvironment Setup complete\n")
-
-	randomDoc, err := CreateRandomDocument(env.ctx, &env.api, env.Docs, env.Creators[1])
-	assert.NilError(t, err)
-
-	// should NOT be a legit new document
-	sameRandomDoc, err := GetOrNewGet(env.ctx, &env.api, env.Docs, env.Creators[1], randomDoc)
-	assert.NilError(t, err)
-
-	assert.Equal(t, randomDoc.Hash.String(), sameRandomDoc.Hash.String())
-}
-
-func TestEraseDocument(t *testing.T) {
-
-	teardownTestCase := setupTestCase(t)
-	defer teardownTestCase(t)
-
-	// var env Environment
-	env = SetupEnvironment(t)
-	t.Log("\nEnvironment Setup complete\n")
-
-	randomDoc, err := CreateRandomDocument(env.ctx, &env.api, env.Docs, env.Creators[1])
-	assert.NilError(t, err)
-
-	_, err = docgraph.EraseDocument(env.ctx, &env.api, env.Docs, randomDoc.Hash)
-	assert.NilError(t, err)
-
-	_, err = docgraph.LoadDocument(env.ctx, &env.api, env.Docs, randomDoc.Hash.String())
-	assert.ErrorContains(t, err, "document not found")
-}
-
-func TestCreateRoot(t *testing.T) {
-
-	teardownTestCase := setupTestCase(t)
-	defer teardownTestCase(t)
-
-	// var env Environment
-	env = SetupEnvironment(t)
-	t.Log("\nEnvironment Setup complete\n")
-
-	rootDoc, err := CreateRoot(env.ctx, &env.api, env.Docs, env.Docs)
-	assert.NilError(t, err)
-
-	t.Log("Root Document hash: ", rootDoc.Hash.String())
-}
-
-func TestGetLastDocOfEdgeName(t *testing.T) {
-
-	teardownTestCase := setupTestCase(t)
-	defer teardownTestCase(t)
-
-	// var env Environment
-	env = SetupEnvironment(t)
-	t.Log("\nEnvironment Setup complete\n")
-
-	randomDoc1, err := CreateRandomDocument(env.ctx, &env.api, env.Docs, env.Creators[1])
-	assert.NilError(t, err)
-
-	randomDoc2, err := CreateRandomDocument(env.ctx, &env.api, env.Docs, env.Creators[1])
-	assert.NilError(t, err)
-
-	_, err = docgraph.CreateEdge(env.ctx, &env.api, env.Docs, env.Creators[1], randomDoc1.Hash, randomDoc2.Hash, "testlastedge")
-	assert.NilError(t, err)
-
-	lastDocument, err := docgraph.GetLastDocumentOfEdge(env.ctx, &env.api, env.Docs, "testlastedge")
-	assert.NilError(t, err)
-	assert.Equal(t, randomDoc2.Hash.String(), lastDocument.Hash.String())
 }
