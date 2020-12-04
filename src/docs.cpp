@@ -52,7 +52,7 @@ namespace hypha
 
       eosio::print(" testgetasset:: looking for groupLabel: " + groupLabel + "\n");
       eosio::print(" testgetasset:: looking for contentLabel: " + contentLabel + "\n");
-      asset readValue = document.getOrFail(groupLabel, contentLabel, "contentGroup or contentLabel does not exist")->getAs<eosio::asset>();
+      asset readValue = document.getContentWrapper().getOrFail(groupLabel, contentLabel, "contentGroup or contentLabel does not exist")->getAs<eosio::asset>();
 
       eosio::check(readValue == contentValue, "read value does not equal content value. read value: " +
                                                   readValue.to_string() + " expected value: " + contentValue.to_string());
@@ -65,7 +65,7 @@ namespace hypha
       Document document(get_self(), hash);
       eosio::print(" testgetasset:: looking for groupLabel: " + groupLabel + "\n");
 
-      auto [idx, contentGroup] = document.getGroup(groupLabel);
+      auto [idx, contentGroup] = document.getContentWrapper().getGroup(groupLabel);
       check(idx > -1, "group was not found");
    }
 

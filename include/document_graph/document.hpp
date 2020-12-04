@@ -9,14 +9,10 @@
 #include <eosio/crypto.hpp>
 
 #include <document_graph/content.hpp>
+#include <document_graph/content_wrapper.hpp>
 
 namespace hypha
 {
-    using ContentGroup = std::vector<Content>;
-    using ContentGroups = std::vector<ContentGroup>;
-
-    static const std::string CONTENT_GROUP_LABEL = std::string("content_group_label");
-
     // unused for now, but leaving in the data structure for the future
     struct Certificate
     {
@@ -66,17 +62,9 @@ namespace hypha
         static ContentGroups rollup(Content content);
         static void insertOrReplace(ContentGroup &contentGroup, Content &newContent);
 
-        // Content checkers and accessors
-        std::pair<int64_t, ContentGroup *> getGroup(const std::string &label);
-        ContentGroup *getGroupOrFail(const std::string &label, const std::string &error);
-
-        std::pair<int64_t, Content *> get(const std::string &groupLabel, const std::string &contentLabel);
-        Content *getOrFail(const std::string &groupLabel, const std::string &contentLabel, const std::string &error);
-
-        bool contentExists(const std::string &groupLabel, const std::string &contentLabel);
-
         // vanilla accessors
         ContentGroups &getContentGroups() { return content_groups; }
+        ContentWrapper getContentWrapper() { return ContentWrapper(content_groups); }
         const eosio::checksum256 &getHash() const { return hash; }
         const eosio::time_point &getCreated() const { return created_date; }
         const eosio::name &getCreator() const { return creator; }

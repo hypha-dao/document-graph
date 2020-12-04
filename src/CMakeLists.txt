@@ -8,6 +8,7 @@ add_contract( docs docs
     docs.cpp 
     document_graph/util.cpp
     document_graph/content.cpp
+    document_graph/content_wrapper.cpp
     document_graph/document.cpp
     document_graph/document_graph.cpp 
     document_graph/edge.cpp )
