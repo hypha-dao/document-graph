@@ -63,8 +63,8 @@ namespace hypha
         static void insertOrReplace(ContentGroup &contentGroup, Content &newContent);
 
         // vanilla accessors
-        ContentGroups &getContentGroups() { return content_groups; }
         ContentWrapper getContentWrapper() { return ContentWrapper(content_groups); }
+        ContentGroups &getContentGroups() { return content_groups; }
         const eosio::checksum256 &getHash() const { return hash; }
         const eosio::time_point &getCreated() const { return created_date; }
         const eosio::name &getCreator() const { return creator; }

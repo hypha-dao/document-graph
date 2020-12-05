@@ -20,31 +20,15 @@ namespace hypha
         // non-static definitions
         std::pair<int64_t, ContentGroup *> getGroup(const std::string &label);
         ContentGroup *getGroupOrFail(const std::string &label, const std::string &error);
+        ContentGroup *getGroupOrFail(const std::string &groupLabel);
+
         std::pair<int64_t, Content *> get(const std::string &groupLabel, const std::string &contentLabel);
         Content *getOrFail(const std::string &groupLabel, const std::string &contentLabel, const std::string &error);
+        Content *getOrFail(const std::string &groupLabel, const std::string &contentLabel);
+
         bool exists(const std::string &groupLabel, const std::string &contentLabel);
-        
+
         static void insertOrReplace(ContentGroup &contentGroup, Content &newContent);
-
-        // prior version of getters used the std::pair as a return type
-        // std::pair<int64_t, Content*> get (const std::string &label);
-        // Content* getOrFail(const std::string &label, const std::string &error);
-
-        // void add(Content item);
-        // bool exists(const std::string &label);
-
-        // ContentGroup& getItems();
-        // const std::string toString();
-
-        // static (stateless) parsers and finders
-        // used to find data within ContentGroups
-        // static std::pair<int64_t, Content *> get(ContentGroups contentGroups, const std::string &label);
-
-        // static Content::FlexValue getValueOrFail(const ContentGroups &contentGroups,
-        //                                          const string &contentGroupLabel,
-        //                                          const string &contentLabel);
-
-        // static ContentWrapper* getContentGroupOrFail(const string &label);
 
     private:
         ContentGroups &getContentGroups() { return m_contentGroups; }

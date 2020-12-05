@@ -18,6 +18,28 @@ namespace hypha
     Edge::~Edge() {}
 
     // static
+    void Edge::write(const eosio::name &_contract,
+                     const eosio::name &_creator,
+                     const eosio::checksum256 &_from_node,
+                     const eosio::checksum256 &_to_node,
+                     const eosio::name &_edge_name)
+    {
+        edge_table e_t(_contract, _contract.value);
+        e_t.emplace(_contract, [&](auto &e) {
+            e.id = concatHash(_from_node, _to_node, _edge_name);
+            e.from_node_edge_name_index = concatHash(_from_node, _edge_name);
+            e.from_node_to_node_index = concatHash(_from_node, _to_node);
+            e.to_node_edge_name_index = concatHash(_to_node, _edge_name);
+            e.creator = _creator;
+            e.contract = _contract;
+            e.from_node = _from_node;
+            e.to_node = _to_node;
+            e.edge_name = _edge_name;
+            e.created_date = eosio::current_time_point();
+        });
+    }
+
+    // static
     Edge Edge::getOrNew(const eosio::name &_contract,
                         const eosio::name &creator,
                         const eosio::checksum256 &_from_node,
