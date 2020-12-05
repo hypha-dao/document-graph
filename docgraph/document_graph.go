@@ -135,5 +135,29 @@ func GetLastDocumentOfEdge(ctx context.Context, api *eos.API, contract eos.Accou
 		}
 	}
 
-	return Document{}, fmt.Errorf("no proposal found")
+	return Document{}, fmt.Errorf("no document with edge found")
+}
+
+// GetAllDocuments reads all documents (up to 1000) and returns them in an array
+func GetAllDocuments(ctx context.Context, api *eos.API,
+	contract eos.AccountName) ([]Document, error) {
+
+	var documents []Document
+	var request eos.GetTableRowsRequest
+	request.Code = string(contract)
+	request.Scope = string(contract)
+	request.Table = "documents"
+	request.Limit = 1000
+	request.JSON = true
+	response, err := api.GetTableRows(ctx, request)
+	if err != nil {
+		return []Document{}, fmt.Errorf("get table rows %v", err)
+	}
+
+	err = response.JSONToStructs(&documents)
+	if err != nil {
+		return []Document{}, fmt.Errorf("json to structs %v", err)
+	}
+
+	return documents, nil
 }
