@@ -12,6 +12,7 @@ import (
 // Edge is a directional, named connection from one graph to another
 type Edge struct {
 	ID          uint64             `json:"id"`
+	Creator     eos.Name           `json:"creator"`
 	FromNode    eos.Checksum256    `json:"from_node"`
 	ToNode      eos.Checksum256    `json:"to_node"`
 	EdgeName    eos.Name           `json:"edge_name"`
