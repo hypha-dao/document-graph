@@ -44,20 +44,8 @@ namespace hypha
     std::pair<int64_t, Content *> ContentWrapper::get(const std::string &groupLabel, const std::string &contentLabel)
     {
         auto [idx, contentGroup] = getGroup(groupLabel);
-        if (idx == -1)
-        {
-            return {-1, nullptr};
-        }
-
-        for (std::size_t i = 0; i < contentGroup->size(); ++i)
-        {
-            if (contentGroup->at(i).label == contentLabel)
-            {
-                return {(int64_t)i, &contentGroup->at(i)};
-            }
-        }
-
-        return {-1, nullptr};
+        
+        return get(static_cast<size_t>(idx), contentLabel);
     }
 
     Content *ContentWrapper::getOrFail(const std::string &groupLabel, const std::string &contentLabel, const std::string &error)
@@ -86,7 +74,98 @@ namespace hypha
         return false;
     }
 
-    void ContentWrapper::insertOrReplace(ContentGroup &contentGroup, Content &newContent)
+    std::pair<int64_t, Content *> ContentWrapper::get(size_t groupIndex, const std::string &contentLabel)
+    {
+      if (groupIndex < m_contentGroups.size()) {
+
+        auto& contentGroup = m_contentGroups[groupIndex];
+
+        for (size_t i = 0; i < contentGroup.size(); ++i)
+        {
+            if (contentGroup.at(i).label == contentLabel)
+            {
+                return {(int64_t)i, &contentGroup.at(i)};
+            }
+        }
+      }
+
+      return {-1, nullptr};
+    }
+
+    void ContentWrapper::removeGroup(const std::string &groupLabel)
+    {
+      auto [idx, grp] = getGroup(groupLabel);
+      eosio::check(idx != -1, 
+            "Can't remove unexisting group: " + groupLabel);
+      removeGroup(static_cast<size_t>(idx));
+    }
+
+    void ContentWrapper::removeGroup(size_t groupIndex)
+    {
+      eosio::check(groupIndex >= m_contentGroups.size(), 
+            "Can't remove invalid group index: " + std::to_string(groupIndex));
+      
+      m_contentGroups.erase(m_contentGroups.begin() + groupIndex);
+    }
+
+    void ContentWrapper::removeContent(const std::string &groupLabel, const std::string &contentLabel)
+    {
+      auto [gidx, contentGroup] = getGroup(groupLabel);
+
+      eosio::check(gidx != -1, 
+            "Can't remove content from unexisting group: " + groupLabel);
+      
+      removeContent(static_cast<size_t>(gidx), contentLabel);
+    }
+
+    void ContentWrapper::removeContent(size_t groupIndex, const std::string &contentLabel)
+    {
+      auto [cidx, content] = get(static_cast<size_t>(groupIndex), contentLabel);
+
+      eosio::check(cidx != -1, 
+            "Can't remove unexisting content [" + contentLabel + "]");
+
+      removeContent(groupIndex, cidx);
+    }
+
+    void ContentWrapper::removeContent(size_t groupIndex, size_t contentIndex)
+    {
+      eosio::check(groupIndex >= m_contentGroups.size(), 
+            "Can't remove content from invalid group index [Out Of Rrange]: " + std::to_string(groupIndex));
+
+      auto& contentGroup = m_contentGroups[groupIndex];
+
+      eosio::check(contentIndex >= contentGroup.size(), 
+            "Can't remove invalid content index [Out Of Rrange]: " + std::to_string(contentIndex));
+
+      contentGroup.erase(contentGroup.begin() + contentIndex);
+    }
+
+
+    void ContentWrapper::insertOrReplace(size_t groupIndex, const Content &newContent)
+    {
+      eosio::check(groupIndex >= m_contentGroups.size(), 
+            "Can't access invalid group index [Out Of Rrange]: " + std::to_string(groupIndex));
+      
+      auto& contentGroup = m_contentGroups[groupIndex];
+
+      insertOrReplace(contentGroup, newContent);
+    }
+
+    string_view ContentWrapper::getGroupLabel(const ContentGroup &contentGroup)
+    {
+      for (auto& content : contentGroup) {
+        if (content.label == CONTENT_GROUP_LABEL) {
+          eosio::check(std::holds_alternative<std::string>(content.value), 
+                       "fatal error: " + CONTENT_GROUP_LABEL + " must be a string");
+          return content.getAs<string>();
+        }
+      }
+
+      return {};
+    }
+
+    void ContentWrapper::insertOrReplace(ContentGroup &contentGroup, const Content &newContent)
     {
         auto is_key = [&newContent](auto &c) {
             return c.label == newContent.label;
