@@ -130,12 +130,12 @@ namespace hypha
 
     void ContentWrapper::removeContent(size_t groupIndex, size_t contentIndex)
     {
-      eosio::check(groupIndex >= m_contentGroups.size(), 
+      eosio::check(groupIndex < m_contentGroups.size(), 
             "Can't remove content from invalid group index [Out Of Rrange]: " + std::to_string(groupIndex));
 
       auto& contentGroup = m_contentGroups[groupIndex];
 
-      eosio::check(contentIndex >= contentGroup.size(), 
+      eosio::check(contentIndex < contentGroup.size(), 
             "Can't remove invalid content index [Out Of Rrange]: " + std::to_string(contentIndex));
 
       contentGroup.erase(contentGroup.begin() + contentIndex);
@@ -144,7 +144,7 @@ namespace hypha
 
     void ContentWrapper::insertOrReplace(size_t groupIndex, const Content &newContent)
     {
-      eosio::check(groupIndex >= m_contentGroups.size(), 
+      eosio::check(groupIndex < m_contentGroups.size(), 
             "Can't access invalid group index [Out Of Rrange]: " + std::to_string(groupIndex));
       
       auto& contentGroup = m_contentGroups[groupIndex];
