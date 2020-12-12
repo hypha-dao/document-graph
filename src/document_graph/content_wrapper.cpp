@@ -102,7 +102,7 @@ namespace hypha
 
     void ContentWrapper::removeGroup(size_t groupIndex)
     {
-      eosio::check(groupIndex >= m_contentGroups.size(), 
+      eosio::check(groupIndex < m_contentGroups.size(), 
             "Can't remove invalid group index: " + std::to_string(groupIndex));
       
       m_contentGroups.erase(m_contentGroups.begin() + groupIndex);
