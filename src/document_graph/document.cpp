@@ -212,7 +212,7 @@ namespace hypha
         return rollup(contentGroup);
     }
 
-    Document merge(Document original, Document &deltas)
+    Document Document::merge(Document original, Document &deltas)
     {
       const auto& deltasGroups = deltas.getContentGroups();
       auto& originalGroups = original.getContentGroups();
