@@ -28,8 +28,16 @@ namespace hypha
         std::string label;
         FlexValue value;
 
+        //Can return reference to stored type
         template <class T>
-        T getAs()
+        decltype(auto) getAs()
+        {
+            eosio::check(std::holds_alternative<T>(value), "Content value is not of expected type");
+            return std::get<T>(value);
+        }
+
+        template <class T>
+        decltype(auto) getAs() const
         {
             eosio::check(std::holds_alternative<T>(value), "Content value is not of expected type");
             return std::get<T>(value);

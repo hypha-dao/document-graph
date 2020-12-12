@@ -1,5 +1,7 @@
 #include <eosio/crypto.hpp>
 
+#include <map>
+
 #include <document_graph/document.hpp>
 #include <document_graph/util.hpp>
 
@@ -210,4 +212,60 @@ namespace hypha
         return rollup(contentGroup);
     }
 
+    Document merge(Document original, Document &deltas)
+    {
+      const auto& deltasGroups = deltas.getContentGroups();
+      auto& originalGroups = original.getContentGroups();
+      auto deltasWrapper = deltas.getContentWrapper();
+      auto originalWrapper = original.getContentWrapper();
+
+      //unordered_map not available with eosio atm
+      std::map<string, std::pair<size_t, ContentGroup*>> groupsByLabel;
+
+      for (size_t i = 0; i < originalGroups.size(); ++i) {
+        auto label = ContentWrapper::getGroupLabel(originalGroups[i]);
+        if (!label.empty()) {
+          groupsByLabel[string(label)] = std::pair{i, &originalGroups[i]};
+        }
+      }  
+
+      for (size_t i = 0; i < deltasGroups.size(); ++i) {
+        
+        auto label = ContentWrapper::getGroupLabel(deltasGroups[i]);
+        
+        //If there is no group label just append it to the original doc
+        if (label.empty()) {
+          originalGroups.push_back(deltasGroups[i]);
+          continue;
+        }
+        
+        //Check if we need to delete the group
+        if (auto [idx, c] = deltasWrapper.get(i, "delete_group"); 
+            c) {
+          originalWrapper.removeGroup(string(label));
+          continue;
+        }
+        
+        //If group is not present on original document we should append it
+        if (auto groupIt = groupsByLabel.find(string(label)); 
+            groupIt == groupsByLabel.end()) {
+          originalGroups.push_back(deltasGroups[i]);
+        }
+        else {
+          auto [oriGroupIdx, oriGroup] = groupIt->second;
+
+          //It doesn't matter if it replaces content_group_label as they should be equal
+          for (auto& deltaContent : deltasGroups[i]) {
+            if (std::holds_alternative<std::monostate>(deltaContent.value)) {
+              originalWrapper.removeContent(oriGroupIdx, deltaContent.label);
+            }
+            else {
+              originalWrapper.insertOrReplace(oriGroupIdx, deltaContent);
+            }
+          }
+        }
+      }
+
+      return original;
+    }
 } // namespace hypha

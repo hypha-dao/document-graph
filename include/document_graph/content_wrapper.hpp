@@ -1,7 +1,10 @@
 #pragma once
 #include <document_graph/content.hpp>
 
+#include <string_view>
+
 using std::string;
+using std::string_view;
 
 namespace hypha
 {
@@ -23,12 +26,25 @@ namespace hypha
         ContentGroup *getGroupOrFail(const std::string &groupLabel);
 
         std::pair<int64_t, Content *> get(const std::string &groupLabel, const std::string &contentLabel);
+        //Looks for content in an specific group index
+        std::pair<int64_t, Content *> get(size_t groupIndex, const std::string &contentLabel);
         Content *getOrFail(const std::string &groupLabel, const std::string &contentLabel, const std::string &error);
         Content *getOrFail(const std::string &groupLabel, const std::string &contentLabel);
+        
+
+        void removeGroup(const std::string &groupLabel);
+        void removeGroup(size_t groupIndex);
+
+        void removeContent(const std::string &groupLabel, const std::string &contentLabel);
+        void removeContent(size_t groupIndex, const std::string &contentLabel);
+        void removeContent(size_t groupIndex, size_t contentIndex);
+
+        void insertOrReplace(size_t groupIndex, const Content &newContent);
 
         bool exists(const std::string &groupLabel, const std::string &contentLabel);
 
-        static void insertOrReplace(ContentGroup &contentGroup, Content &newContent);
+        static string_view getGroupLabel(const ContentGroup &contentGroup);
+        static void insertOrReplace(ContentGroup &contentGroup, const Content &newContent);
 
     private:
         ContentGroups &getContentGroups() { return m_contentGroups; }

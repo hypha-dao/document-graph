@@ -62,9 +62,12 @@ namespace hypha
         static ContentGroups rollup(Content content);
         static void insertOrReplace(ContentGroup &contentGroup, Content &newContent);
 
+        static Document merge(Document original, Document &deltas);
+
         // vanilla accessors
         ContentWrapper getContentWrapper() { return ContentWrapper(content_groups); }
         ContentGroups &getContentGroups() { return content_groups; }
+        const ContentGroups &getContentGroups() const { return content_groups; }
         const eosio::checksum256 &getHash() const { return hash; }
         const eosio::time_point &getCreated() const { return created_date; }
         const eosio::name &getCreator() const { return creator; }
