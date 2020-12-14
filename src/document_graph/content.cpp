@@ -8,7 +8,7 @@ namespace hypha
     Content::Content() {}
     Content::~Content() {}
 
-    const bool Content::isEmpty () 
+    const bool Content::isEmpty () const
     {
         if (std::holds_alternative<std::monostate>(value)) {
             return true;
@@ -16,7 +16,7 @@ namespace hypha
         return false;
     }
 
-    const std::string Content::toString()
+    const std::string Content::toString() const
     {
         if (isEmpty()) return "";
         

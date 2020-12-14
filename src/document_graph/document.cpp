@@ -148,18 +148,18 @@ namespace hypha
     }
 
     // static version cannot cache the hash in a member
-    const eosio::checksum256 Document::hashContents(ContentGroups &contentGroups)
+    const eosio::checksum256 Document::hashContents(const ContentGroups &contentGroups)
     {
         std::string string_data = toString(contentGroups);
         return eosio::sha256(const_cast<char *>(string_data.c_str()), string_data.length());
     }
 
-    const std::string Document::toString(ContentGroups &contentGroups)
+    const std::string Document::toString(const ContentGroups &contentGroups)
     {
         std::string results = "[";
         bool is_first = true;
 
-        for (ContentGroup &contentGroup : contentGroups)
+        for (const ContentGroup &contentGroup : contentGroups)
         {
             if (is_first)
             {
@@ -176,12 +176,12 @@ namespace hypha
         return results;
     }
 
-    const std::string Document::toString(ContentGroup &contentGroup)
+    const std::string Document::toString(const ContentGroup &contentGroup)
     {
         std::string results = "[";
         bool is_first = true;
 
-        for (Content &content : contentGroup)
+        for (const Content &content : contentGroup)
         {
             if (is_first)
             {

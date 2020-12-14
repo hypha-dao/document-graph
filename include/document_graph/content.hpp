@@ -20,9 +20,9 @@ namespace hypha
         Content(std::string label, FlexValue value);
         ~Content();
 
-        const bool isEmpty();
+        const bool isEmpty() const;
 
-        const std::string toString();
+        const std::string toString() const;
 
         // NOTE: not using m_ notation because this changes serialization format
         std::string label;
