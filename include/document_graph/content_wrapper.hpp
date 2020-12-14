@@ -30,6 +30,7 @@ namespace hypha
         std::pair<int64_t, Content *> get(size_t groupIndex, const std::string &contentLabel);
         Content *getOrFail(const std::string &groupLabel, const std::string &contentLabel, const std::string &error);
         Content *getOrFail(const std::string &groupLabel, const std::string &contentLabel);
+        Content *getOrFail(size_t groupIndex, const string &contentLabel, string_view error = string_view{});
         
 
         void removeGroup(const std::string &groupLabel);

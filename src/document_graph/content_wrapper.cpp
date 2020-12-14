@@ -64,6 +64,22 @@ namespace hypha
             " is required but not found");
     }
 
+    Content *ContentWrapper::getOrFail(size_t groupIndex, const std::string &contentLabel, string_view error)
+    {
+      eosio::check(groupIndex < m_contentGroups.size(), 
+                   "getOrFail(): Can't access invalid group index [Out Of Rrange]: " +
+                   std::to_string(groupIndex));
+
+      auto [idx, item] = get(groupIndex, contentLabel);
+
+      eosio::check(item, error.empty() ? "group index: " + 
+                                          std::to_string(groupIndex) + 
+                                          " content: " + 
+                                          contentLabel + 
+                                          " is required but not found"
+                                        : string(error));
+    }
+
     bool ContentWrapper::exists(const std::string &groupLabel, const std::string &contentLabel)
     {
         auto [idx, item] = get(groupLabel, contentLabel);
