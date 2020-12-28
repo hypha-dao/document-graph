@@ -57,7 +57,7 @@ namespace hypha
         const void hashContents();
 
         // static helpers
-        static const eosio::checksum256 hashContents(ContentGroups &contentGroups);
+        static const eosio::checksum256 hashContents(const ContentGroups &contentGroups);
         static ContentGroups rollup(ContentGroup contentGroup);
         static ContentGroups rollup(Content content);
         static void insertOrReplace(ContentGroup &contentGroup, Content &newContent);
@@ -91,8 +91,8 @@ namespace hypha
         // toString iterates through all content, all levels, concatenating all values
         // the resulting string is used for fingerprinting and hashing
         const std::string toString();
-        static const std::string toString(ContentGroups &contentGroups);
-        static const std::string toString(ContentGroup &contentGroup);
+        static const std::string toString(const ContentGroups &contentGroups);
+        static const std::string toString(const ContentGroup &contentGroup);
 
         EOSLIB_SERIALIZE(Document, (id)(hash)(creator)(content_groups)(certificates)(created_date)(contract))
 
