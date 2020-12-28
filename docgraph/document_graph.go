@@ -23,7 +23,7 @@ func getEdgesByIndex(ctx context.Context, api *eos.API, contract eos.AccountName
 	request.KeyType = "sha256"
 	request.LowerBound = document.Hash.String()
 	request.UpperBound = document.Hash.String()
-	request.Limit = 1000
+	request.Limit = 10000
 	request.JSON = true
 	response, err := api.GetTableRows(ctx, request)
 	if err != nil {
@@ -117,7 +117,7 @@ func GetLastDocumentOfEdge(ctx context.Context, api *eos.API, contract eos.Accou
 	request.Reverse = true
 	request.Index = "8"
 	request.KeyType = "i64"
-	request.Limit = 1000
+	request.Limit = 10000
 	request.JSON = true
 	response, err := api.GetTableRows(ctx, request)
 	if err != nil {
