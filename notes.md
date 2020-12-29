@@ -1,4 +1,10 @@
 
+Setting up prometheus:
+
+docker run -d -p 9090:9090 --name prometheus -v ~/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml prom/prometheus
+docker run -d -p 9100:9100 --name node-exporter prom/node-exporter:latest
+docker run -d -p 8085:8085 --name daoctl_serve_prometheus dsmaxds/daoctl:latest
+
 KEY=EOS696y3uuryxgRRCiajXHBtiX9umXKvhBRGMygPa82HtQDrcDnE6
 cleos create account eosio documents $KEY $KEY
 cleos create account eosio bob $KEY $KEY

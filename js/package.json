@@ -12,7 +12,6 @@
     "command-line-usage": "^6.1.0",
     "dateformat": "^3.0.3",
     "dgraph-js": "^20.3.0",
-    "eosjs": "^21.0.3",
     "faker": "^4.1.0",
     "grpc": "^1.24.3",
     "node-fetch": "^2.6.0",

@@ -12,7 +12,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "eosjs": "^21.0.3",
     "eoslime": "^2.0.0"
   }
 }

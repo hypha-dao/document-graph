@@ -41,7 +41,7 @@ async function getDocuments (host, contract) {
   options.scope = contract
   options.table = 'documents'
   options.limit = 1000
-
+console.log (options)
   const result = await rpc.get_table_rows(options)
   if (result.rows.length > 0) {
     return result.rows
@@ -76,8 +76,8 @@ class FileDetails {
 async function loadOptions () {
   const optionDefinitions = [
     { name: 'file', alias: 'f', type: filename => new FileDetails(filename) },
-    { name: 'host', alias: 'h', type: String, defaultValue: 'https://test.telos.kitchen' },
-    { name: 'contract', type: String, defaultValue: 'docs.hypha' },
+    { name: 'host', alias: 'h', type: String, defaultValue: 'https://testnet.telos.caleos.io' },
+    { name: 'contract', type: String, defaultValue: 'dao1.hypha' },
     { name: 'hash', type: String },
     { name: 'from', type: String },
     { name: 'to', type: String },
