@@ -1,6 +1,7 @@
 package docgraph_test
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
 	"testing"
@@ -116,4 +117,25 @@ func TestGetLastDocOfEdgeName(t *testing.T) {
 	lastDocument, err := docgraph.GetLastDocumentOfEdge(env.ctx, &env.api, env.Docs, "testlastedge")
 	assert.NilError(t, err)
 	assert.Equal(t, randomDoc2.Hash.String(), lastDocument.Hash.String())
+}
+
+func TestManyDocuments(t *testing.T) {
+	teardownTestCase := setupTestCase(t)
+	defer teardownTestCase(t)
+
+	env = SetupEnvironment(t)
+	t.Log("\nEnvironment Setup complete\n")
+
+	for i := 1; i < 1000; i++ {
+		_, err := CreateRandomDocument(env.ctx, &env.api, env.Docs, env.Creators[1])
+		assert.NilError(t, err)
+	}
+
+	docs, err := docgraph.GetAllDocuments(env.ctx, &env.api, env.Docs)
+	if err != nil {
+		panic(fmt.Errorf("cannot get all documents: %v", err))
+	}
+
+	assert.NilError(t, err)
+	assert.Equal(t, len(docs), 999)
 }

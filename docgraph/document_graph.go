@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strconv"
 
 	eos "github.com/eoscanada/eos-go"
 )
@@ -138,26 +139,53 @@ func GetLastDocumentOfEdge(ctx context.Context, api *eos.API, contract eos.Accou
 	return Document{}, fmt.Errorf("no document with edge found")
 }
 
-// GetAllDocuments reads all documents (up to 1000) and returns them in an array
-func GetAllDocuments(ctx context.Context, api *eos.API,
-	contract eos.AccountName) ([]Document, error) {
-
+func getRange(ctx context.Context, api *eos.API, contract eos.AccountName, id, count int) ([]Document, bool, error) {
 	var documents []Document
 	var request eos.GetTableRowsRequest
+	request.LowerBound = strconv.Itoa(id)
 	request.Code = string(contract)
 	request.Scope = string(contract)
 	request.Table = "documents"
-	request.Limit = 1000
+	request.Limit = uint32(count)
 	request.JSON = true
 	response, err := api.GetTableRows(ctx, request)
 	if err != nil {
-		return []Document{}, fmt.Errorf("get table rows %v", err)
+		return []Document{}, false, fmt.Errorf("get table rows %v", err)
 	}
 
 	err = response.JSONToStructs(&documents)
 	if err != nil {
+		return []Document{}, false, fmt.Errorf("json to structs %v", err)
+	}
+	fmt.Println("Retrieved batch from : " + strconv.Itoa(id) + " for batch size: " + strconv.Itoa(count))
+	return documents, response.More, nil
+}
+
+// GetAllDocuments reads all documents (up to 1000) and returns them in an array
+func GetAllDocuments(ctx context.Context, api *eos.API,
+	contract eos.AccountName) ([]Document, error) {
+
+	var allDocuments []Document
+
+	cursor := 0
+	batchSize := 100
+
+	batch, more, err := getRange(ctx, api, contract, cursor, batchSize)
+	if err != nil {
 		return []Document{}, fmt.Errorf("json to structs %v", err)
 	}
+	allDocuments = append(allDocuments, batch...)
 
-	return documents, nil
+	for more {
+
+		cursor += batchSize
+		batch, more, err = getRange(ctx, api, contract, cursor, batchSize)
+		if err != nil {
+			return []Document{}, fmt.Errorf("json to structs %v", err)
+		}
+		allDocuments = append(allDocuments, batch...)
+
+	}
+
+	return allDocuments, nil
 }
