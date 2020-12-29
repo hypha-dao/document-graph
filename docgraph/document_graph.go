@@ -157,13 +157,11 @@ func getRange(ctx context.Context, api *eos.API, contract eos.AccountName, id, c
 	if err != nil {
 		return []Document{}, false, fmt.Errorf("json to structs %v", err)
 	}
-	fmt.Println("Retrieved batch from : " + strconv.Itoa(id) + " for batch size: " + strconv.Itoa(count))
 	return documents, response.More, nil
 }
 
-// GetAllDocuments reads all documents (up to 1000) and returns them in an array
-func GetAllDocuments(ctx context.Context, api *eos.API,
-	contract eos.AccountName) ([]Document, error) {
+// GetAllDocuments reads all documents and returns them in a slice
+func GetAllDocuments(ctx context.Context, api *eos.API, contract eos.AccountName) ([]Document, error) {
 
 	var allDocuments []Document
 
@@ -177,14 +175,12 @@ func GetAllDocuments(ctx context.Context, api *eos.API,
 	allDocuments = append(allDocuments, batch...)
 
 	for more {
-
 		cursor += batchSize
 		batch, more, err = getRange(ctx, api, contract, cursor, batchSize)
 		if err != nil {
 			return []Document{}, fmt.Errorf("json to structs %v", err)
 		}
 		allDocuments = append(allDocuments, batch...)
-
 	}
 
 	return allDocuments, nil
