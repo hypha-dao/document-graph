@@ -22,6 +22,7 @@ namespace hypha
 
         // non-static definitions
         std::pair<int64_t, ContentGroup *> getGroup(const std::string &label);
+        std::pair<int64_t, ContentGroup*> getGroupOrCreate(const string& label);
         ContentGroup *getGroupOrFail(const std::string &label, const std::string &error);
         ContentGroup *getGroupOrFail(const std::string &groupLabel);
 
@@ -36,6 +37,8 @@ namespace hypha
         void removeGroup(const std::string &groupLabel);
         void removeGroup(size_t groupIndex);
 
+        //Deletes the first instance of a content with the same value
+        void removeContent(const std::string& groupLabel, const Content& content);
         void removeContent(const std::string &groupLabel, const std::string &contentLabel);
         void removeContent(size_t groupIndex, const std::string &contentLabel);
         void removeContent(size_t groupIndex, size_t contentIndex);

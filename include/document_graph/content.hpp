@@ -30,17 +30,22 @@ namespace hypha
 
         //Can return reference to stored type
         template <class T>
-        decltype(auto) getAs()
+        inline decltype(auto) getAs()
         {
             eosio::check(std::holds_alternative<T>(value), "Content value is not of expected type");
             return std::get<T>(value);
         }
 
         template <class T>
-        decltype(auto) getAs() const
+        inline decltype(auto) getAs() const
         {
             eosio::check(std::holds_alternative<T>(value), "Content value is not of expected type");
             return std::get<T>(value);
+        }
+
+        inline bool operator==(const Content& other) 
+        {
+          return label == other.label && value == other.value;
         }
 
         EOSLIB_SERIALIZE(Content, (label)(value))
