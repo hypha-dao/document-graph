@@ -1,5 +1,9 @@
 # Document Graph data structure
 
+## Document 
+
+Each document is comprised of:
+
 - Header 
     - creator (account)
     - contract (where this is saved)
@@ -12,9 +16,9 @@
     - ContentGroups = vector<ContentGroup>
     - there is a single instance of ContentGroups per document
     - this provides enough flexibility to support: 
-        - precise data of all EOSIO types,
-        - short clauses of highly annotated text,
-        - longer form sequenced data like chapters
+        - data of all EOSIO types,
+        - short clauses of annotated text,
+        - longer form sequenced data, e.g. chapters 
 - Certificates
     - each document has a list of certificates
     - Certificate 
