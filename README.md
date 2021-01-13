@@ -74,7 +74,7 @@ mkdir build
 cd build
 cmake ..
 make -j8
-cd docgraph
+cd ../docgraph
 go test -v -timeout 0
 ```
 
