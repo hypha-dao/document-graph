@@ -52,8 +52,9 @@ namespace hypha
         static string_view getGroupLabel(const ContentGroup &contentGroup);
         static void insertOrReplace(ContentGroup &contentGroup, const Content &newContent);
 
-    private:
         ContentGroups &getContentGroups() { return m_contentGroups; }
+
+    private:
         ContentGroups &m_contentGroups;
     };
 

@@ -67,14 +67,14 @@ namespace hypha
     {
         hashContents();
 
-        document_table d_t(contract, contract.value);
+        document_table d_t(getContract(), getContract().value);
         auto hash_index = d_t.get_index<eosio::name("idhash")>();
         auto h_itr = hash_index.find(hash);
 
         // if this content exists already, error out and send back the hash of the existing document
         eosio::check(h_itr == hash_index.end(), "document exists already: " + readableHash(hash));
 
-        d_t.emplace(contract, [&](auto &d) {
+        d_t.emplace(getContract(), [&](auto &d) {
             id = d_t.available_primary_key();
             created_date = eosio::current_time_point();
             d = *this;

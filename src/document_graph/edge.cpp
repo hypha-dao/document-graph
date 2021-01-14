@@ -125,8 +125,8 @@ namespace hypha
         from_node_to_node_index = concatHash(from_node, to_node);
         to_node_edge_name_index = concatHash(to_node, edge_name);
 
-        edge_table e_t(contract, contract.value);
-        e_t.emplace(contract, [&](auto &e) {
+        edge_table e_t(getContract(), getContract().value);
+        e_t.emplace(getContract(), [&](auto &e) {
             e = *this;
             e.created_date = eosio::current_time_point();
         });
@@ -134,7 +134,7 @@ namespace hypha
 
     void Edge::erase()
     {
-        edge_table e_t(contract, contract.value);
+        edge_table e_t(getContract(), getContract().value);
         auto itr = e_t.find(id);
 
         eosio::check(itr != e_t.end(), "edge does not exist: from " + readableHash(from_node) + " to " + readableHash(to_node) + " with edge name of " + edge_name.to_string());
