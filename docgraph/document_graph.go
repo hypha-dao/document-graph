@@ -136,7 +136,7 @@ func GetLastDocumentOfEdge(ctx context.Context, api *eos.API, contract eos.Accou
 		}
 	}
 
-	return Document{}, fmt.Errorf("no document with edge found")
+	return Document{}, fmt.Errorf("no document with edge found: %v", string(edgeName))
 }
 
 func getRange(ctx context.Context, api *eos.API, contract eos.AccountName, id, count int) ([]Document, bool, error) {

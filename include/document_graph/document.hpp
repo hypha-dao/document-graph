@@ -71,8 +71,9 @@ namespace hypha
         const eosio::checksum256 &getHash() const { return hash; }
         const eosio::time_point &getCreated() const { return created_date; }
         const eosio::name &getCreator() const { return creator; }
+        const eosio::name &getContract() { return contract; }
 
-        //This has to be public in order to be reachable by the abi-generator macro
+        // This has to be public in order to be reachable by the abi-generator macro
         // indexes for table
         uint64_t by_created() const { return created_date.sec_since_epoch(); }
         uint64_t by_creator() const { return creator.value; }
