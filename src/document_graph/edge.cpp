@@ -87,6 +87,22 @@ namespace hypha
     }
 
     // static getter
+    std::vector<Edge> Edge::getAll(const eosio::name &_contract,
+                      const eosio::checksum256 &_from_node,
+                      const eosio::name &_edge_name)
+    {
+        edge_table e_t(_contract, _contract.value);
+        auto fromEdgeIndex = e_t.get_index<eosio::name("byfromname")>();
+        auto index = concatHash(_from_node, _edge_name);
+        std::vector<Edge> edges;
+        for (auto itr = fromEdgeIndex.find(index); itr != fromEdgeIndex.end(); ++itr) {
+            edges.push_back(*itr);
+        }
+
+        return edges;
+    }
+
+    // static getter
     std::pair<bool, Edge> Edge::getIfExists(const eosio::name &_contract,
                                             const eosio::checksum256 &_from_node,
                                             const eosio::name &_edge_name)
