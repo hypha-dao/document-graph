@@ -67,6 +67,23 @@ func GetEdgesFromDocumentWithEdge(ctx context.Context, api *eos.API, contract eo
 	return namedEdges, nil
 }
 
+// GetDocumentsWithEdge retrieves a list of documents connected to the provided document via the provided edge name
+func GetDocumentsWithEdge(ctx context.Context, api *eos.API, contract eos.AccountName, document Document, edgeName eos.Name) ([]Document, error) {
+	edges, err := GetEdgesFromDocumentWithEdge(ctx, api, contract, document, edgeName)
+	if err != nil {
+		return []Document{}, fmt.Errorf("error retrieving edges %v", err)
+	}
+
+	documents := make([]Document, len(edges))
+	for index, edge := range edges {
+		documents[index], err = LoadDocument(ctx, api, contract, edge.ToNode.String())
+		if err != nil {
+			return []Document{}, fmt.Errorf("error loading document %v", err)
+		}
+	}
+	return documents, nil
+}
+
 // GetEdgesToDocumentWithEdge retrieves a list of edges from this node to other nodes
 func GetEdgesToDocumentWithEdge(ctx context.Context, api *eos.API, contract eos.AccountName, document Document, edgeName eos.Name) ([]Edge, error) {
 	edges, err := getEdgesByIndex(ctx, api, contract, document, string("3"))
@@ -118,8 +135,10 @@ func GetLastDocumentOfEdge(ctx context.Context, api *eos.API, contract eos.Accou
 	request.Reverse = true
 	request.Index = "8"
 	request.KeyType = "i64"
-	request.Limit = 10000
+	request.Limit = 1000
 	request.JSON = true
+	// request.LowerBound = sdtrinedgeName
+	// request.UpperBound = edgeName
 	response, err := api.GetTableRows(ctx, request)
 	if err != nil {
 		return Document{}, fmt.Errorf("json to struct: %v", err)
@@ -142,7 +161,9 @@ func GetLastDocumentOfEdge(ctx context.Context, api *eos.API, contract eos.Accou
 func getRange(ctx context.Context, api *eos.API, contract eos.AccountName, id, count int) ([]Document, bool, error) {
 	var documents []Document
 	var request eos.GetTableRowsRequest
-	request.LowerBound = strconv.Itoa(id)
+	if id > 0 {
+		request.LowerBound = strconv.Itoa(id)
+	}
 	request.Code = string(contract)
 	request.Scope = string(contract)
 	request.Table = "documents"
@@ -165,18 +186,16 @@ func GetAllDocuments(ctx context.Context, api *eos.API, contract eos.AccountName
 
 	var allDocuments []Document
 
-	cursor := 0
-	batchSize := 100
+	batchSize := 75
 
-	batch, more, err := getRange(ctx, api, contract, cursor, batchSize)
+	batch, more, err := getRange(ctx, api, contract, 0, batchSize)
 	if err != nil {
 		return []Document{}, fmt.Errorf("json to structs %v", err)
 	}
 	allDocuments = append(allDocuments, batch...)
 
 	for more {
-		cursor += batchSize
-		batch, more, err = getRange(ctx, api, contract, cursor, batchSize)
+		batch, more, err = getRange(ctx, api, contract, int(batch[len(batch)-1].ID), batchSize)
 		if err != nil {
 			return []Document{}, fmt.Errorf("json to structs %v", err)
 		}
