@@ -4,14 +4,13 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"math/rand"
 	"testing"
 	"time"
 
 	eostest "github.com/digital-scarcity/eos-go-test"
 	eos "github.com/eoscanada/eos-go"
-	"github.com/hypha-dao/document/docgraph"
+	"github.com/hypha-dao/document-graph/docgraph"
 	"github.com/k0kubun/go-ansi"
 	"github.com/schollz/progressbar/v3"
 	"gotest.tools/assert"
@@ -20,6 +19,10 @@ import (
 type createDoc struct {
 	Creator       eos.AccountName         `json:"creator"`
 	ContentGroups []docgraph.ContentGroup `json:"content_groups"`
+}
+
+type createRoot struct {
+	Notes string `json:"notes"`
 }
 
 var seededRand *rand.Rand = rand.New(
@@ -37,6 +40,129 @@ const charset = "abcdefghijklmnopqrstuvwxyz" + "12345"
 
 func randomString() string {
 	return stringWithCharset(12, charset)
+}
+
+// GetOrNewNew creates a document with a single random value
+func GetOrNewNew(ctx context.Context, api *eos.API, contract, creator eos.AccountName, d docgraph.Document) (docgraph.Document, error) {
+
+	actions := []*eos.Action{{
+		Account: contract,
+		Name:    eos.ActN("getornewnew"),
+		Authorization: []eos.PermissionLevel{
+			{Actor: creator, Permission: eos.PN("active")},
+		},
+		ActionData: eos.NewActionData(createDoc{
+			Creator:       creator,
+			ContentGroups: d.ContentGroups,
+		}),
+	}}
+	_, err := eostest.ExecTrx(ctx, api, actions)
+	if err != nil {
+		return docgraph.Document{}, fmt.Errorf("execute transaction getornewnew: %v", err)
+	}
+
+	lastDoc, err := docgraph.GetLastDocument(ctx, api, contract)
+	if err != nil {
+		return docgraph.Document{}, fmt.Errorf("get last document: %v", err)
+	}
+	return lastDoc, nil
+}
+
+// GetOrNewGet creates a document with a single random value
+func GetOrNewGet(ctx context.Context, api *eos.API, contract, creator eos.AccountName, d docgraph.Document) (docgraph.Document, error) {
+
+	actions := []*eos.Action{{
+		Account: contract,
+		Name:    eos.ActN("getornewget"),
+		Authorization: []eos.PermissionLevel{
+			{Actor: creator, Permission: eos.PN("active")},
+		},
+		ActionData: eos.NewActionData(createDoc{
+			Creator:       creator,
+			ContentGroups: d.ContentGroups,
+		}),
+	}}
+	_, err := eostest.ExecTrx(ctx, api, actions)
+	if err != nil {
+		return docgraph.Document{}, fmt.Errorf("execute transaction getornewnew: %v", err)
+	}
+
+	lastDoc, err := docgraph.GetLastDocument(ctx, api, contract)
+	if err != nil {
+		return docgraph.Document{}, fmt.Errorf("get last document: %v", err)
+	}
+	return lastDoc, nil
+}
+
+type getAsset struct {
+	Hash         eos.Checksum256 `json:"hash"`
+	GroupLabel   string          `json:"groupLabel"`
+	ContentLabel string          `json:"contentLabel"`
+	ContentValue eos.Asset       `json:"contentValue"`
+}
+
+// GetAssetTest creates a document with a single random value
+func GetAssetTest(ctx context.Context, api *eos.API, contract eos.AccountName, d docgraph.Document,
+	groupLabel, contentLabel string, contentValue eos.Asset) (string, error) {
+
+	actions := []*eos.Action{{
+		Account: contract,
+		Name:    eos.ActN("testgetasset"),
+		Authorization: []eos.PermissionLevel{
+			{Actor: contract, Permission: eos.PN("active")},
+		},
+		ActionData: eos.NewActionData(getAsset{
+			Hash:         d.Hash,
+			GroupLabel:   groupLabel,
+			ContentLabel: contentLabel,
+			ContentValue: contentValue,
+		}),
+	}}
+	return eostest.ExecTrx(ctx, api, actions)
+}
+
+type getGroup struct {
+	Hash       eos.Checksum256 `json:"hash"`
+	GroupLabel string          `json:"groupLabel"`
+}
+
+func GetGroupTest(ctx context.Context, api *eos.API, contract eos.AccountName, d docgraph.Document, groupLabel string) (string, error) {
+
+	actions := []*eos.Action{{
+		Account: contract,
+		Name:    eos.ActN("testgetgroup"),
+		Authorization: []eos.PermissionLevel{
+			{Actor: contract, Permission: eos.PN("active")},
+		},
+		ActionData: eos.NewActionData(getAsset{
+			Hash:       d.Hash,
+			GroupLabel: groupLabel,
+		}),
+	}}
+	return eostest.ExecTrx(ctx, api, actions)
+}
+
+func CreateRoot(ctx context.Context, api *eos.API, contract, creator eos.AccountName) (docgraph.Document, error) {
+	actions := []*eos.Action{{
+		Account: contract,
+		Name:    eos.ActN("createroot"),
+		Authorization: []eos.PermissionLevel{
+			{Actor: creator, Permission: eos.PN("active")},
+		},
+		ActionData: eos.NewActionData(createRoot{
+			Notes: "notes",
+		}),
+	}}
+	_, err := eostest.ExecTrx(ctx, api, actions)
+	if err != nil {
+		return docgraph.Document{}, fmt.Errorf("execute create root: %v", err)
+	}
+
+	lastDoc, err := docgraph.GetLastDocument(ctx, api, contract)
+	if err != nil {
+		return docgraph.Document{}, fmt.Errorf("get last document: %v", err)
+	}
+	return lastDoc, nil
 }
 
 // CreateRandomDocument creates a document with a single random value
@@ -77,29 +203,6 @@ func CreateRandomDocument(ctx context.Context, api *eos.API, contract, creator e
 		return docgraph.Document{}, fmt.Errorf("get last document: %v", err)
 	}
 	return lastDoc, nil
-}
-
-// GetAllEdges retrieves all edges from table
-func GetAllEdges(ctx context.Context, api *eos.API, contract eos.AccountName) ([]docgraph.Edge, error) {
-	var edges []docgraph.Edge
-	var request eos.GetTableRowsRequest
-	request.Code = string(contract)
-	request.Scope = string(contract)
-	request.Table = "edges"
-	request.Limit = 1000
-	request.JSON = true
-	response, err := api.GetTableRows(ctx, request)
-	if err != nil {
-		log.Println("Error with GetTableRows: ", err)
-		return []docgraph.Edge{}, err
-	}
-
-	err = response.JSONToStructs(&edges)
-	if err != nil {
-		log.Println("Error with JSONToStructs: ", err)
-		return []docgraph.Edge{}, err
-	}
-	return edges, nil
 }
 
 func pause(t *testing.T, seconds time.Duration, headline, prefix string) {

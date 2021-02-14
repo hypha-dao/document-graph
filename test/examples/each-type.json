@@ -2,10 +2,10 @@
     "content_groups": [
         [
             {
-                "label": "content_group_name",
+                "label": "content_group_label",
                 "value": [
                     "string",
-                    "My Content Group #1"
+                    "My Content Group Label"
                 ]
             },
             {

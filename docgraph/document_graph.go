@@ -2,12 +2,10 @@ package docgraph
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
+	"strconv"
 
-	eostest "github.com/digital-scarcity/eos-go-test"
 	eos "github.com/eoscanada/eos-go"
 )
 
@@ -16,133 +14,7 @@ type DocumentGraph struct {
 	RootNode Document
 }
 
-// CreateDocument creates a new document on chain from the provided file
-func CreateDocument(ctx context.Context, api *eos.API,
-	contract, creator eos.AccountName,
-	fileName string) (Document, error) {
-
-	data, err := ioutil.ReadFile(fileName)
-	if err != nil {
-		return Document{}, fmt.Errorf("readfile %v: %v", fileName, err)
-	}
-
-	action := eos.ActN("create")
-
-	var dump map[string]interface{}
-	err = json.Unmarshal(data, &dump)
-	if err != nil {
-		return Document{}, fmt.Errorf("unmarshal %v: %v", fileName, err)
-	}
-
-	dump["creator"] = creator
-
-	actionBinary, err := api.ABIJSONToBin(ctx, contract, eos.Name(action), dump)
-	if err != nil {
-		return Document{}, fmt.Errorf("api json to bin %v: %v", fileName, err)
-	}
-
-	actions := []*eos.Action{
-		{
-			Account: contract,
-			Name:    action,
-			Authorization: []eos.PermissionLevel{
-				{Actor: creator, Permission: eos.PN("active")},
-			},
-			ActionData: eos.NewActionDataFromHexData([]byte(actionBinary)),
-		}}
-
-	_, err = eostest.ExecTrx(ctx, api, actions)
-	if err != nil {
-		return Document{}, fmt.Errorf("execute transaction %v: %v", fileName, err)
-	}
-
-	lastDoc, err := GetLastDocument(ctx, api, contract)
-	if err != nil {
-		return Document{}, fmt.Errorf("get last document %v: %v", fileName, err)
-	}
-	return lastDoc, nil
-}
-
-// LoadDocument reads a document from the blockchain and creates a Document instance
-func LoadDocument(ctx context.Context, api *eos.API,
-	contract eos.AccountName,
-	hash string) (Document, error) {
-
-	var documents []Document
-	var request eos.GetTableRowsRequest
-	request.Code = string(contract)
-	request.Scope = string(contract)
-	request.Table = "documents"
-	request.Index = "2"
-	request.KeyType = "sha256"
-	request.LowerBound = hash
-	request.UpperBound = hash
-	request.Limit = 1
-	request.JSON = true
-	response, err := api.GetTableRows(ctx, request)
-	if err != nil {
-		return Document{}, fmt.Errorf("get table rows %v: %v", hash, err)
-	}
-
-	err = response.JSONToStructs(&documents)
-	if err != nil {
-		return Document{}, fmt.Errorf("json to structs %v: %v", hash, err)
-	}
-
-	if len(documents) == 0 {
-		return Document{}, fmt.Errorf("document not found %v: %v", hash, err)
-	}
-	return documents[0], nil
-}
-
-// CreateEdge creates an edge from one document node to another with the specified name
-func CreateEdge(ctx context.Context, api *eos.API,
-	contract, creator eos.AccountName,
-	fromNode, toNode eos.Checksum256,
-	edgeName eos.Name) (string, error) {
-
-	actionData := make(map[string]interface{})
-	actionData["from_node"] = fromNode
-	actionData["to_node"] = toNode
-	actionData["edge_name"] = edgeName
-
-	actionBinary, err := api.ABIJSONToBin(ctx, contract, eos.Name("newedge"), actionData)
-	if err != nil {
-		log.Println("Error with ABIJSONToBin: ", err)
-		return "error", err
-	}
-
-	actions := []*eos.Action{
-		{
-			Account: contract,
-			Name:    eos.ActN("newedge"),
-			Authorization: []eos.PermissionLevel{
-				{Actor: creator, Permission: eos.PN("active")},
-			},
-			ActionData: eos.NewActionDataFromHexData([]byte(actionBinary)),
-		}}
-
-	return eostest.ExecTrx(ctx, api, actions)
-}
-
-// EdgeExists checks to see if the edge exists
-func EdgeExists(ctx context.Context, api *eos.API, contract eos.AccountName,
-	fromNode, toNode Document, edgeName eos.Name) (bool, error) {
-
-	edges, err := fromNode.GetEdgesFromByName(ctx, api, contract, edgeName)
-	if err != nil {
-		return false, fmt.Errorf("get edges from by name doc: %v err: %v", fromNode.Hash, err)
-	}
-
-	for _, edge := range edges {
-		if edge.ToNode.String() == toNode.Hash.String() {
-			return true, nil
-		}
-	}
-	return false, nil
-}
-
-func (d *Document) getEdgesIndex(ctx context.Context, api *eos.API, contract eos.AccountName, edgeIndex string) ([]Edge, error) {
+func getEdgesByIndex(ctx context.Context, api *eos.API, contract eos.AccountName, document Document, edgeIndex string) ([]Edge, error) {
 	var edges []Edge
 	var request eos.GetTableRowsRequest
 	request.Code = string(contract)
@@ -150,9 +22,9 @@ func (d *Document) getEdgesIndex(ctx context.Context, api *eos.API, contract eos
 	request.Table = "edges"
 	request.Index = edgeIndex
 	request.KeyType = "sha256"
-	request.LowerBound = d.Hash.String()
-	request.UpperBound = d.Hash.String()
-	request.Limit = 1000
+	request.LowerBound = document.Hash.String()
+	request.UpperBound = document.Hash.String()
+	request.Limit = 10000
 	request.JSON = true
 	response, err := api.GetTableRows(ctx, request)
 	if err != nil {
@@ -168,19 +40,19 @@ func (d *Document) getEdgesIndex(ctx context.Context, api *eos.API, contract eos
 	return edges, nil
 }
 
-// GetEdgesFrom retrieves a list of edges from this node to other nodes
-func (d *Document) GetEdgesFrom(ctx context.Context, api *eos.API, contract eos.AccountName) ([]Edge, error) {
-	return d.getEdgesIndex(ctx, api, contract, string("2"))
+// GetEdgesFromDocument retrieves a list of edges from this node to other nodes
+func GetEdgesFromDocument(ctx context.Context, api *eos.API, contract eos.AccountName, document Document) ([]Edge, error) {
+	return getEdgesByIndex(ctx, api, contract, document, string("2"))
 }
 
-// GetEdgesTo retrieves a list of edges to this node from other nodes
-func (d *Document) GetEdgesTo(ctx context.Context, api *eos.API, contract eos.AccountName) ([]Edge, error) {
-	return d.getEdgesIndex(ctx, api, contract, string("3"))
+// GetEdgesToDocument retrieves a list of edges to this node from other nodes
+func GetEdgesToDocument(ctx context.Context, api *eos.API, contract eos.AccountName, document Document) ([]Edge, error) {
+	return getEdgesByIndex(ctx, api, contract, document, string("3"))
 }
 
-// GetEdgesFromByName retrieves a list of edges from this node to other nodes
-func (d *Document) GetEdgesFromByName(ctx context.Context, api *eos.API, contract eos.AccountName, edgeName eos.Name) ([]Edge, error) {
-	edges, err := d.getEdgesIndex(ctx, api, contract, string("2"))
+// GetEdgesFromDocumentWithEdge retrieves a list of edges from this node to other nodes
+func GetEdgesFromDocumentWithEdge(ctx context.Context, api *eos.API, contract eos.AccountName, document Document, edgeName eos.Name) ([]Edge, error) {
+	edges, err := getEdgesByIndex(ctx, api, contract, document, string("2"))
 	if err != nil {
 		log.Println("Error with JSONToStructs: ", err)
 		return []Edge{}, err
@@ -195,9 +67,26 @@ func (d *Document) GetEdgesFromByName(ctx context.Context, api *eos.API, contrac
 	return namedEdges, nil
 }
 
-// GetEdgesToByName retrieves a list of edges from this node to other nodes
-func (d *Document) GetEdgesToByName(ctx context.Context, api *eos.API, contract eos.AccountName, edgeName eos.Name) ([]Edge, error) {
-	edges, err := d.getEdgesIndex(ctx, api, contract, string("3"))
+// GetDocumentsWithEdge retrieves a list of documents connected to the provided document via the provided edge name
+func GetDocumentsWithEdge(ctx context.Context, api *eos.API, contract eos.AccountName, document Document, edgeName eos.Name) ([]Document, error) {
+	edges, err := GetEdgesFromDocumentWithEdge(ctx, api, contract, document, edgeName)
+	if err != nil {
+		return []Document{}, fmt.Errorf("error retrieving edges %v", err)
+	}
+
+	documents := make([]Document, len(edges))
+	for index, edge := range edges {
+		documents[index], err = LoadDocument(ctx, api, contract, edge.ToNode.String())
+		if err != nil {
+			return []Document{}, fmt.Errorf("error loading document %v", err)
+		}
+	}
+	return documents, nil
+}
+
+// GetEdgesToDocumentWithEdge retrieves a list of edges from this node to other nodes
+func GetEdgesToDocumentWithEdge(ctx context.Context, api *eos.API, contract eos.AccountName, document Document, edgeName eos.Name) ([]Edge, error) {
+	edges, err := getEdgesByIndex(ctx, api, contract, document, string("3"))
 	if err != nil {
 		log.Println("Error with JSONToStructs: ", err)
 		return []Edge{}, err
@@ -234,4 +123,84 @@ func GetLastDocument(ctx context.Context, api *eos.API, contract eos.AccountName
 		return Document{}, err
 	}
 	return docs[0], nil
+}
+
+// GetLastDocumentOfEdge ...
+func GetLastDocumentOfEdge(ctx context.Context, api *eos.API, contract eos.AccountName, edgeName eos.Name) (Document, error) {
+	var edges []Edge
+	var request eos.GetTableRowsRequest
+	request.Code = string(contract)
+	request.Scope = string(contract)
+	request.Table = "edges"
+	request.Reverse = true
+	request.Index = "8"
+	request.KeyType = "i64"
+	request.Limit = 1000
+	request.JSON = true
+	// request.LowerBound = sdtrinedgeName
+	// request.UpperBound = edgeName
+	response, err := api.GetTableRows(ctx, request)
+	if err != nil {
+		return Document{}, fmt.Errorf("json to struct: %v", err)
+	}
+
+	err = response.JSONToStructs(&edges)
+	if err != nil {
+		return Document{}, fmt.Errorf("json to struct: %v", err)
+	}
+
+	for _, edge := range edges {
+		if edge.EdgeName == edgeName {
+			return LoadDocument(ctx, api, contract, edge.ToNode.String())
+		}
+	}
+
+	return Document{}, fmt.Errorf("no document with edge found: %v", string(edgeName))
+}
+
+func getRange(ctx context.Context, api *eos.API, contract eos.AccountName, id, count int) ([]Document, bool, error) {
+	var documents []Document
+	var request eos.GetTableRowsRequest
+	if id > 0 {
+		request.LowerBound = strconv.Itoa(id)
+	}
+	request.Code = string(contract)
+	request.Scope = string(contract)
+	request.Table = "documents"
+	request.Limit = uint32(count)
+	request.JSON = true
+	response, err := api.GetTableRows(ctx, request)
+	if err != nil {
+		return []Document{}, false, fmt.Errorf("get table rows %v", err)
+	}
+
+	err = response.JSONToStructs(&documents)
+	if err != nil {
+		return []Document{}, false, fmt.Errorf("json to structs %v", err)
+	}
+	return documents, response.More, nil
+}
+
+// GetAllDocuments reads all documents and returns them in a slice
+func GetAllDocuments(ctx context.Context, api *eos.API, contract eos.AccountName) ([]Document, error) {
+
+	var allDocuments []Document
+
+	batchSize := 75
+
+	batch, more, err := getRange(ctx, api, contract, 0, batchSize)
+	if err != nil {
+		return []Document{}, fmt.Errorf("json to structs %v", err)
+	}
+	allDocuments = append(allDocuments, batch...)
+
+	for more {
+		batch, more, err = getRange(ctx, api, contract, int(batch[len(batch)-1].ID), batchSize)
+		if err != nil {
+			return []Document{}, fmt.Errorf("json to structs %v", err)
+		}
+		allDocuments = append(allDocuments, batch...)
+	}
+
+	return allDocuments, nil
 }
