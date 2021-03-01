@@ -28,15 +28,15 @@ func TestDocuments(t *testing.T) {
 		}{
 			{
 				name:  "simplest",
-				input: "../test/examples/simplest.json",
+				input: "examples/simplest.json",
 			},
 			{
 				name:  "each-type",
-				input: "../test/examples/each-type.json",
+				input: "examples/each-type.json",
 			},
 			{
 				name:  "contribution",
-				input: "../test/examples/contribution.json",
+				input: "examples/contribution.json",
 			},
 		}
 
@@ -68,7 +68,7 @@ func TestLoadDocument(t *testing.T) {
 	env = SetupEnvironment(t)
 	t.Log("\nEnvironment Setup complete\n")
 
-	doc, err := docgraph.CreateDocument(env.ctx, &env.api, env.Docs, env.Creators[1], "../test/examples/simplest.json")
+	doc, err := docgraph.CreateDocument(env.ctx, &env.api, env.Docs, env.Creators[1], "examples/simplest.json")
 	assert.NilError(t, err)
 
 	loadedDoc, err := docgraph.LoadDocument(env.ctx, &env.api, env.Docs, doc.Hash.String())
@@ -131,7 +131,7 @@ func TestGetContent(t *testing.T) {
 		}{
 			{
 				name:  "each-type",
-				input: "../test/examples/each-type.json",
+				input: "examples/each-type.json",
 			},
 		}
 
@@ -186,7 +186,7 @@ func TestGetGroup(t *testing.T) {
 		}{
 			{
 				name:  "each-type",
-				input: "../test/examples/each-type.json",
+				input: "examples/each-type.json",
 			},
 		}
 

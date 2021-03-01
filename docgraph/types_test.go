@@ -212,15 +212,15 @@ func TestExamplePayloads(t *testing.T) {
 	}{
 		{
 			name:  "simplest",
-			input: "../test/examples/simplest.json",
+			input: "examples/simplest.json",
 		},
 		{
 			name:  "each-type",
-			input: "../test/examples/each-type.json",
+			input: "examples/each-type.json",
 		},
 		{
 			name:  "contribution",
-			input: "../test/examples/contribution.json",
+			input: "examples/contribution.json",
 		},
 	}
 
@@ -246,15 +246,15 @@ func TestDocumentEquality(t *testing.T) {
 	}{
 		{
 			name:  "simplest",
-			input: "../test/examples/simplest.json",
+			input: "examples/simplest.json",
 		},
 		{
 			name:  "each-type",
-			input: "../test/examples/each-type.json",
+			input: "examples/each-type.json",
 		},
 		{
 			name:  "contribution",
-			input: "../test/examples/contribution.json",
+			input: "examples/contribution.json",
 		},
 	}
 
@@ -286,18 +286,18 @@ func TestDocumentInEquality(t *testing.T) {
 	}{
 		{
 			name:   "simplest vs each-type",
-			input1: "../test/examples/simplest.json",
-			input2: "../test/examples/each-type.json",
+			input1: "examples/simplest.json",
+			input2: "examples/each-type.json",
 		},
 		{
 			name:   "each-type vs contribution",
-			input1: "../test/examples/each-type.json",
-			input2: "../test/examples/contribution.json",
+			input1: "examples/each-type.json",
+			input2: "examples/contribution.json",
 		},
 		{
 			name:   "contribution vs simplest",
-			input1: "../test/examples/contribution.json",
-			input2: "../test/examples/simplest.json",
+			input1: "examples/contribution.json",
+			input2: "examples/simplest.json",
 		},
 	}
 

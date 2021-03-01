@@ -81,6 +81,20 @@ func (fv *FlexValue) String() string {
 	}
 }
 
+// TimePoint returns a eos.TimePoint value of found content
+func (fv *FlexValue) TimePoint() (eos.TimePoint, error) {
+	switch v := fv.Impl.(type) {
+	case eos.TimePoint:
+		return v, nil
+	default:
+		return 0, &InvalidTypeError{
+			Label:        fmt.Sprintf("received an unexpected type %T for variant %T", v, fv),
+			ExpectedType: "eos.TimePoint",
+			FlexValue:    fv,
+		}
+	}
+}
+
 // Asset returns a string value of found content or it panics
 func (fv *FlexValue) Asset() (eos.Asset, error) {
 	switch v := fv.Impl.(type) {

@@ -194,7 +194,7 @@ cd js && yarn install && node index.js
 
 #### Create a document from a file
 ``` bash
-$ node index.js --file "../test/examples/each-type.json" --create --auth alice
+$ node index.js --file "examples/each-type.json" --create --auth alice
 Transaction Successfull :  7dc613a7c716897f498c95e5973333db5e6a9f5170f604cdcde1b4bb546bdef6
 Documents table:  [
   {
