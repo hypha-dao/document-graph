@@ -16,13 +16,13 @@ func TestEdges(t *testing.T) {
 	env = SetupEnvironment(t)
 	t.Log("\nEnvironment Setup complete\n")
 
-	doc1, err := docgraph.CreateDocument(env.ctx, &env.api, env.Docs, env.Creators[0], "../test/examples/simplest.json")
+	doc1, err := docgraph.CreateDocument(env.ctx, &env.api, env.Docs, env.Creators[0], "examples/simplest.json")
 	assert.NilError(t, err)
 
-	doc2, err := docgraph.CreateDocument(env.ctx, &env.api, env.Docs, env.Creators[0], "../test/examples/each-type.json")
+	doc2, err := docgraph.CreateDocument(env.ctx, &env.api, env.Docs, env.Creators[0], "examples/each-type.json")
 	assert.NilError(t, err)
 
-	// doc3, err := CreateDocument(env.ctx, &env.api, env.Docs, suite.Accounts[3], "../test/examples/contribution.json")
+	// doc3, err := CreateDocument(env.ctx, &env.api, env.Docs, suite.Accounts[3], "examples/contribution.json")
 	// suite.Require().NoError(err)
 
 	tests := []struct {

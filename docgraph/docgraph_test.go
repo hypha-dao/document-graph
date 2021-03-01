@@ -137,5 +137,5 @@ func TestManyDocuments(t *testing.T) {
 	}
 
 	assert.NilError(t, err)
-	assert.Equal(t, len(docs), 999)
+	assert.Assert(t, len(docs) >= 999)
 }
