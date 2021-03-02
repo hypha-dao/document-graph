@@ -181,6 +181,27 @@ func getRange(ctx context.Context, api *eos.API, contract eos.AccountName, id, c
 	return documents, response.More, nil
 }
 
+// GetAllDocumentsForType reads all documents and returns them in a slice
+func GetAllDocumentsForType(ctx context.Context, api *eos.API, contract eos.AccountName, docType string) ([]Document, error) {
+
+	allDocuments, err := GetAllDocuments(ctx, api, contract)
+	if err != nil {
+		return []Document{}, fmt.Errorf("cannot get all documents %v", err)
+	}
+
+	var filteredDocs []Document
+	for _, doc := range allDocuments {
+
+		typeFV, err := doc.GetContent("type")
+		if err == nil &&
+			typeFV.Impl.(eos.Name) == eos.Name(docType) {
+			filteredDocs = append(filteredDocs, doc)
+		}
+	}
+
+	return filteredDocs, nil
+}
+
 // GetAllDocuments reads all documents and returns them in a slice
 func GetAllDocuments(ctx context.Context, api *eos.API, contract eos.AccountName) ([]Document, error) {
 
