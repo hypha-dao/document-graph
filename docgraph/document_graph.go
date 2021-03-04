@@ -7,6 +7,8 @@ import (
 	"strconv"
 
 	eos "github.com/eoscanada/eos-go"
+	"github.com/k0kubun/go-ansi"
+	"github.com/schollz/progressbar/v3"
 )
 
 // DocumentGraph is defined by a root node, and is aware of nodes and edges
@@ -181,18 +183,41 @@ func getRange(ctx context.Context, api *eos.API, contract eos.AccountName, id, c
 	return documents, response.More, nil
 }
 
+// GetAllDocumentsForType reads all documents and returns them in a slice
+func GetAllDocumentsForType(ctx context.Context, api *eos.API, contract eos.AccountName, docType string) ([]Document, error) {
+
+	allDocuments, err := GetAllDocuments(ctx, api, contract)
+	if err != nil {
+		return []Document{}, fmt.Errorf("cannot get all documents %v", err)
+	}
+
+	var filteredDocs []Document
+	for _, doc := range allDocuments {
+
+		typeFV, err := doc.GetContent("type")
+		if err == nil &&
+			typeFV.Impl.(eos.Name) == eos.Name(docType) {
+			filteredDocs = append(filteredDocs, doc)
+		}
+	}
+
+	return filteredDocs, nil
+}
+
 // GetAllDocuments reads all documents and returns them in a slice
 func GetAllDocuments(ctx context.Context, api *eos.API, contract eos.AccountName) ([]Document, error) {
 
 	var allDocuments []Document
-
 	batchSize := 75
+
+	bar := DefaultProgressBar("Retrieving graph for cache ... ", -1) // progressbar.Default(-1)
 
 	batch, more, err := getRange(ctx, api, contract, 0, batchSize)
 	if err != nil {
 		return []Document{}, fmt.Errorf("json to structs %v", err)
 	}
 	allDocuments = append(allDocuments, batch...)
+	bar.Add(batchSize)
 
 	for more {
 		batch, more, err = getRange(ctx, api, contract, int(batch[len(batch)-1].ID), batchSize)
@@ -200,7 +225,26 @@ func GetAllDocuments(ctx context.Context, api *eos.API, contract eos.AccountName
 			return []Document{}, fmt.Errorf("json to structs %v", err)
 		}
 		allDocuments = append(allDocuments, batch...)
+		bar.Add(batchSize)
 	}
 
+	bar.Clear()
 	return allDocuments, nil
+}
+
+// DefaultProgressBar ...
+func DefaultProgressBar(desc string, counter int) *progressbar.ProgressBar {
+	return progressbar.NewOptions(-1,
+		progressbar.OptionSetWriter(ansi.NewAnsiStdout()),
+		progressbar.OptionEnableColorCodes(true),
+		progressbar.OptionSetWidth(90),
+		// progressbar.OptionShowIts(),
+		progressbar.OptionSetDescription("[cyan]"+fmt.Sprintf("%20v", desc)),
+		progressbar.OptionSetTheme(progressbar.Theme{
+			Saucer:        "[green]=[reset]",
+			SaucerHead:    "[green]>[reset]",
+			SaucerPadding: " ",
+			BarStart:      "[",
+			BarEnd:        "]",
+		}))
 }
