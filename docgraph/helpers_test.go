@@ -101,6 +101,10 @@ type getAsset struct {
 	ContentValue eos.Asset       `json:"contentValue"`
 }
 
+type empty struct {
+	Test string `json:"test"`
+}
+
 // GetAssetTest creates a document with a single random value
 func GetAssetTest(ctx context.Context, api *eos.API, contract eos.AccountName, d docgraph.Document,
 	groupLabel, contentLabel string, contentValue eos.Asset) (string, error) {
@@ -137,6 +141,20 @@ func GetGroupTest(ctx context.Context, api *eos.API, contract eos.AccountName, d
 		ActionData: eos.NewActionData(getAsset{
 			Hash:       d.Hash,
 			GroupLabel: groupLabel,
+		}),
+	}}
+	return eostest.ExecTrx(ctx, api, actions)
+}
+
+func ContentError(ctx context.Context, api *eos.API, contract eos.AccountName) (string, error) {
+	actions := []*eos.Action{{
+		Account: contract,
+		Name:    eos.ActN("testcntnterr"),
+		Authorization: []eos.PermissionLevel{
+			{Actor: contract, Permission: eos.PN("active")},
+		},
+		ActionData: eos.NewActionData(empty{
+			Test: "",
 		}),
 	}}
 	return eostest.ExecTrx(ctx, api, actions)
