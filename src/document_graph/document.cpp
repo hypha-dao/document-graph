@@ -232,6 +232,10 @@ namespace hypha
       for (size_t i = 0; i < deltasGroups.size(); ++i) {
         
         auto label = ContentWrapper::getGroupLabel(deltasGroups[i]);
+        if (label != "details") {
+            // TODO: fix hack: this is to only update the details content group for now
+            continue;
+        }
         
         //If there is no group label just append it to the original doc
         if (label.empty()) {
@@ -256,6 +260,10 @@ namespace hypha
 
           //It doesn't matter if it replaces content_group_label as they should be equal
           for (auto& deltaContent : deltasGroups[i]) {
+            if (deltaContent.label == "title") {
+                // TODO: fix hack: we need to separate 'ballot title' from the assignment/document title
+                continue;
+            }
             if (std::holds_alternative<std::monostate>(deltaContent.value)) {
               originalWrapper.removeContent(oriGroupIdx, deltaContent.label);
             }
