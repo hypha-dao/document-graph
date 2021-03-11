@@ -11,3 +11,5 @@ require (
 	gotest.tools v2.2.0+incompatible
 	gotest.tools/v3 v3.0.3
 )
+
+replace github.com/digital-scarcity/eos-go-test => ../../../../digital-scarcity/eos-go-test

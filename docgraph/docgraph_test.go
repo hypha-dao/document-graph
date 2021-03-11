@@ -20,21 +20,12 @@ var chainResponsePause time.Duration
 func setupTestCase(t *testing.T) func(t *testing.T) {
 	t.Log("Bootstrapping testing environment ...")
 
-	_, err := exec.Command("sh", "-c", "pkill -SIGINT nodeos").Output()
-	if err == nil {
-		pause(t, time.Second, "Killing nodeos ...", "")
-	}
-
-	t.Log("Starting nodeos from 'nodeos.sh' script ...")
-	cmd := exec.Command("./nodeos.sh")
-	cmd.Stdout = os.Stdout
-	err = cmd.Start()
+	cmd, err = eostest.RestartNodeos(true)
 	assert.NilError(t, err)
+
 	chainResponsePause = time.Second
 
 	t.Log("nodeos PID: ", cmd.Process.Pid)
-
-	pause(t, 500*time.Millisecond, "", "")
 
 	return func(t *testing.T) {
 		folderName := "test_results"

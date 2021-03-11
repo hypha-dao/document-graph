@@ -232,14 +232,13 @@ func GetAllDocuments(ctx context.Context, api *eos.API, contract eos.AccountName
 	return allDocuments, nil
 }
 
-// DefaultProgressBar ...
-func DefaultProgressBar(desc string, counter int) *progressbar.ProgressBar {
-	return progressbar.NewOptions(-1,
+func DefaultProgressBar(prefix string, counter int) *progressbar.ProgressBar {
+	return progressbar.NewOptions(counter,
 		progressbar.OptionSetWriter(ansi.NewAnsiStdout()),
 		progressbar.OptionEnableColorCodes(true),
 		progressbar.OptionSetWidth(90),
 		// progressbar.OptionShowIts(),
-		progressbar.OptionSetDescription("[cyan]"+fmt.Sprintf("%20v", desc)),
+		progressbar.OptionSetDescription("[cyan]"+fmt.Sprintf("%20v", prefix)),
 		progressbar.OptionSetTheme(progressbar.Theme{
 			Saucer:        "[green]=[reset]",
 			SaucerHead:    "[green]>[reset]",
