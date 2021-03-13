@@ -212,6 +212,63 @@ namespace hypha
         return rollup(contentGroup);
     }
 
+    /** Example
+    * Original Doc {
+    *   content_groups: [
+    *     [
+    *       { "label": "content_group_label", "value": "test" },
+    *       { "label": "epsilon", "value": 22 }
+    *       { "label": "other", "value": "ABCD"} 
+    *     ],
+    *     [
+    *       { "label": "content_group_label", "value": "system" },
+    *       { "label": "alpha", "value": "lorem" }
+    *       { "label": "date", "value": "2019-08-10"}
+    *     ],
+    *     [
+    *       { "label": "content_group_label", "value": "common" },
+    *       { "label": "beta", "value": 12345 }
+    *       { "label": "gamma", "value": "#$#$"}
+    *     ], 
+    *   ]
+    * }
+    * 
+    * Delta Doc {
+    *   content_groups: [
+    *     [
+    *       { "label": "content_group_label", "value": "test" },
+    *       { "label": "epsilon", "value": 10 }
+    *       { "label": "other", "value": ""} #Monostate values will delete the item
+    *     ], 
+    *     [
+    *       { "label": "content_group_label", "value": "system" },
+    *       { "label": "alpha", "value": "ipsu" }
+    *       { "label": "date", "value": "2020-08-10"}
+    *       { "label": "skip_from_merge", "value": "" } #This tag will skip this group from the merge (keep original)
+    *     ], 
+    *     [
+    *       { "label": "content_group_label", "value": "common" },
+    *       { "label": "beta", "value": 0 }
+    *       { "label": "gamma", "value": "....."}
+    *       { "label": "delete_group", "value": "" } #This tag will delete group
+    *     ], 
+    *   ]
+    * }
+    * 
+    * Merged Doc {
+    *   content_groups: [
+    *     [
+    *       { "label": "content_group_label", "value": "test" },
+    *       { "label": "epsilon", "value": 10 }
+    *     ], 
+    *     [
+    *       { "label": "content_group_label", "value": "system" },
+    *       { "label": "alpha", "value": "lorem" }
+    *       { "label": "date", "value": "2019-08-10"}
+    *     ],
+    *   ]
+    * }
+    */
     Document Document::merge(Document original, Document &deltas)
     {
       const auto& deltasGroups = deltas.getContentGroups();
@@ -232,11 +289,7 @@ namespace hypha
       for (size_t i = 0; i < deltasGroups.size(); ++i) {
         
         auto label = ContentWrapper::getGroupLabel(deltasGroups[i]);
-        if (label != "details") {
-            // TODO: fix hack: this is to only update the details content group for now
-            continue;
-        }
-        
+                
         //If there is no group label just append it to the original doc
         if (label.empty()) {
           originalGroups.push_back(deltasGroups[i]);
@@ -247,6 +300,12 @@ namespace hypha
         if (auto [idx, c] = deltasWrapper.get(i, "delete_group"); 
             c) {
           originalWrapper.removeGroup(string(label));
+          continue;
+        }
+
+        //Check if we need to skip this group from merge
+        if (auto [_, c] = deltasWrapper.get(i, "skip_from_merge"); 
+            c) {
           continue;
         }
         
@@ -260,10 +319,12 @@ namespace hypha
 
           //It doesn't matter if it replaces content_group_label as they should be equal
           for (auto& deltaContent : deltasGroups[i]) {
-            if (deltaContent.label == "title") {
-                // TODO: fix hack: we need to separate 'ballot title' from the assignment/document title
-                continue;
-            }
+            // Proposed fix is to use ballot_title & ballot_description as
+            // a separated item
+            // if (deltaContent.label == "title") {
+            //     // TODO: fix hack: we need to separate 'ballot title' from the assignment/document title
+            //     continue;
+            // }
             if (std::holds_alternative<std::monostate>(deltaContent.value)) {
               originalWrapper.removeContent(oriGroupIdx, deltaContent.label);
             }
