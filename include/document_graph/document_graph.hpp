@@ -38,6 +38,8 @@ namespace hypha
                                 const eosio::checksum256 &doc_hash,
                                 ContentGroups content_groups);
 
+        bool hasEdges(const eosio::checksum256 &node);
+        
         void replaceNode(const eosio::checksum256 &oldNode, const eosio::checksum256 &newNode);
         void eraseDocument(const eosio::checksum256 &document_hash);
         void eraseDocument(const eosio::checksum256 &document_hash, const bool includeEdges);
