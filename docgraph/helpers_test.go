@@ -11,8 +11,6 @@ import (
 	eostest "github.com/digital-scarcity/eos-go-test"
 	eos "github.com/eoscanada/eos-go"
 	"github.com/hypha-dao/document-graph/docgraph"
-	"github.com/k0kubun/go-ansi"
-	"github.com/schollz/progressbar/v3"
 	"gotest.tools/assert"
 )
 
@@ -56,7 +54,7 @@ func GetOrNewNew(ctx context.Context, api *eos.API, contract, creator eos.Accoun
 			ContentGroups: d.ContentGroups,
 		}),
 	}}
-	_, err := eostest.ExecTrx(ctx, api, actions)
+	_, err := eostest.ExecWithRetry(ctx, api, actions)
 	if err != nil {
 		return docgraph.Document{}, fmt.Errorf("execute transaction getornewnew: %v", err)
 	}
@@ -82,7 +80,7 @@ func GetOrNewGet(ctx context.Context, api *eos.API, contract, creator eos.Accoun
 			ContentGroups: d.ContentGroups,
 		}),
 	}}
-	_, err := eostest.ExecTrx(ctx, api, actions)
+	_, err := eostest.ExecWithRetry(ctx, api, actions)
 	if err != nil {
 		return docgraph.Document{}, fmt.Errorf("execute transaction getornewnew: %v", err)
 	}
@@ -118,7 +116,7 @@ func GetAssetTest(ctx context.Context, api *eos.API, contract eos.AccountName, d
 			ContentValue: contentValue,
 		}),
 	}}
-	return eostest.ExecTrx(ctx, api, actions)
+	return eostest.ExecWithRetry(ctx, api, actions)
 }
 
 type getGroup struct {
@@ -139,7 +137,7 @@ func GetGroupTest(ctx context.Context, api *eos.API, contract eos.AccountName, d
 			GroupLabel: groupLabel,
 		}),
 	}}
-	return eostest.ExecTrx(ctx, api, actions)
+	return eostest.ExecWithRetry(ctx, api, actions)
 }
 
 func CreateRoot(ctx context.Context, api *eos.API, contract, creator eos.AccountName) (docgraph.Document, error) {
@@ -153,7 +151,7 @@ func CreateRoot(ctx context.Context, api *eos.API, contract, creator eos.Account
 			Notes: "notes",
 		}),
 	}}
-	_, err := eostest.ExecTrx(ctx, api, actions)
+	_, err := eostest.ExecWithRetry(ctx, api, actions)
 	if err != nil {
 		return docgraph.Document{}, fmt.Errorf("execute create root: %v", err)
 	}
@@ -193,7 +191,7 @@ func CreateRandomDocument(ctx context.Context, api *eos.API, contract, creator e
 			ContentGroups: cgs,
 		}),
 	}}
-	_, err := eostest.ExecTrx(ctx, api, actions)
+	_, err := eostest.ExecWithRetry(ctx, api, actions)
 	if err != nil {
 		return docgraph.Document{}, fmt.Errorf("execute transaction random document: %v", err)
 	}
@@ -280,5 +278,5 @@ func EdgeIdxTest(ctx context.Context, api *eos.API,
 			Strict:   true,
 		}),
 	}}
-	return eostest.ExecTrx(ctx, api, actions)
+	return eostest.ExecWithRetry(ctx, api, actions)
 }

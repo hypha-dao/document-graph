@@ -61,7 +61,7 @@ func CreateEdge(ctx context.Context, api *eos.API,
 			ActionData: eos.NewActionDataFromHexData([]byte(actionBinary)),
 		}}
 
-	return eostest.ExecTrx(ctx, api, actions)
+	return eostest.ExecWithRetry(ctx, api, actions)
 }
 
 // RemoveEdge ...
@@ -81,7 +81,7 @@ func RemoveEdge(ctx context.Context, api *eos.API,
 			EdgeName: edgeName,
 		}),
 	}}
-	return eostest.ExecTrx(ctx, api, actions)
+	return eostest.ExecWithRetry(ctx, api, actions)
 }
 
 // // GetAllEdges retrieves all edges from table
@@ -191,7 +191,7 @@ func EdgeExists(ctx context.Context, api *eos.API, contract eos.AccountName,
 // 			Strict:   true,
 // 		}),
 // 	}}
-// 	return eostest.ExecTrx(ctx, api, actions)
+// 	return eostest.ExecWithRetry(ctx, api, actions)
 // }
 
 // RemoveEdgesFromAndTo ...
@@ -211,5 +211,5 @@ func EdgeExists(ctx context.Context, api *eos.API, contract eos.AccountName,
 // 			Strict:   true,
 // 		}),
 // 	}}
-// 	return eostest.ExecTrx(ctx, api, actions)
+// 	return eostest.ExecWithRetry(ctx, api, actions)
 // }

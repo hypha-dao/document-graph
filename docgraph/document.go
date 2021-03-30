@@ -71,7 +71,7 @@ func newDocumentTrx(ctx context.Context, api *eos.API,
 			ActionData: eos.NewActionDataFromHexData([]byte(actionBinary)),
 		}}
 
-	_, err = eostest.ExecTrx(ctx, api, actions)
+	_, err = eostest.ExecWithRetry(ctx, api, actions)
 	if err != nil {
 		return Document{}, fmt.Errorf("execute transaction %v: %v", fileName, err)
 	}
@@ -250,5 +250,5 @@ func EraseDocument(ctx context.Context, api *eos.API,
 			Hash: hash,
 		}),
 	}}
-	return eostest.ExecTrx(ctx, api, actions)
+	return eostest.ExecWithRetry(ctx, api, actions)
 }
