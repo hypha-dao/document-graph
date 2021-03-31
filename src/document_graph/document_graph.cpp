@@ -110,17 +110,13 @@ namespace hypha
         Edge::edge_table e_t(m_contract, m_contract.value);
         
         auto from_node_index = e_t.get_index<eosio::name("fromnode")>();
-        auto from_itr = from_node_index.find(node);
-
-        while (from_itr != from_node_index.end() && from_itr->to_node == node)
+        if (from_node_index.find(node) != from_node_index.end()) 
         {
             return true;
         }
 
         auto to_node_index = e_t.get_index<eosio::name("tonode")>();
-        auto to_itr = to_node_index.find(node);
-
-        while (to_itr != to_node_index.end() && to_itr->to_node == node)
+        if (to_node_index.find(node) != to_node_index.end())
         {
             return true;
         }
