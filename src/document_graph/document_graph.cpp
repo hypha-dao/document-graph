@@ -91,7 +91,7 @@ namespace hypha
         auto from_node_index = e_t.get_index<eosio::name("fromnode")>();
         auto from_itr = from_node_index.find(node);
 
-        while (from_itr != from_node_index.end() && from_itr->to_node == node)
+        while (from_itr != from_node_index.end() && from_itr->from_node == node)
         {
             from_itr = from_node_index.erase(from_itr);
         }
