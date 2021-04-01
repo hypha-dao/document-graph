@@ -91,7 +91,7 @@ namespace hypha
         auto from_node_index = e_t.get_index<eosio::name("fromnode")>();
         auto from_itr = from_node_index.find(node);
 
-        while (from_itr != from_node_index.end() && from_itr->to_node == node)
+        while (from_itr != from_node_index.end() && from_itr->from_node == node)
         {
             from_itr = from_node_index.erase(from_itr);
         }
@@ -103,6 +103,25 @@ namespace hypha
         {
             to_itr = to_node_index.erase(to_itr);
         }
+    }
+
+    bool DocumentGraph::hasEdges(const eosio::checksum256 &node)
+    {
+        Edge::edge_table e_t(m_contract, m_contract.value);
+        
+        auto from_node_index = e_t.get_index<eosio::name("fromnode")>();
+        if (from_node_index.find(node) != from_node_index.end()) 
+        {
+            return true;
+        }
+
+        auto to_node_index = e_t.get_index<eosio::name("tonode")>();
+        if (to_node_index.find(node) != to_node_index.end())
+        {
+            return true;
+        }
+
+        return false;
     }
 
     void DocumentGraph::replaceNode(const eosio::checksum256 &oldNode, const eosio::checksum256 &newNode)
