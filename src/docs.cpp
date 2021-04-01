@@ -68,6 +68,19 @@ namespace hypha
       auto [idx, contentGroup] = document.getContentWrapper().getGroup(groupLabel);
       check(idx > -1, "group was not found");
    }
+   
+   void docs::testcntnterr(string test) 
+   {
+     ContentGroups cgs{
+       ContentGroup{
+         Content{CONTENT_GROUP_LABEL, "test"},
+         Content{"test_label", string("hello world")}
+       }
+     };
+     ContentWrapper cw(cgs);
+
+     cw.getOrFail("test", "test_label")->getAs<int64_t>();
+   }
 
    void docs::createroot(const std::string &notes)
    {

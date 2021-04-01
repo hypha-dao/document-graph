@@ -130,3 +130,17 @@ func TestManyDocuments(t *testing.T) {
 	assert.NilError(t, err)
 	assert.Assert(t, len(docs) >= 999)
 }
+
+func TestWrongContentError(t *testing.T) {
+	teardownTestCase := setupTestCase(t)
+	defer teardownTestCase(t)
+
+	env = SetupEnvironment(t)
+	t.Log("\nEnvironment Setup complete\n")
+
+	t.Log("\nTesting Worng Content Error:")
+
+	_, err := ContentError(env.ctx, &env.api, env.Docs)
+
+	assert.ErrorContains(t, err, "Content value for label [test_label] is not of expected type")
+}
