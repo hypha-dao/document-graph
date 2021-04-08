@@ -2,11 +2,10 @@ package docgraph_test
 
 import (
 	"fmt"
-	"os"
-	"os/exec"
 	"testing"
 	"time"
 
+	eostest "github.com/digital-scarcity/eos-go-test"
 	eos "github.com/eoscanada/eos-go"
 	"github.com/hypha-dao/document-graph/docgraph"
 	"gotest.tools/v3/assert"
@@ -20,7 +19,7 @@ var chainResponsePause time.Duration
 func setupTestCase(t *testing.T) func(t *testing.T) {
 	t.Log("Bootstrapping testing environment ...")
 
-	cmd, err = eostest.RestartNodeos(true)
+	cmd, err := eostest.RestartNodeos(true)
 	assert.NilError(t, err)
 
 	chainResponsePause = time.Second
