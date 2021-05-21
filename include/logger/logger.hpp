@@ -56,7 +56,6 @@ if (!(condition)) {\
   eosio::check(false, Logger::instance().generateMessage());\
 }\
 }
-#define GET_LOG()
 #else
 #define TRACE_FUNCTION()
 #define TRACE_ERROR(message)
