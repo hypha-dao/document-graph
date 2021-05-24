@@ -36,6 +36,7 @@ namespace hypha
 
     Document::Document(eosio::name contract, const eosio::checksum256 &_hash) : contract{contract}
     {
+        TRACE_FUNCTION()
         document_table d_t(contract, contract.value);
         auto hash_index = d_t.get_index<eosio::name("idhash")>();
         auto h_itr = hash_index.find(_hash);
@@ -67,6 +68,7 @@ namespace hypha
 
     void Document::emplace()
     {
+        TRACE_FUNCTION()
         hashContents();
 
         document_table d_t(getContract(), getContract().value);
@@ -273,6 +275,7 @@ namespace hypha
     */
     Document Document::merge(Document original, Document &deltas)
     {
+      TRACE_FUNCTION()
       const auto& deltasGroups = deltas.getContentGroups();
       auto& originalGroups = original.getContentGroups();
       auto deltasWrapper = deltas.getContentWrapper();

@@ -1,6 +1,7 @@
 #include <document_graph/document.hpp>
 #include <document_graph/edge.hpp>
 #include <document_graph/util.hpp>
+#include <logger/logger.hpp>
 
 namespace hypha
 {
@@ -12,6 +13,7 @@ namespace hypha
                const eosio::name &edge_name)
         : contract{contract}, creator{creator}, from_node{from_node}, to_node{to_node}, edge_name{edge_name}
     {
+        TRACE_FUNCTION()
         emplace();
     }
 
@@ -66,7 +68,7 @@ namespace hypha
         edge_table e_t(_contract, _contract.value);
         auto itr = e_t.find(concatHash(_from_node, _to_node, _edge_name));
 
-        eosio::check(itr != e_t.end(), "edge does not exist: from " + readableHash(_from_node) + " to " + readableHash(_to_node) + " with edge name of " + _edge_name.to_string());
+        EOS_CHECK(itr != e_t.end(), "edge does not exist: from " + readableHash(_from_node) + " to " + readableHash(_to_node) + " with edge name of " + _edge_name.to_string());
 
         return *itr;
     }
@@ -81,7 +83,7 @@ namespace hypha
         auto index = concatHash(_from_node, _edge_name);
         auto itr = fromEdgeIndex.find(index);
 
-        eosio::check(itr != fromEdgeIndex.end() && itr->from_node_edge_name_index == index, "edge does not exist: from " + readableHash(_from_node) + " with edge name of " + _edge_name.to_string());
+        EOS_CHECK(itr != fromEdgeIndex.end() && itr->from_node_edge_name_index == index, "edge does not exist: from " + readableHash(_from_node) + " with edge name of " + _edge_name.to_string());
 
         return *itr;
     }
@@ -137,7 +139,7 @@ namespace hypha
         edge_table e_t(getContract(), getContract().value);
         auto itr = e_t.find(id);
 
-        eosio::check(itr != e_t.end(), "edge does not exist: from " + readableHash(from_node) + " to " + readableHash(to_node) + " with edge name of " + edge_name.to_string());
+        EOS_CHECK(itr != e_t.end(), "edge does not exist: from " + readableHash(from_node) + " to " + readableHash(to_node) + " with edge name of " + edge_name.to_string());
         e_t.erase(itr);
     }
 

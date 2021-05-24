@@ -1,6 +1,7 @@
 #include <document_graph/document_graph.hpp>
 #include <document_graph/document.hpp>
 #include <document_graph/util.hpp>
+#include <logger/logger.hpp>
 
 namespace hypha
 {
@@ -26,7 +27,7 @@ namespace hypha
     std::vector<Edge> DocumentGraph::getEdgesOrFail(const eosio::checksum256 &fromNode, const eosio::checksum256 &toNode)
     {
         std::vector<Edge> edges = getEdges(fromNode, toNode);
-        eosio::check(edges.size() > 0, "no edges exist: from " + readableHash(fromNode) + " to " + readableHash(toNode));
+        EOS_CHECK(edges.size() > 0, "no edges exist: from " + readableHash(fromNode) + " to " + readableHash(toNode));
         return edges;
     }
 
@@ -52,7 +53,7 @@ namespace hypha
     std::vector<Edge> DocumentGraph::getEdgesFromOrFail(const eosio::checksum256 &fromNode, const eosio::name &edgeName)
     {
         std::vector<Edge> edges = getEdgesFrom(fromNode, edgeName);
-        eosio::check(edges.size() > 0, "no edges exist: from " + readableHash(fromNode) + " with name " + edgeName.to_string());
+        EOS_CHECK(edges.size() > 0, "no edges exist: from " + readableHash(fromNode) + " with name " + edgeName.to_string());
         return edges;
     }
 
@@ -78,7 +79,7 @@ namespace hypha
     std::vector<Edge> DocumentGraph::getEdgesToOrFail(const eosio::checksum256 &toNode, const eosio::name &edgeName)
     {
         std::vector<Edge> edges = getEdgesTo(toNode, edgeName);
-        eosio::check(edges.size() > 0, "no edges exist: to " + readableHash(toNode) + " with name " + edgeName.to_string());
+        EOS_CHECK(edges.size() > 0, "no edges exist: to " + readableHash(toNode) + " with name " + edgeName.to_string());
         return edges;
     }
 
@@ -157,6 +158,7 @@ namespace hypha
                                            const eosio::checksum256 &documentHash,
                                            ContentGroups contentGroups)
     {
+        TRACE_FUNCTION()
         Document currentDocument(m_contract, documentHash);
         Document newDocument(m_contract, updater, contentGroups);
 
@@ -172,7 +174,7 @@ namespace hypha
         auto hash_index = d_t.get_index<eosio::name("idhash")>();
         auto h_itr = hash_index.find(documentHash);
 
-        eosio::check(h_itr != hash_index.end(), "Cannot erase document; does not exist: " + readableHash(documentHash));
+        EOS_CHECK(h_itr != hash_index.end(), "Cannot erase document; does not exist: " + readableHash(documentHash));
 
         if (includeEdges)
         {
@@ -184,6 +186,7 @@ namespace hypha
 
     void DocumentGraph::eraseDocument(const eosio::checksum256 &documentHash)
     {
+        TRACE_FUNCTION()
         return eraseDocument(documentHash, true);
     }
 } // namespace hypha

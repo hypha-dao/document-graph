@@ -3,7 +3,6 @@
 #include <string>
 #include <eosio/crypto.hpp>
 #include <eosio/name.hpp>
-#include "content_wrapper.hpp"
 
 namespace hypha
 {
@@ -56,7 +55,7 @@ namespace hypha
         else if constexpr (std::is_same_v<T, eosio::checksum256>) {
           return readableHash(arg);
         }
-        else if constexpr (std::is_same_v<T, ContentGroup>) {
+        else if constexpr (std::is_same_v<T, class ContentGroup>) {
 
           std::string s;
 
