@@ -27,8 +27,18 @@ namespace hypha
                      const eosio::name &_edge_name)
     {
         edge_table e_t(_contract, _contract.value);
+
+        const int64_t edgeID = concatHash(_from_node, _to_node, _edge_name);
+
+        EOS_CHECK(
+          e_t.find(edgeID) == e_t.end(), 
+          util::to_str("Edge from: ", _from_node, 
+                       " to: ", _to_node, 
+                       " with name: ", _edge_name, " already exists")
+        );
+
         e_t.emplace(_contract, [&](auto &e) {
-            e.id = concatHash(_from_node, _to_node, _edge_name);
+            e.id = edgeID;
             e.from_node_edge_name_index = concatHash(_from_node, _edge_name);
             e.from_node_to_node_index = concatHash(_from_node, _to_node);
             e.to_node_edge_name_index = concatHash(_to_node, _edge_name);
@@ -98,7 +108,7 @@ namespace hypha
         auto index = concatHash(_to_node, _edge_name);
         auto itr = toEdgeIndex.find(index);
 
-        eosio::check(itr != toEdgeIndex.end() && itr->to_node_edge_name_index == index, "edge does not exist: to " + readableHash(_to_node) + " with edge name of " + _edge_name.to_string());
+        EOS_CHECK(itr != toEdgeIndex.end() && itr->to_node_edge_name_index == index, "edge does not exist: to " + readableHash(_to_node) + " with edge name of " + _edge_name.to_string());
 
         return *itr;
     }
@@ -138,11 +148,20 @@ namespace hypha
     {
         // update indexes prior to save
         id = concatHash(from_node, to_node, edge_name);
+
         from_node_edge_name_index = concatHash(from_node, edge_name);
         from_node_to_node_index = concatHash(from_node, to_node);
         to_node_edge_name_index = concatHash(to_node, edge_name);
 
         edge_table e_t(getContract(), getContract().value);
+
+        EOS_CHECK(
+          e_t.find(id) == e_t.end(), 
+          util::to_str("Edge from: ", from_node, 
+                       " to: ", to_node, 
+                       " with name: ", edge_name, " already exists")
+        );
+
         e_t.emplace(getContract(), [&](auto &e) {
             e = *this;
             e.created_date = eosio::current_time_point();
