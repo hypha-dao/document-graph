@@ -116,9 +116,9 @@ bool ContentWrapper::exists(const std::string &groupLabel, const std::string &co
     auto [idx, item] = get(groupLabel, contentLabel);
     if (idx == -1)
     {
-        return true;
+        return false;
     }
-    return false;
+    return true;
 }
 
 std::pair<int64_t, Content *> ContentWrapper::get(size_t groupIndex, const std::string &contentLabel)
