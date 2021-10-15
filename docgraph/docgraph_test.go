@@ -2,11 +2,10 @@ package docgraph_test
 
 import (
 	"fmt"
-	"os"
-	"os/exec"
 	"testing"
 	"time"
 
+	eostest "github.com/digital-scarcity/eos-go-test"
 	eos "github.com/eoscanada/eos-go"
 	"github.com/hypha-dao/document-graph/docgraph"
 	"gotest.tools/v3/assert"
@@ -20,21 +19,12 @@ var chainResponsePause time.Duration
 func setupTestCase(t *testing.T) func(t *testing.T) {
 	t.Log("Bootstrapping testing environment ...")
 
-	_, err := exec.Command("sh", "-c", "pkill -SIGINT nodeos").Output()
-	if err == nil {
-		pause(t, time.Second, "Killing nodeos ...", "")
-	}
-
-	t.Log("Starting nodeos from 'nodeos.sh' script ...")
-	cmd := exec.Command("./nodeos.sh")
-	cmd.Stdout = os.Stdout
-	err = cmd.Start()
+	cmd, err := eostest.RestartNodeos(true)
 	assert.NilError(t, err)
+
 	chainResponsePause = time.Second
 
 	t.Log("nodeos PID: ", cmd.Process.Pid)
-
-	pause(t, 500*time.Millisecond, "", "")
 
 	return func(t *testing.T) {
 		folderName := "test_results"
@@ -138,4 +128,18 @@ func TestManyDocuments(t *testing.T) {
 
 	assert.NilError(t, err)
 	assert.Assert(t, len(docs) >= 999)
+}
+
+func TestWrongContentError(t *testing.T) {
+	teardownTestCase := setupTestCase(t)
+	defer teardownTestCase(t)
+
+	env = SetupEnvironment(t)
+	t.Log("\nEnvironment Setup complete\n")
+
+	t.Log("\nTesting Worng Content Error:")
+
+	_, err := ContentError(env.ctx, &env.api, env.Docs)
+
+	assert.ErrorContains(t, err, "Content value for label [test_label] is not of expected type")
 }

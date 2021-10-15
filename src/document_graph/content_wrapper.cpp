@@ -4,6 +4,7 @@
 
 #include <document_graph/content_wrapper.hpp>
 #include <document_graph/content.hpp>
+#include <logger/logger.hpp>
 
 namespace hypha
 {
@@ -20,7 +21,7 @@ std::pair<int64_t, ContentGroup *> ContentWrapper::getGroup(const std::string &l
         {
             if (content.label == CONTENT_GROUP_LABEL)
             {
-                eosio::check(std::holds_alternative<std::string>(content.value), "fatal error: " + CONTENT_GROUP_LABEL + " must be a string");
+                EOS_CHECK(std::holds_alternative<std::string>(content.value), "fatal error: " + CONTENT_GROUP_LABEL + " must be a string");
                 if (std::get<std::string>(content.value) == label)
                 {
                     return {(int64_t)i, &getContentGroups()[i]};
@@ -33,6 +34,7 @@ std::pair<int64_t, ContentGroup *> ContentWrapper::getGroup(const std::string &l
 
 std::pair<int64_t, ContentGroup*> ContentWrapper::getGroupOrCreate(const string& label) 
 {
+  TRACE_FUNCTION()
   auto [idx, contentGroup] = getGroup(label);
 
   if (!contentGroup) {
@@ -50,21 +52,24 @@ std::pair<int64_t, ContentGroup*> ContentWrapper::getGroupOrCreate(const string&
 
 ContentGroup *ContentWrapper::getGroupOrFail(const std::string &label, const std::string &error)
 {
+    TRACE_FUNCTION()
     auto [idx, contentGroup] = getGroup(label);
     if (idx == -1)
     {
-        eosio::check(false, error);
+        EOS_CHECK(false, error);
     }
     return contentGroup;
 }
 
 ContentGroup *ContentWrapper::getGroupOrFail(const std::string &groupLabel)
 {
+    TRACE_FUNCTION()
     return getGroupOrFail(groupLabel, "group: " + groupLabel + " is required but not found");
 }
 
 std::pair<int64_t, Content *> ContentWrapper::get(const std::string &groupLabel, const std::string &contentLabel)
 {
+    TRACE_FUNCTION()
     auto [idx, contentGroup] = getGroup(groupLabel);
     
     return get(static_cast<size_t>(idx), contentLabel);
@@ -72,29 +77,31 @@ std::pair<int64_t, Content *> ContentWrapper::get(const std::string &groupLabel,
 
 Content *ContentWrapper::getOrFail(const std::string &groupLabel, const std::string &contentLabel, const std::string &error)
 {
+    TRACE_FUNCTION()
     auto [idx, item] = get(groupLabel, contentLabel);
     if (idx == -1)
     {
-        eosio::check(false, error);
+        EOS_CHECK(false, error);
     }
     return item;
 }
 
 Content *ContentWrapper::getOrFail(const std::string &groupLabel, const std::string &contentLabel)
 {
+    TRACE_FUNCTION()
     return getOrFail(groupLabel, contentLabel, "group: " + groupLabel + "; content: " + contentLabel + 
         " is required but not found");
 }
 
 std::pair<int64_t, Content*> ContentWrapper::getOrFail(size_t groupIndex, const std::string &contentLabel, string_view error)
 {
-  eosio::check(groupIndex < m_contentGroups.size(), 
+  EOS_CHECK(groupIndex < m_contentGroups.size(), 
                 "getOrFail(): Can't access invalid group index [Out Of Rrange]: " +
                 std::to_string(groupIndex));
 
   auto [idx, item] = get(groupIndex, contentLabel);
 
-  eosio::check(item, error.empty() ? "group index: " + 
+  EOS_CHECK(item, error.empty() ? "group index: " + 
                                       std::to_string(groupIndex) + 
                                       " content: " + 
                                       contentLabel + 
@@ -109,9 +116,9 @@ bool ContentWrapper::exists(const std::string &groupLabel, const std::string &co
     auto [idx, item] = get(groupLabel, contentLabel);
     if (idx == -1)
     {
-        return true;
+        return false;
     }
-    return false;
+    return true;
 }
 
 std::pair<int64_t, Content *> ContentWrapper::get(size_t groupIndex, const std::string &contentLabel)
@@ -134,15 +141,16 @@ std::pair<int64_t, Content *> ContentWrapper::get(size_t groupIndex, const std::
 
 void ContentWrapper::removeGroup(const std::string &groupLabel)
 {
+  TRACE_FUNCTION()
   auto [idx, grp] = getGroup(groupLabel);
-  eosio::check(idx != -1, 
+  EOS_CHECK(idx != -1, 
         "Can't remove unexisting group: " + groupLabel);
   removeGroup(static_cast<size_t>(idx));
 }
 
 void ContentWrapper::removeGroup(size_t groupIndex)
 {
-  eosio::check(groupIndex < m_contentGroups.size(), 
+  EOS_CHECK(groupIndex < m_contentGroups.size(), 
         "Can't remove invalid group index: " + std::to_string(groupIndex));
   
   m_contentGroups.erase(m_contentGroups.begin() + groupIndex);
@@ -150,16 +158,18 @@ void ContentWrapper::removeGroup(size_t groupIndex)
 
 void ContentWrapper::removeContent(const std::string& groupLabel, const Content& content) 
 {
+  TRACE_FUNCTION()
+
   auto [gidx, contentGroup] = getGroup(groupLabel);
 
-  eosio::check(gidx != -1, 
+  EOS_CHECK(gidx != -1, 
                "Can't remove content from unexisting group: " + groupLabel);
 
   //Search for equal content
   auto contentIt = std::find(contentGroup->begin(), 
                              contentGroup->end(), content);
 
-  eosio::check(contentIt != contentGroup->end(), 
+  EOS_CHECK(contentIt != contentGroup->end(), 
                "Can't remove unexisting content [" + content.label + "]");
   
   removeContent(static_cast<size_t>(gidx), 
@@ -168,9 +178,11 @@ void ContentWrapper::removeContent(const std::string& groupLabel, const Content&
 
 void ContentWrapper::removeContent(const std::string &groupLabel, const std::string &contentLabel)
 {
+  TRACE_FUNCTION()
+
   auto [gidx, contentGroup] = getGroup(groupLabel);
 
-  eosio::check(gidx != -1, 
+  EOS_CHECK(gidx != -1, 
         "Can't remove content from unexisting group: " + groupLabel);
   
   removeContent(static_cast<size_t>(gidx), contentLabel);
@@ -178,9 +190,11 @@ void ContentWrapper::removeContent(const std::string &groupLabel, const std::str
 
 void ContentWrapper::removeContent(size_t groupIndex, const std::string &contentLabel)
 {
+  TRACE_FUNCTION()
+
   auto [cidx, content] = get(static_cast<size_t>(groupIndex), contentLabel);
 
-  eosio::check(cidx != -1, 
+  EOS_CHECK(cidx != -1, 
         "Can't remove unexisting content [" + contentLabel + "]");
 
   removeContent(groupIndex, cidx);
@@ -188,12 +202,12 @@ void ContentWrapper::removeContent(size_t groupIndex, const std::string &content
 
 void ContentWrapper::removeContent(size_t groupIndex, size_t contentIndex)
 {
-  eosio::check(groupIndex < m_contentGroups.size(), 
+  EOS_CHECK(groupIndex < m_contentGroups.size(), 
         "Can't remove content from invalid group index [Out Of Rrange]: " + std::to_string(groupIndex));
 
   auto& contentGroup = m_contentGroups[groupIndex];
 
-  eosio::check(contentIndex < contentGroup.size(), 
+  EOS_CHECK(contentIndex < contentGroup.size(), 
         "Can't remove invalid content index [Out Of Rrange]: " + std::to_string(contentIndex));
 
   contentGroup.erase(contentGroup.begin() + contentIndex);
@@ -202,7 +216,7 @@ void ContentWrapper::removeContent(size_t groupIndex, size_t contentIndex)
 
 void ContentWrapper::insertOrReplace(size_t groupIndex, const Content &newContent)
 {
-  eosio::check(groupIndex < m_contentGroups.size(), 
+  EOS_CHECK(groupIndex < m_contentGroups.size(), 
         "Can't access invalid group index [Out Of Rrange]: " + std::to_string(groupIndex));
   
   auto& contentGroup = m_contentGroups[groupIndex];
@@ -212,8 +226,10 @@ void ContentWrapper::insertOrReplace(size_t groupIndex, const Content &newConten
 
 string_view ContentWrapper::getGroupLabel(size_t groupIndex)
 {
-  eosio::check(groupIndex < m_contentGroups.size(), 
+  EOS_CHECK(groupIndex < m_contentGroups.size(), 
                 "Can't access invalid group index [Out Of Rrange]: " + std::to_string(groupIndex));
+
+  TRACE_FUNCTION()
 
   return getGroupLabel(m_contentGroups[groupIndex]);
 }
@@ -222,7 +238,7 @@ string_view ContentWrapper::getGroupLabel(const ContentGroup &contentGroup)
 {
   for (auto& content : contentGroup) {
     if (content.label == CONTENT_GROUP_LABEL) {
-      eosio::check(std::holds_alternative<std::string>(content.value), 
+      EOS_CHECK(std::holds_alternative<std::string>(content.value), 
                     "fatal error: " + CONTENT_GROUP_LABEL + " must be a string");
       return content.getAs<string>();
     }

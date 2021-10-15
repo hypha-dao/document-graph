@@ -4,6 +4,7 @@ import (
 	"log"
 	"testing"
 
+	eostest "github.com/digital-scarcity/eos-go-test"
 	eos "github.com/eoscanada/eos-go"
 	"github.com/hypha-dao/document-graph/docgraph"
 	"gotest.tools/v3/assert"
@@ -135,7 +136,7 @@ func TestRemoveEdges(t *testing.T) {
 	for i := 0; i < 5; i++ {
 		_, err = docgraph.CreateEdge(env.ctx, &env.api, env.Docs, env.Creators[1], docs[0].Hash, docs[i].Hash, "test")
 		assert.NilError(t, err)
-		pause(t, chainResponsePause, "Build block...", "")
+		eostest.Pause(chainResponsePause, "Build block...", "")
 	}
 
 	allEdges, err := docgraph.GetAllEdges(env.ctx, &env.api, env.Docs)

@@ -11,8 +11,6 @@ import (
 	eostest "github.com/digital-scarcity/eos-go-test"
 	eos "github.com/eoscanada/eos-go"
 	"github.com/hypha-dao/document-graph/docgraph"
-	"github.com/k0kubun/go-ansi"
-	"github.com/schollz/progressbar/v3"
 	"gotest.tools/assert"
 )
 
@@ -56,7 +54,7 @@ func GetOrNewNew(ctx context.Context, api *eos.API, contract, creator eos.Accoun
 			ContentGroups: d.ContentGroups,
 		}),
 	}}
-	_, err := eostest.ExecTrx(ctx, api, actions)
+	_, err := eostest.ExecWithRetry(ctx, api, actions)
 	if err != nil {
 		return docgraph.Document{}, fmt.Errorf("execute transaction getornewnew: %v", err)
 	}
@@ -82,7 +80,7 @@ func GetOrNewGet(ctx context.Context, api *eos.API, contract, creator eos.Accoun
 			ContentGroups: d.ContentGroups,
 		}),
 	}}
-	_, err := eostest.ExecTrx(ctx, api, actions)
+	_, err := eostest.ExecWithRetry(ctx, api, actions)
 	if err != nil {
 		return docgraph.Document{}, fmt.Errorf("execute transaction getornewnew: %v", err)
 	}
@@ -99,6 +97,10 @@ type getAsset struct {
 	GroupLabel   string          `json:"groupLabel"`
 	ContentLabel string          `json:"contentLabel"`
 	ContentValue eos.Asset       `json:"contentValue"`
+}
+
+type empty struct {
+	Test string `json:"test"`
 }
 
 // GetAssetTest creates a document with a single random value
@@ -118,7 +120,7 @@ func GetAssetTest(ctx context.Context, api *eos.API, contract eos.AccountName, d
 			ContentValue: contentValue,
 		}),
 	}}
-	return eostest.ExecTrx(ctx, api, actions)
+	return eostest.ExecWithRetry(ctx, api, actions)
 }
 
 type getGroup struct {
@@ -139,6 +141,20 @@ func GetGroupTest(ctx context.Context, api *eos.API, contract eos.AccountName, d
 			GroupLabel: groupLabel,
 		}),
 	}}
+	return eostest.ExecWithRetry(ctx, api, actions)
+}
+
+func ContentError(ctx context.Context, api *eos.API, contract eos.AccountName) (string, error) {
+	actions := []*eos.Action{{
+		Account: contract,
+		Name:    eos.ActN("testcntnterr"),
+		Authorization: []eos.PermissionLevel{
+			{Actor: contract, Permission: eos.PN("active")},
+		},
+		ActionData: eos.NewActionData(empty{
+			Test: "",
+		}),
+	}}
 	return eostest.ExecTrx(ctx, api, actions)
 }
 
@@ -153,7 +169,7 @@ func CreateRoot(ctx context.Context, api *eos.API, contract, creator eos.Account
 			Notes: "notes",
 		}),
 	}}
-	_, err := eostest.ExecTrx(ctx, api, actions)
+	_, err := eostest.ExecWithRetry(ctx, api, actions)
 	if err != nil {
 		return docgraph.Document{}, fmt.Errorf("execute create root: %v", err)
 	}
@@ -193,7 +209,7 @@ func CreateRandomDocument(ctx context.Context, api *eos.API, contract, creator e
 			ContentGroups: cgs,
 		}),
 	}}
-	_, err := eostest.ExecTrx(ctx, api, actions)
+	_, err := eostest.ExecWithRetry(ctx, api, actions)
 	if err != nil {
 		return docgraph.Document{}, fmt.Errorf("execute transaction random document: %v", err)
 	}
@@ -203,34 +219,6 @@ func CreateRandomDocument(ctx context.Context, api *eos.API, contract, creator e
 		return docgraph.Document{}, fmt.Errorf("get last document: %v", err)
 	}
 	return lastDoc, nil
-}
-
-func pause(t *testing.T, seconds time.Duration, headline, prefix string) {
-	if headline != "" {
-		t.Log(headline)
-	}
-
-	bar := progressbar.NewOptions(100,
-		progressbar.OptionSetWriter(ansi.NewAnsiStdout()),
-		progressbar.OptionEnableColorCodes(true),
-		progressbar.OptionSetWidth(90),
-		// progressbar.OptionShowIts(),
-		progressbar.OptionSetDescription("[cyan]"+fmt.Sprintf("%20v", prefix)),
-		progressbar.OptionSetTheme(progressbar.Theme{
-			Saucer:        "[green]=[reset]",
-			SaucerHead:    "[green]>[reset]",
-			SaucerPadding: " ",
-			BarStart:      "[",
-			BarEnd:        "]",
-		}))
-
-	chunk := seconds / 100
-	for i := 0; i < 100; i++ {
-		bar.Add(1)
-		time.Sleep(chunk)
-	}
-	fmt.Println()
-	fmt.Println()
 }
 
 func SaveGraph(ctx context.Context, api *eos.API, contract eos.AccountName, folderName string) error {
@@ -308,5 +296,5 @@ func EdgeIdxTest(ctx context.Context, api *eos.API,
 			Strict:   true,
 		}),
 	}}
-	return eostest.ExecTrx(ctx, api, actions)
+	return eostest.ExecWithRetry(ctx, api, actions)
 }

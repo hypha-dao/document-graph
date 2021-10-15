@@ -45,7 +45,7 @@ var FlexValueVariant = eos.NewVariantDefinition([]eos.VariantType{
 	{Name: "monostate", Type: int64(0)},
 	{Name: "name", Type: eos.Name("")},
 	{Name: "string", Type: ""},
-	{Name: "asset", Type: (*eos.Asset)(nil)}, // Syntax for pointer to a type, could be any struct
+	{Name: "asset", Type: eos.Asset{}}, //(*eos.Asset)(nil)}, // Syntax for pointer to a type, could be any struct
 	{Name: "time_point", Type: eos.TimePoint(0)},
 	{Name: "int64", Type: int64(0)},
 	{Name: "checksum256", Type: eos.Checksum256([]byte("0"))},
@@ -68,7 +68,7 @@ func (fv *FlexValue) String() string {
 		return string(v)
 	case int64:
 		return fmt.Sprint(v)
-	case *eos.Asset:
+	case eos.Asset:
 		return v.String()
 	case string:
 		return v
@@ -98,8 +98,8 @@ func (fv *FlexValue) TimePoint() (eos.TimePoint, error) {
 // Asset returns a string value of found content or it panics
 func (fv *FlexValue) Asset() (eos.Asset, error) {
 	switch v := fv.Impl.(type) {
-	case *eos.Asset:
-		return *v, nil
+	case eos.Asset:
+		return v, nil
 	default:
 		return eos.Asset{}, &InvalidTypeError{
 			Label:        fmt.Sprintf("received an unexpected type %T for variant %T", v, fv),

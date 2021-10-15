@@ -49,9 +49,9 @@ namespace hypha
                         const eosio::checksum256 &from_node,
                         const eosio::name &edge_name);
 
-        static std::vector<Edge> getAll(const eosio::name &_contract,
-                           const eosio::checksum256 &_from_node,
-                           const eosio::name &_edge_name);
+        static Edge getTo(const eosio::name &contract,
+                          const eosio::checksum256 &to_node,
+                          const eosio::name &edge_name);
 
         static bool exists(const eosio::name &_contract,
                            const eosio::checksum256 &_from_node,

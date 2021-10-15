@@ -71,7 +71,7 @@ func newDocumentTrx(ctx context.Context, api *eos.API,
 			ActionData: eos.NewActionDataFromHexData([]byte(actionBinary)),
 		}}
 
-	_, err = eostest.ExecTrx(ctx, api, actions)
+	_, err = eostest.ExecWithRetry(ctx, api, actions)
 	if err != nil {
 		return Document{}, fmt.Errorf("execute transaction %v: %v", fileName, err)
 	}
@@ -149,6 +149,22 @@ func (d *Document) GetNodeLabel() string {
 		return ""
 	}
 	return nodeLabel.String()
+}
+
+// GetType return the document type; fails if it does not exist or is not an eos.Name type
+func (d *Document) GetType() (eos.Name, error) {
+	typeValue, err := d.GetContentFromGroup("system", "type")
+	if err != nil {
+		return eos.Name(""), nil
+		// return eos.Name(""), fmt.Errorf("document type does not exist in system group of document: %v", err)
+	}
+
+	typeValueName, err := typeValue.Name()
+	if err != nil {
+		return eos.Name(""), fmt.Errorf("document type is not an eos.Name value: %v", err)
+	}
+
+	return typeValueName, nil
 }
 
 // IsEqual is a deep equal comparison of two documents
@@ -234,5 +250,5 @@ func EraseDocument(ctx context.Context, api *eos.API,
 			Hash: hash,
 		}),
 	}}
-	return eostest.ExecTrx(ctx, api, actions)
+	return eostest.ExecWithRetry(ctx, api, actions)
 }

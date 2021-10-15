@@ -6,6 +6,7 @@
 #include <eosio/asset.hpp>
 #include <eosio/time.hpp>
 #include <eosio/crypto.hpp>
+#include <logger/logger.hpp>
 
 namespace hypha
 {
@@ -32,14 +33,14 @@ namespace hypha
         template <class T>
         inline decltype(auto) getAs()
         {
-            eosio::check(std::holds_alternative<T>(value), "Content value is not of expected type");
+            EOS_CHECK(std::holds_alternative<T>(value), "Content value for label [" + label + "] is not of expected type");
             return std::get<T>(value);
         }
 
         template <class T>
         inline decltype(auto) getAs() const
         {
-            eosio::check(std::holds_alternative<T>(value), "Content value is not of expected type");
+            EOS_CHECK(std::holds_alternative<T>(value), "Content value for label [" + label + "] is not of expected type");
             return std::get<T>(value);
         }
 

@@ -19,3 +19,4 @@ test.key
 test.pub
 junk.json
 docgraph/test_results
+nodeos-go.log

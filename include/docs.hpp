@@ -42,6 +42,8 @@ namespace hypha
       ACTION testgetgroup(const checksum256 &hash,
                           const std::string &groupLabel);
 
+      ACTION testcntnterr(string test);
+
       // // Fork creates a new document (node in a graph) from an existing document.
       // // The forked content should contain only new or updated entries to avoid data duplication. (lazily enforced?)
       // ACTION fork(const checksum256 &hash, const name &creator, const vector<document_graph::content_group> &content_groups);

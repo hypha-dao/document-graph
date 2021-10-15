@@ -1,6 +1,7 @@
 #include <document_graph/document_graph.hpp>
 #include <document_graph/document.hpp>
 #include <document_graph/util.hpp>
+#include <logger/logger.hpp>
 
 namespace hypha
 {
@@ -26,7 +27,7 @@ namespace hypha
     std::vector<Edge> DocumentGraph::getEdgesOrFail(const eosio::checksum256 &fromNode, const eosio::checksum256 &toNode)
     {
         std::vector<Edge> edges = getEdges(fromNode, toNode);
-        eosio::check(edges.size() > 0, "no edges exist: from " + readableHash(fromNode) + " to " + readableHash(toNode));
+        EOS_CHECK(edges.size() > 0, "no edges exist: from " + readableHash(fromNode) + " to " + readableHash(toNode));
         return edges;
     }
 
@@ -52,7 +53,7 @@ namespace hypha
     std::vector<Edge> DocumentGraph::getEdgesFromOrFail(const eosio::checksum256 &fromNode, const eosio::name &edgeName)
     {
         std::vector<Edge> edges = getEdgesFrom(fromNode, edgeName);
-        eosio::check(edges.size() > 0, "no edges exist: from " + readableHash(fromNode) + " with name " + edgeName.to_string());
+        EOS_CHECK(edges.size() > 0, "no edges exist: from " + readableHash(fromNode) + " with name " + edgeName.to_string());
         return edges;
     }
 
@@ -78,7 +79,7 @@ namespace hypha
     std::vector<Edge> DocumentGraph::getEdgesToOrFail(const eosio::checksum256 &toNode, const eosio::name &edgeName)
     {
         std::vector<Edge> edges = getEdgesTo(toNode, edgeName);
-        eosio::check(edges.size() > 0, "no edges exist: to " + readableHash(toNode) + " with name " + edgeName.to_string());
+        EOS_CHECK(edges.size() > 0, "no edges exist: to " + readableHash(toNode) + " with name " + edgeName.to_string());
         return edges;
     }
 
@@ -91,7 +92,7 @@ namespace hypha
         auto from_node_index = e_t.get_index<eosio::name("fromnode")>();
         auto from_itr = from_node_index.find(node);
 
-        while (from_itr != from_node_index.end() && from_itr->to_node == node)
+        while (from_itr != from_node_index.end() && from_itr->from_node == node)
         {
             from_itr = from_node_index.erase(from_itr);
         }
@@ -103,6 +104,25 @@ namespace hypha
         {
             to_itr = to_node_index.erase(to_itr);
         }
+    }
+
+    bool DocumentGraph::hasEdges(const eosio::checksum256 &node)
+    {
+        Edge::edge_table e_t(m_contract, m_contract.value);
+        
+        auto from_node_index = e_t.get_index<eosio::name("fromnode")>();
+        if (from_node_index.find(node) != from_node_index.end()) 
+        {
+            return true;
+        }
+
+        auto to_node_index = e_t.get_index<eosio::name("tonode")>();
+        if (to_node_index.find(node) != to_node_index.end())
+        {
+            return true;
+        }
+
+        return false;
     }
 
     void DocumentGraph::replaceNode(const eosio::checksum256 &oldNode, const eosio::checksum256 &newNode)
@@ -138,6 +158,7 @@ namespace hypha
                                            const eosio::checksum256 &documentHash,
                                            ContentGroups contentGroups)
     {
+        TRACE_FUNCTION()
         Document currentDocument(m_contract, documentHash);
         Document newDocument(m_contract, updater, contentGroups);
 
@@ -153,7 +174,7 @@ namespace hypha
         auto hash_index = d_t.get_index<eosio::name("idhash")>();
         auto h_itr = hash_index.find(documentHash);
 
-        eosio::check(h_itr != hash_index.end(), "Cannot erase document; does not exist: " + readableHash(documentHash));
+        EOS_CHECK(h_itr != hash_index.end(), "Cannot erase document; does not exist: " + readableHash(documentHash));
 
         if (includeEdges)
         {
@@ -165,6 +186,7 @@ namespace hypha
 
     void DocumentGraph::eraseDocument(const eosio::checksum256 &documentHash)
     {
+        TRACE_FUNCTION()
         return eraseDocument(documentHash, true);
     }
 } // namespace hypha
