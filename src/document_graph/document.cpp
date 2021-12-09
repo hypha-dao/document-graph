@@ -85,6 +85,43 @@ namespace hypha
         });
     }
 
+    void Document::update(const eosio::name& updater, const ContentGroups& updatedData)
+    {
+        TRACE_FUNCTION();
+
+        auto oldHash = hash;
+
+        creator = updater;
+
+        content_groups = std::move(updatedData);
+
+        hashContents();
+
+        document_table d_t(getContract(), getContract().value);
+        auto hash_index = d_t.get_index<eosio::name("idhash")>();
+
+        {
+            auto h_itr = hash_index.find(hash);
+
+            // if this content exists already, error out and send back the hash of the existing document
+            EOS_CHECK(
+                h_itr == hash_index.end(), 
+                util::to_str("There is an existing document with hash: ", hash, " Previous hash: ", oldHash)
+            )
+        }
+
+        auto it = d_t.find(id);
+
+        EOS_CHECK(
+            it != d_t.end(), 
+            util::to_str("Couldn't find document in table with id: ", id)
+        )
+
+        d_t.modify(it, getContract(), [&](Document& doc) {
+            doc = *this;
+        });
+    }
+
     Document Document::getOrNew(eosio::name _contract, eosio::name _creator, ContentGroups contentGroups)
     {
         Document document{};

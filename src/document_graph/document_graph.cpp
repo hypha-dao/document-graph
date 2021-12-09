@@ -159,12 +159,15 @@ namespace hypha
                                            ContentGroups contentGroups)
     {
         TRACE_FUNCTION()
-        Document currentDocument(m_contract, documentHash);
-        Document newDocument(m_contract, updater, contentGroups);
+        Document currentDoc(m_contract, documentHash);
 
-        replaceNode(documentHash, newDocument.getHash());
-        eraseDocument(documentHash, false);
-        return newDocument;
+        currentDoc.update(updater, contentGroups);
+
+        replaceNode(documentHash, currentDoc.getHash());
+        
+        //eraseDocument(documentHash, false);
+
+        return currentDoc;
     }
 
     // for now, permissions should be handled in the contract action rather than this class

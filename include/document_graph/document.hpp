@@ -42,6 +42,13 @@ namespace hypha
         ~Document();
 
         void emplace();
+        
+        /**
+         * @brief Updates the document in the multi_index table with the given content groups
+         * 
+         * @param updatedData
+         */
+        void update(const eosio::name& updater, const ContentGroups& updatedData);
 
         // returns a document, saves to RAM if it doesn't already exist
         static Document getOrNew(eosio::name contract, eosio::name creator, ContentGroups contentGroups);
