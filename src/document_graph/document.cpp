@@ -120,6 +120,11 @@ namespace hypha
         d_t.modify(it, getContract(), [&](Document& doc) {
             doc = *this;
         });
+
+        EOS_CHECK(
+            it->hash == hash,
+            util::to_str("Coundn't update document")
+        );
     }
 
     Document Document::getOrNew(eosio::name _contract, eosio::name _creator, ContentGroups contentGroups)
