@@ -53,7 +53,45 @@ namespace hypha
         EOS_CHECK(hash == _hash, "fatal error: provided and indexed hash does not match newly generated hash");
     }
 
-    bool Document::exists(eosio::name contract, const eosio::checksum256 &_hash)
+    Document::Document(eosio::name contract, uint64_t _id) : contract{contract}
+    {
+        TRACE_FUNCTION()
+        document_table d_t(contract, contract.value);
+        auto h_itr = d_t.find(_id);
+        
+        EOS_CHECK(
+            h_itr != d_t.end(), 
+            util::to_str("document not found: ", _id)
+        );
+
+        id = h_itr->id;
+        creator = h_itr->creator;
+        created_date = h_itr->created_date;
+        certificates = h_itr->certificates;
+        content_groups = h_itr->content_groups;
+        hashContents();
+
+        // this should never happen, only if hash algorithm somehow changed
+        EOS_CHECK(
+            hash == h_itr->hash, 
+            "fatal error: provided and indexed hash does not match newly generated hash"
+        );
+    }
+
+    bool Document::exists(eosio::name contract, uint64_t _id)
+    {
+        document_table d_t(contract, contract.value);
+        
+        auto h_itr = d_t.find(_id);
+
+        if (h_itr != d_t.end())
+        {
+            return true;
+        }
+        return false;
+    }
+
+    bool Document::exists(eosio::name contract, const eosio::checksum256& _hash)
     {
         document_table d_t(contract, contract.value);
         auto hash_index = d_t.get_index<eosio::name("idhash")>();
@@ -85,7 +123,7 @@ namespace hypha
         });
     }
 
-    void Document::update(const eosio::name& updater, const ContentGroups& updatedData)
+    void Document::update(const eosio::name& updater, ContentGroups updatedData)
     {
         TRACE_FUNCTION();
 

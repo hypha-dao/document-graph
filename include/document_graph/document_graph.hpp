@@ -21,28 +21,28 @@ namespace hypha
         DocumentGraph(const eosio::name &contract) : m_contract(contract) {}
         ~DocumentGraph() {}
 
-        void removeEdges(const eosio::checksum256 &node);
+        void removeEdges(uint64_t nodeID);
 
-        std::vector<Edge> getEdges(const eosio::checksum256 &fromNode, const eosio::checksum256 &toNode);
-        std::vector<Edge> getEdgesOrFail(const eosio::checksum256 &fromNode, const eosio::checksum256 &toNode);
+        std::vector<Edge> getEdges(uint64_t fromNode, uint64_t toNode);
+        std::vector<Edge> getEdgesOrFail(uint64_t fromNode, uint64_t toNode);
 
-        std::vector<Edge> getEdgesFrom(const eosio::checksum256 &fromNode, const eosio::name &edgeName);
-        std::vector<Edge> getEdgesFromOrFail(const eosio::checksum256 &fromNode, const eosio::name &edgeName);
+        std::vector<Edge> getEdgesFrom(uint64_t fromNode, const eosio::name &edgeName);
+        std::vector<Edge> getEdgesFromOrFail(uint64_t fromNode, const eosio::name &edgeName);
 
-        std::vector<Edge> getEdgesTo(const eosio::checksum256 &toNode, const eosio::name &edgeName);
-        std::vector<Edge> getEdgesToOrFail(const eosio::checksum256 &toNode, const eosio::name &edgeName);
+        std::vector<Edge> getEdgesTo(uint64_t toNode, const eosio::name &edgeName);
+        std::vector<Edge> getEdgesToOrFail(uint64_t toNode, const eosio::name &edgeName);
 
-        Edge createEdge(eosio::name &creator, const eosio::checksum256 &fromNode, const eosio::checksum256 &toNode, const eosio::name &edgeName);
+        Edge createEdge(eosio::name &creator, uint64_t fromNode, uint64_t toNode, const eosio::name &edgeName);
 
         Document updateDocument(const eosio::name &updater,
-                                const eosio::checksum256 &doc_hash,
+                                uint64_t doc_hash,
                                 ContentGroups content_groups);
 
-        bool hasEdges(const eosio::checksum256 &node);
+        bool hasEdges(uint64_t nodeID);
         
-        void replaceNode(const eosio::checksum256 &oldNode, const eosio::checksum256 &newNode);
-        void eraseDocument(const eosio::checksum256 &document_hash);
-        void eraseDocument(const eosio::checksum256 &document_hash, const bool includeEdges);
+        void replaceNode(uint64_t oldNode, uint64_t newNode);
+        void eraseDocument(uint64_t document_hash);
+        void eraseDocument(uint64_t document_hash, const bool includeEdges);
 
     private:
         eosio::name m_contract;
@@ -62,8 +62,8 @@ using root_edge = hypha::Edge;\
 TABLE contract##_edge : public root_edge {};\
 using contract_edge = contract##_edge;\
 using edge_table = eosio::multi_index<eosio::name("edges"), contract_edge,\
-            eosio::indexed_by<eosio::name("fromnode"), eosio::const_mem_fun<root_edge, eosio::checksum256, &root_edge::by_from>>,\
-            eosio::indexed_by<eosio::name("tonode"), eosio::const_mem_fun<root_edge, eosio::checksum256, &root_edge::by_to>>,\
+            eosio::indexed_by<eosio::name("fromnode"), eosio::const_mem_fun<root_edge, uint64_t, &root_edge::by_from>>,\
+            eosio::indexed_by<eosio::name("tonode"), eosio::const_mem_fun<root_edge, uint64_t, &root_edge::by_to>>,\
             eosio::indexed_by<eosio::name("edgename"), eosio::const_mem_fun<root_edge, uint64_t, &root_edge::by_edge_name>>,\
             eosio::indexed_by<eosio::name("byfromname"), eosio::const_mem_fun<root_edge, uint64_t, &root_edge::by_from_node_edge_name_index>>,\
             eosio::indexed_by<eosio::name("byfromto"), eosio::const_mem_fun<root_edge, uint64_t, &root_edge::by_from_node_to_node_index>>,\

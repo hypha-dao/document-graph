@@ -4,20 +4,37 @@
 #include <eosio/crypto.hpp>
 #include <eosio/name.hpp>
 
+namespace std {
+  template <> struct hash<eosio::name>
+  {
+    size_t operator()(const eosio::name& x) const
+    {
+      return std::hash<uint64_t>{}(x.value);
+    }
+  };
+}
+
 namespace hypha
 {
 
-    const std::string toHex(const char *d, std::uint32_t s);
-    const std::string readableHash(const eosio::checksum256 &hash);
-    const std::uint64_t toUint64(const std::string &fingerprint);
-    const std::uint64_t concatHash(const eosio::checksum256 sha1, const eosio::checksum256 sha2, const eosio::name label);
-    const std::uint64_t concatHash(const eosio::checksum256 sha1, const eosio::checksum256 sha2);
-    const std::uint64_t concatHash(const eosio::checksum256 sha, const eosio::name label);
+  const std::string toHex(const char *d, std::uint32_t s);
+  const std::string readableHash(const eosio::checksum256 &hash);
+  const std::uint64_t toUint64(const std::string &fingerprint);
+  const std::uint64_t concatHash(const eosio::checksum256 sha1, const eosio::checksum256 sha2, const eosio::name label);
+  const std::uint64_t concatHash(const eosio::checksum256 sha1, const eosio::checksum256 sha2);
+  const std::uint64_t concatHash(const eosio::checksum256 sha, const eosio::name label);
 
   namespace util
-  {    
+  {
     namespace detail 
     {
+       
+      template <typename T, typename... Rest>
+      void _hashCombine(uint64_t& seed, const T& v, Rest&&... rest)
+      {
+          seed ^= std::hash<T>{}(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+          (_hashCombine(seed, rest), ...);
+      }
 
       template<class T>
       struct supports_to_string
@@ -81,6 +98,13 @@ namespace hypha
       return (detail::to_str_h(first) + ... + detail::to_str_h(others));
     }
 
-  }
 
+    template <typename... Rest>
+    uint64_t hashCombine(Rest&&... rest)
+    {
+        uint64_t seed = 0;
+        detail::_hashCombine(seed, std::forward<Rest>(rest)...);
+        return seed;
+    }
+  }
 } // namespace hypha

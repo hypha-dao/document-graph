@@ -39,6 +39,7 @@ namespace hypha
 
         // this constructor reads the hash from the table and populates the object from storage
         Document(eosio::name contract, const eosio::checksum256 &hash);
+        Document(eosio::name contract, uint64_t id);
         ~Document();
 
         void emplace();
@@ -48,7 +49,7 @@ namespace hypha
          * 
          * @param updatedData
          */
-        void update(const eosio::name& updater, const ContentGroups& updatedData);
+        void update(const eosio::name& updater, ContentGroups updatedData);
 
         // returns a document, saves to RAM if it doesn't already exist
         static Document getOrNew(eosio::name contract, eosio::name creator, ContentGroups contentGroups);
@@ -56,6 +57,7 @@ namespace hypha
         static Document getOrNew(eosio::name contract, eosio::name creator, Content content);
         static Document getOrNew(eosio::name contract, eosio::name creator, const std::string &label, const Content::FlexValue &value);
 
+        static bool exists(eosio::name contract, uint64_t _id);
         static bool exists(eosio::name contract, const eosio::checksum256 &hash);
 
         // certificates are not yet used
@@ -85,7 +87,8 @@ namespace hypha
         uint64_t by_created() const { return created_date.sec_since_epoch(); }
         uint64_t by_creator() const { return creator.value; }
         eosio::checksum256 by_hash() const { return hash; }
-
+        
+        inline uint64_t getID() { return id; }
     private:
         // members, with names as serialized - these must be public for EOSIO tables
         std::uint64_t id;
