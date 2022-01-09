@@ -14,18 +14,6 @@
 namespace hypha
 {
     // unused for now, but leaving in the data structure for the future
-    struct Certificate
-    {
-        Certificate() {}
-        Certificate(const eosio::name &certifier, const std::string notes) : certifier{certifier}, notes{notes} {}
-
-        eosio::name certifier;
-        std::string notes;
-        eosio::time_point certification_date = eosio::current_time_point();
-
-        EOSLIB_SERIALIZE(Certificate, (certifier)(notes)(certification_date))
-    };
-
     struct Document
     {
     public:
@@ -38,35 +26,29 @@ namespace hypha
         Document(eosio::name contract, eosio::name creator, const std::string &label, const Content::FlexValue &value);
 
         // this constructor reads the hash from the table and populates the object from storage
-        Document(eosio::name contract, const eosio::checksum256 &hash);
         Document(eosio::name contract, uint64_t id);
         ~Document();
 
+        // actual sha256 of "DO_NOT_HASH" is d15ddfec8899ee7bf14aea64c77719d99101ae034fadd02e455476d59a8ec0f9
+        // when the document.hash value is set to this, the document contents is never hashed
+        // need to hardcode that to this constant
+        const eosio::checksum256 DO_NOT_HASH = eosio::fixed_bytes<32UL>{};
+
         void emplace();
-        
+
         /**
          * @brief Updates the document in the multi_index table with the given content groups
          * 
          * @param updatedData
          */
-        void update(const eosio::name& updater, ContentGroups updatedData);
-
-        // returns a document, saves to RAM if it doesn't already exist
-        static Document getOrNew(eosio::name contract, eosio::name creator, ContentGroups contentGroups);
-        static Document getOrNew(eosio::name contract, eosio::name creator, ContentGroup contentGroup);
-        static Document getOrNew(eosio::name contract, eosio::name creator, Content content);
-        static Document getOrNew(eosio::name contract, eosio::name creator, const std::string &label, const Content::FlexValue &value);
+        void update(const eosio::name &updater, ContentGroups updatedData);
 
         static bool exists(eosio::name contract, uint64_t _id);
-        static bool exists(eosio::name contract, const eosio::checksum256 &hash);
 
         // certificates are not yet used
         void certify(const eosio::name &certifier, const std::string &notes);
 
-        const void hashContents();
-
         // static helpers
-        static const eosio::checksum256 hashContents(const ContentGroups &contentGroups);
         static ContentGroups rollup(ContentGroup contentGroup);
         static ContentGroups rollup(Content content);
         static void insertOrReplace(ContentGroup &contentGroup, Content &newContent);
@@ -85,18 +67,21 @@ namespace hypha
         // This has to be public in order to be reachable by the abi-generator macro
         // indexes for table
         uint64_t by_created() const { return created_date.sec_since_epoch(); }
+        uint64_t by_updated() const { return updated_date.sec_since_epoch(); }
         uint64_t by_creator() const { return creator.value; }
+
         eosio::checksum256 by_hash() const { return hash; }
-        
+
         inline uint64_t getID() { return id; }
+
     private:
         // members, with names as serialized - these must be public for EOSIO tables
         std::uint64_t id;
-        eosio::checksum256 hash;
+        eosio::checksum256 hash = DO_NOT_HASH;
         eosio::name creator;
         ContentGroups content_groups;
-        std::vector<Certificate> certificates;
         eosio::time_point created_date;
+        eosio::time_point updated_date;
         eosio::name contract;
 
         // toString iterates through all content, all levels, concatenating all values
@@ -105,7 +90,7 @@ namespace hypha
         static const std::string toString(const ContentGroups &contentGroups);
         static const std::string toString(const ContentGroup &contentGroup);
 
-        EOSLIB_SERIALIZE(Document, (id)(hash)(creator)(content_groups)(certificates)(created_date)(contract))
+        EOSLIB_SERIALIZE(Document, (id)(hash)(creator)(content_groups)(created_date)(updated_date)(contract))
 
     public:
         // for unknown reason, primary_key() must be public
@@ -114,8 +99,9 @@ namespace hypha
         typedef eosio::multi_index<eosio::name("documents"), Document,
                                    eosio::indexed_by<eosio::name("idhash"), eosio::const_mem_fun<Document, eosio::checksum256, &Document::by_hash>>,
                                    eosio::indexed_by<eosio::name("bycreator"), eosio::const_mem_fun<Document, uint64_t, &Document::by_creator>>,
-                                   eosio::indexed_by<eosio::name("bycreated"), eosio::const_mem_fun<Document, uint64_t, &Document::by_created>>>
+                                   eosio::indexed_by<eosio::name("bycreated"), eosio::const_mem_fun<Document, uint64_t, &Document::by_created>>,
+                                   eosio::indexed_by<eosio::name("byupdated"), eosio::const_mem_fun<Document, uint64_t, &Document::by_updated>>>
+
             document_table;
     };
-
 } // namespace hypha
