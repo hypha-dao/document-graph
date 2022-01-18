@@ -58,6 +58,7 @@ using document_table =  eosio::multi_index<eosio::name("documents"), contract_do
                             eosio::indexed_by<name("idhash"), eosio::const_mem_fun<root_doc, eosio::checksum256, &root_doc::by_hash>>,\
                             eosio::indexed_by<name("bycreator"), eosio::const_mem_fun<root_doc, uint64_t, &root_doc::by_creator>>,\
                             eosio::indexed_by<name("bycreated"), eosio::const_mem_fun<root_doc, uint64_t, &root_doc::by_created>>>;\
+                            eosio::indexed_by<name("byupdated"), eosio::const_mem_fun<root_doc, uint64_t, &root_doc::by_updated>>>;\
 using root_edge = hypha::Edge;\
 TABLE contract##_edge : public root_edge {};\
 using contract_edge = contract##_edge;\

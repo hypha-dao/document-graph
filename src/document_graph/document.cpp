@@ -9,6 +9,7 @@
 
 namespace hypha
 {
+{
 
     Document::~Document() {}
     Document::Document() {}
@@ -34,30 +35,26 @@ namespace hypha
     {
     }
 
-    Document::Document(eosio::name contract, uint64_t _id) : contract{contract}
+    Document::Document(eosio::name contract, const uint64_t &documentId) : contract{contract}
     {
         TRACE_FUNCTION()
         document_table d_t(contract, contract.value);
-        auto h_itr = d_t.find(_id);
-        
-        EOS_CHECK(
-            h_itr != d_t.end(), 
-            util::to_str("document not found: ", _id)
-        );
+        auto d_itr = d_t.find(documentId);
+        EOS_CHECK(d_itr != d_t.end(), "document not found: " + std::to_string(documentId));
 
-        id = h_itr->id;
-        creator = h_itr->creator;
-        created_date = h_itr->created_date;
-        content_groups = h_itr->content_groups;
+        id = d_itr->id;
+        creator = d_itr->creator;
+        created_date = d_itr->created_date;
+        updated_date = eosio::current_time_point();
+        content_groups = d_itr->content_groups;
     }
 
-    bool Document::exists(eosio::name contract, uint64_t _id)
+    bool Document::exists(eosio::name contract, const uint64_t &documentId)
     {
         document_table d_t(contract, contract.value);
-        
-        auto h_itr = d_t.find(_id);
+        auto d_itr = d_t.find(documentId);
 
-        if (h_itr != d_t.end())
+        if (d_itr != d_t.end())
         {
             return true;
         }
@@ -69,56 +66,33 @@ namespace hypha
         TRACE_FUNCTION()
 
         document_table d_t(getContract(), getContract().value);
-        d_t.emplace(getContract(), [&](auto &d) {
-            id = d_t.available_primary_key();
-            created_date = eosio::current_time_point();
-            d = *this;
-        });
+
+        d_t.emplace(getContract(), [&](auto &d)
+                    {
+                        id = d_t.available_primary_key();
+                        created_date = eosio::current_time_point();
+                        updated_date = eosio::current_time_point();
+                        d = *this;
+                    });
     }
 
-    void Document::update(const eosio::name& updater, ContentGroups updatedData)
+    void Document::modify()
     {
-        TRACE_FUNCTION();
-
-        auto oldHash = hash;
-
-        creator = updater;
-
-        content_groups = std::move(updatedData);
-
-        hashContents();
+        TRACE_FUNCTION()
 
         document_table d_t(getContract(), getContract().value);
-        auto hash_index = d_t.get_index<eosio::name("idhash")>();
+        auto d_itr = d_t.find(getId());
 
-        {
-            auto h_itr = hash_index.find(hash);
+        EOS_CHECK(d_itr != d_t.end(), "document does not exist: " + std::to_string(getId()));
 
-            // if this content exists already, error out and send back the hash of the existing document
-            EOS_CHECK(
-                h_itr == hash_index.end(), 
-                util::to_str("There is an existing document with hash: ", hash, " Previous hash: ", oldHash)
-            )
-        }
+        require_auth(d_itr->creator);
 
-        auto it = d_t.find(id);
-
-        EOS_CHECK(
-            it != d_t.end(), 
-            util::to_str("Couldn't find document in table with id: ", id)
-        )
-
-        d_t.modify(it, getContract(), [&](Document& doc) {
-            doc = *this;
-        });
-
-        EOS_CHECK(
-            it->hash == hash,
-            util::to_str("Coundn't update document")
-        );
+        d_t.modify(d_itr, getContract(), [&](auto &d)
+                   {
+                       updated_date = eosio::current_time_point();
+                       d = *this;
+                   });
     }
-
-  
 
     // void Document::certify(const eosio::name &certifier, const std::string &notes)
     // {
@@ -136,22 +110,23 @@ namespace hypha
     //     });
     // }
 
-    const void Document::hashContents()
+    ContentGroups Document::rollup(ContentGroup contentGroup)
     {
-        // save/cache the hash in the member
-        hash = hashContents(content_groups);
+        ContentGroups contentGroups;
+        contentGroups.push_back(contentGroup);
+        return contentGroups;
+    }
+
+    ContentGroups Document::rollup(Content content)
+    {
+        ContentGroup contentGroup;
+        contentGroup.push_back(content);
+        return rollup(contentGroup);
     }
 
     const std::string Document::toString()
     {
-        return toString(content_groups);
-    }
-
-    // static version cannot cache the hash in a member
-    const eosio::checksum256 Document::hashContents(const ContentGroups &contentGroups)
-    {
-        std::string string_data = toString(contentGroups);
-        return eosio::sha256(const_cast<char *>(string_data.c_str()), string_data.length());
+        // return toString(content_groups);
     }
 
     const std::string Document::toString(const ContentGroups &contentGroups)
@@ -196,20 +171,6 @@ namespace hypha
 
         results = results + "]";
         return results;
-    }
-
-    ContentGroups Document::rollup(ContentGroup contentGroup)
-    {
-        ContentGroups contentGroups;
-        contentGroups.push_back(contentGroup);
-        return contentGroups;
-    }
-
-    ContentGroups Document::rollup(Content content)
-    {
-        ContentGroup contentGroup;
-        contentGroup.push_back(content);
-        return rollup(contentGroup);
     }
 
     /** Example
@@ -271,71 +232,83 @@ namespace hypha
     */
     Document Document::merge(Document original, Document &deltas)
     {
-      TRACE_FUNCTION()
-      const auto& deltasGroups = deltas.getContentGroups();
-      auto& originalGroups = original.getContentGroups();
-      auto deltasWrapper = deltas.getContentWrapper();
-      auto originalWrapper = original.getContentWrapper();
+        TRACE_FUNCTION()
+        const auto &deltasGroups = deltas.getContentGroups();
+        auto &originalGroups = original.getContentGroups();
+        auto deltasWrapper = deltas.getContentWrapper();
+        auto originalWrapper = original.getContentWrapper();
 
-      //unordered_map not available with eosio atm
-      std::map<string, std::pair<size_t, ContentGroup*>> groupsByLabel;
+        //unordered_map not available with eosio atm
+        std::map<string, std::pair<size_t, ContentGroup *>> groupsByLabel;
 
-      for (size_t i = 0; i < originalGroups.size(); ++i) {
-        auto label = ContentWrapper::getGroupLabel(originalGroups[i]);
-        if (!label.empty()) {
-          groupsByLabel[string(label)] = std::pair{i, &originalGroups[i]};
-        }
-      }  
-
-      for (size_t i = 0; i < deltasGroups.size(); ++i) {
-        
-        auto label = ContentWrapper::getGroupLabel(deltasGroups[i]);
-                
-        //If there is no group label just append it to the original doc
-        if (label.empty()) {
-          originalGroups.push_back(deltasGroups[i]);
-          continue;
-        }
-        
-        //Check if we need to delete the group
-        if (auto [idx, c] = deltasWrapper.get(i, "delete_group"); 
-            c) {
-          originalWrapper.removeGroup(string(label));
-          continue;
-        }
-
-        //Check if we need to skip this group from merge
-        if (auto [_, c] = deltasWrapper.get(i, "skip_from_merge"); 
-            c) {
-          continue;
-        }
-        
-        //If group is not present on original document we should append it
-        if (auto groupIt = groupsByLabel.find(string(label)); 
-            groupIt == groupsByLabel.end()) {
-          originalGroups.push_back(deltasGroups[i]);
-        }
-        else {
-          auto [oriGroupIdx, oriGroup] = groupIt->second;
-
-          //It doesn't matter if it replaces content_group_label as they should be equal
-          for (auto& deltaContent : deltasGroups[i]) {
-            // Proposed fix is to use ballot_title & ballot_description as
-            // a separated item
-            // if (deltaContent.label == "title") {
-            //     // TODO: fix hack: we need to separate 'ballot title' from the assignment/document title
-            //     continue;
-            // }
-            if (std::holds_alternative<std::monostate>(deltaContent.value)) {
-              originalWrapper.removeContent(oriGroupIdx, deltaContent.label);
+        for (size_t i = 0; i < originalGroups.size(); ++i)
+        {
+            auto label = ContentWrapper::getGroupLabel(originalGroups[i]);
+            if (!label.empty())
+            {
+                groupsByLabel[string(label)] = std::pair{i, &originalGroups[i]};
             }
-            else {
-              originalWrapper.insertOrReplace(oriGroupIdx, deltaContent);
-            }
-          }
         }
-      }
 
-      return original;
+        for (size_t i = 0; i < deltasGroups.size(); ++i)
+        {
+
+            auto label = ContentWrapper::getGroupLabel(deltasGroups[i]);
+
+            //If there is no group label just append it to the original doc
+            if (label.empty())
+            {
+                originalGroups.push_back(deltasGroups[i]);
+                continue;
+            }
+
+            //Check if we need to delete the group
+            if (auto [idx, c] = deltasWrapper.get(i, "delete_group");
+                c)
+            {
+                originalWrapper.removeGroup(string(label));
+                continue;
+            }
+
+            //Check if we need to skip this group from merge
+            if (auto [_, c] = deltasWrapper.get(i, "skip_from_merge");
+                c)
+            {
+                continue;
+            }
+
+            //If group is not present on original document we should append it
+            if (auto groupIt = groupsByLabel.find(string(label));
+                groupIt == groupsByLabel.end())
+            {
+                originalGroups.push_back(deltasGroups[i]);
+            }
+            else
+            {
+                auto [oriGroupIdx, oriGroup] = groupIt->second;
+
+                //It doesn't matter if it replaces content_group_label as they should be equal
+                for (auto &deltaContent : deltasGroups[i])
+                {
+                    // Proposed fix is to use ballot_title & ballot_description as
+                    // a separated item
+                    // if (deltaContent.label == "title") {
+                    //     // TODO: fix hack: we need to separate 'ballot title' from the assignment/document title
+                    //     continue;
+                    // }
+                    if (std::holds_alternative<std::monostate>(deltaContent.value))
+                    {
+                        originalWrapper.removeContent(oriGroupIdx, deltaContent.label);
+                    }
+                    else
+                    {
+                        originalWrapper.insertOrReplace(oriGroupIdx, deltaContent);
+                    }
+                }
+            }
+        }
+
+        return original;
     }
+
 } // namespace hypha
