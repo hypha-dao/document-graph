@@ -165,12 +165,12 @@ namespace hypha
     }
 
     Document DocumentGraph::updateDocument(const eosio::name &updater,
-                                           uint64_t documentHash,
+                                           uint64_t documentId,
                                            ContentGroups contentGroups)
     {
         TRACE_FUNCTION()
 
-        Document currentDoc(m_contract, documentHash);
+        Document currentDoc(m_contract, documentId);
 
         currentDoc.update(updater, std::move(contentGroups));
         
@@ -178,27 +178,27 @@ namespace hypha
     }
 
     // for now, permissions should be handled in the contract action rather than this class
-    void DocumentGraph::eraseDocument(uint64_t documentID, const bool includeEdges)
+    void DocumentGraph::eraseDocument(uint64_t documentId, const bool includeEdges)
     {
         Document::document_table d_t(m_contract, m_contract.value);
-        auto h_itr = d_t.find(documentID);
+        auto h_itr = d_t.find(documentId);
 
         EOS_CHECK(
             h_itr != d_t.end(), 
-            util::to_str("Cannot erase document; does not exist: ", documentID)
+            util::to_str("Cannot erase document; does not exist: ", documentId)
         );
 
         if (includeEdges)
         {
-            removeEdges(documentID);
+            removeEdges(documentId);
         }
 
         d_t.erase(h_itr);
     }
 
-    void DocumentGraph::eraseDocument(uint64_t documentID)
+    void DocumentGraph::eraseDocument(uint64_t documentId)
     {
         TRACE_FUNCTION()
-        return eraseDocument(documentID, true);
+        return eraseDocument(documentId, true);
     }
 } // namespace hypha

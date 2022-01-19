@@ -14,18 +14,15 @@ namespace hypha
         HashDocument(eosio::name *contract, const eosio::checksum256 &hash);
 
         // returns a document, saves to RAM if it doesn't already exist
-        static HashDocument getOrNew(eosio::name contract, eosio::name creator, ContentGroups contentGroups);
-        static HashDocument getOrNew(eosio::name contract, eosio::name creator, ContentGroup contentGroup);
-        static HashDocument getOrNew(eosio::name contract, eosio::name creator, Content content);
-        static HashDocument getOrNew(eosio::name contract, eosio::name creator, const std::string &label, const Content::FlexValue &value);
+        // static HashDocument getOrNew(eosio::name contract, eosio::name creator, ContentGroups contentGroups);
+        // static HashDocument getOrNew(eosio::name contract, eosio::name creator, ContentGroup contentGroup);
+        // static HashDocument getOrNew(eosio::name contract, eosio::name creator, Content content);
+        // static HashDocument getOrNew(eosio::name contract, eosio::name creator, const std::string &label, const Content::FlexValue &value);
 
+        void update(const eosio::name& updater, ContentGroups updatedData);
         static bool exists(eosio::name contract, const eosio::checksum256 &hash);
 
         const void hashContents();
         static const eosio::checksum256 hashContents(const ContentGroups &contentGroups);
-
-        bool isHash();
-        std::string getLabel();
-        std::string getReadable();
     };
 } // namespace hypha
