@@ -26,7 +26,7 @@ namespace hypha
         Document(eosio::name contract, eosio::name creator, const std::string &label, const Content::FlexValue &value);
 
         // this constructor reads the hash from the table and populates the object from storage
-        Document(eosio::name contract, uint64_t id);
+        Document(eosio::name contract, const uint64_t &id);
         ~Document();
 
         void emplace();
@@ -39,7 +39,7 @@ namespace hypha
          */
         void update(const eosio::name &updater, ContentGroups updatedData);
 
-        static bool exists(eosio::name contract, uint64_t _id);
+        static bool exists(eosio::name contract, const uint64_t &documentId);
 
    // static helpers
         static ContentGroups rollup(ContentGroup contentGroup);
@@ -69,12 +69,14 @@ namespace hypha
         //       to do that whilst also impacting the ABI correctly :| (help!)
         eosio::checksum256 by_hash() const
         {
-            if (auto [_, hash] = getContentWrapper().get(DETAILS, HASH); hash)
+            auto cgs = getContentGroups();
+            ContentWrapper cw (cgs); 
+            if (const auto [_, hash] = cw.get("DETAILS", "HASH"); hash)
             {
                 return std::get<eosio::checksum256>(hash->value);
             }
             // default value, for cases where hash is not used, would be all zeros
-            return eosio::checksum256{eosio::fixed_bytes<32>()};
+            return eosio::checksum256{};
         }
     private:
         // members, with names as serialized - these must be public for EOSIO tables

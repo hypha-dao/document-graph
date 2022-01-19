@@ -9,8 +9,6 @@
 
 namespace hypha
 {
-{
-
     Document::~Document() {}
     Document::Document() {}
 
