@@ -59,6 +59,18 @@ namespace hypha
 
         static constexpr bool value = (sizeof(can_pass_to_string((T*)0)) == 1);
       };
+
+      template<class T>
+      struct supports_call_to_string_v2
+      {
+        template<class U>
+        static auto can_pass_to_string(const U* arg) -> decltype(arg->toString(), char(0))
+        {}
+
+        static std::array<char, 2> can_pass_to_string(...) { }
+
+        static constexpr bool value = (sizeof(can_pass_to_string((T*)0)) == 1);
+      };
       
       template<class T>
       std::string to_str_h(const T& arg)
@@ -68,6 +80,9 @@ namespace hypha
         }
         else if constexpr (supports_call_to_string<T>::value) {
           return arg.to_string();
+        }
+        else if constexpr (supports_call_to_string_v2<T>::value) {
+          return arg.toString();
         }
         else if constexpr (std::is_same_v<T, eosio::checksum256>) {
           return readableHash(arg);
