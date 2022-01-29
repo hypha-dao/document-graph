@@ -28,11 +28,11 @@ namespace hypha
       ACTION getornewget(const name &creator, ContentGroups &content_groups);
       ACTION getornewnew(const name &creator, ContentGroups &content_groups);
 
-      ACTION newedge(eosio::name & creator, const checksum256 &from_node, const checksum256 &to_node, const name &edge_name);
+      ACTION newedge(eosio::name & creator, const uint64_t &from_node, const uint64_t &to_node, const name &edge_name);
 
-      ACTION removeedge(const checksum256 &from_node, const checksum256 &to_node, const name &edge_name);
+      ACTION removeedge(const uint64_t &from_node, const uint64_t &to_node, const name &edge_name);
 
-      ACTION erase(const checksum256 &hash);
+      ACTION erase(const uint64_t &hash);
 
       ACTION testgetasset(const checksum256 &hash,
                           const std::string &groupLabel,
