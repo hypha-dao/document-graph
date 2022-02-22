@@ -40,7 +40,7 @@ namespace hypha
         document_table d_t(contract, contract.value);
         auto hash_index = d_t.get_index<eosio::name("idhash")>();
         auto h_itr = hash_index.find(_hash);
-        EOS_CHECK(h_itr != hash_index.end(), "document not found: " + readableHash(_hash));
+        EOS_CHECK(h_itr != hash_index.end(), "document not found: " + util::to_str(_hash));
 
         id = h_itr->id;
         creator = h_itr->creator;
@@ -114,7 +114,7 @@ namespace hypha
         auto h_itr = hash_index.find(hash);
 
         // if this content exists already, error out and send back the hash of the existing document
-        EOS_CHECK(h_itr == hash_index.end(), "document exists already: " + readableHash(hash));
+        EOS_CHECK(h_itr == hash_index.end(), "document exists already: " + util::to_str(hash));
 
         d_t.emplace(getContract(), [&](auto &d) {
             id = d_t.available_primary_key();

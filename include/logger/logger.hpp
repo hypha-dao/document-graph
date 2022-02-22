@@ -60,7 +60,12 @@ if (!(condition)) {\
 #define TRACE_FUNCTION()
 #define TRACE_ERROR(message)
 #define LOG_MESSAGE(message)
-#define EOS_CHECK(condition, message) eosio::check((condition), message);
+#define EOS_CHECK(condition, message)\
+{\
+if (!(condition)) {\
+  eosio::check(false, message);\
+}\
+}
 #endif 
 
 }
