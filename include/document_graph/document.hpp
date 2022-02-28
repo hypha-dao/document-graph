@@ -7,6 +7,7 @@
 #include <eosio/asset.hpp>
 #include <eosio/transaction.hpp>
 #include <eosio/crypto.hpp>
+#include <eosio/binary_extension.hpp>
 
 #include <document_graph/content.hpp>
 #include <document_graph/content_wrapper.hpp>
@@ -81,6 +82,7 @@ namespace hypha
         const eosio::time_point &getCreated() const { return created_date; }
         const eosio::name &getCreator() const { return creator; }
         const eosio::name &getContract() const { return contract; }
+        eosio::time_point getUpdatedDate() const { return updated_date.value_or(); }
 
         // This has to be public in order to be reachable by the abi-generator macro
         // indexes for table
@@ -89,7 +91,7 @@ namespace hypha
         eosio::checksum256 by_hash() const { return hash; }
         
         inline uint64_t getID() { return id; }
-    private:
+    //private:
         // members, with names as serialized - these must be public for EOSIO tables
         std::uint64_t id;
         eosio::checksum256 hash;
@@ -98,6 +100,7 @@ namespace hypha
         std::vector<Certificate> certificates;
         eosio::time_point created_date;
         eosio::name contract;
+        eosio::binary_extension<eosio::time_point> updated_date;
 
         // toString iterates through all content, all levels, concatenating all values
         // the resulting string is used for fingerprinting and hashing
@@ -105,7 +108,7 @@ namespace hypha
         static const std::string toString(const ContentGroups &contentGroups);
         static const std::string toString(const ContentGroup &contentGroup);
 
-        EOSLIB_SERIALIZE(Document, (id)(hash)(creator)(content_groups)(certificates)(created_date)(contract))
+        EOSLIB_SERIALIZE(Document, (id)(hash)(creator)(content_groups)(certificates)(created_date)(contract)(updated_date))
 
     public:
         // for unknown reason, primary_key() must be public

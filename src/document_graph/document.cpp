@@ -45,6 +45,7 @@ namespace hypha
         id = h_itr->id;
         creator = h_itr->creator;
         created_date = h_itr->created_date;
+        updated_date = h_itr->updated_date;
         certificates = h_itr->certificates;
         content_groups = h_itr->content_groups;
         hashContents();
@@ -67,6 +68,7 @@ namespace hypha
         id = h_itr->id;
         creator = h_itr->creator;
         created_date = h_itr->created_date;
+        updated_date = h_itr->updated_date;
         certificates = h_itr->certificates;
         content_groups = h_itr->content_groups;
         hashContents();
@@ -119,6 +121,7 @@ namespace hypha
         d_t.emplace(getContract(), [&](auto &d) {
             id = d_t.available_primary_key();
             created_date = eosio::current_time_point();
+            updated_date = created_date;
             d = *this;
         });
     }
@@ -130,6 +133,8 @@ namespace hypha
         auto oldHash = hash;
 
         creator = updater;
+
+        updated_date = eosio::current_time_point();
 
         content_groups = std::move(updatedData);
 
@@ -181,6 +186,7 @@ namespace hypha
             document.contract = _contract;
             document.creator = h_itr->creator;
             document.created_date = h_itr->created_date;
+            document.updated_date = h_itr->updated_date;
             document.certificates = h_itr->certificates;
             document.id = h_itr->id;
             return document;
