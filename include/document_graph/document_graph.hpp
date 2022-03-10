@@ -34,10 +34,6 @@ namespace hypha
 
         Edge createEdge(eosio::name &creator, uint64_t fromNode, uint64_t toNode, const eosio::name &edgeName);
 
-        Document updateDocument(const eosio::name &updater,
-                                uint64_t doc_hash,
-                                ContentGroups content_groups);
-
         bool hasEdges(uint64_t nodeID);
         
         void replaceNode(uint64_t oldNode, uint64_t newNode);
@@ -55,7 +51,6 @@ using root_doc = hypha::Document;\
 TABLE contract##_document : public root_doc {};\
 using contract_document = contract##_document;\
 using document_table =  eosio::multi_index<eosio::name("documents"), contract_document,\
-                            eosio::indexed_by<name("idhash"), eosio::const_mem_fun<root_doc, eosio::checksum256, &root_doc::by_hash>>,\
                             eosio::indexed_by<name("bycreator"), eosio::const_mem_fun<root_doc, uint64_t, &root_doc::by_creator>>,\
                             eosio::indexed_by<name("bycreated"), eosio::const_mem_fun<root_doc, uint64_t, &root_doc::by_created>>>;\
 using root_edge = hypha::Edge;\

@@ -34,26 +34,6 @@ namespace hypha
     {
     }
 
-    Document::Document(eosio::name contract, const eosio::checksum256 &_hash) : contract{contract}
-    {
-        TRACE_FUNCTION()
-        document_table d_t(contract, contract.value);
-        auto hash_index = d_t.get_index<eosio::name("idhash")>();
-        auto h_itr = hash_index.find(_hash);
-        EOS_CHECK(h_itr != hash_index.end(), "document not found: " + util::to_str(_hash));
-
-        id = h_itr->id;
-        creator = h_itr->creator;
-        created_date = h_itr->created_date;
-        updated_date = h_itr->updated_date;
-        certificates = h_itr->certificates;
-        content_groups = h_itr->content_groups;
-        hashContents();
-
-        // this should never happen, only if hash algorithm somehow changed
-        EOS_CHECK(hash == _hash, "fatal error: provided and indexed hash does not match newly generated hash");
-    }
-
     Document::Document(eosio::name contract, uint64_t _id) : contract{contract}
     {
         TRACE_FUNCTION()
@@ -71,13 +51,6 @@ namespace hypha
         updated_date = h_itr->updated_date;
         certificates = h_itr->certificates;
         content_groups = h_itr->content_groups;
-        hashContents();
-
-        // this should never happen, only if hash algorithm somehow changed
-        EOS_CHECK(
-            hash == h_itr->hash, 
-            "fatal error: provided and indexed hash does not match newly generated hash"
-        );
     }
 
     bool Document::exists(eosio::name contract, uint64_t _id)
@@ -93,30 +66,11 @@ namespace hypha
         return false;
     }
 
-    bool Document::exists(eosio::name contract, const eosio::checksum256& _hash)
-    {
-        document_table d_t(contract, contract.value);
-        auto hash_index = d_t.get_index<eosio::name("idhash")>();
-        auto h_itr = hash_index.find(_hash);
-
-        if (h_itr != hash_index.end())
-        {
-            return true;
-        }
-        return false;
-    }
-
     void Document::emplace()
     {
         TRACE_FUNCTION()
-        hashContents();
 
         document_table d_t(getContract(), getContract().value);
-        auto hash_index = d_t.get_index<eosio::name("idhash")>();
-        auto h_itr = hash_index.find(hash);
-
-        // if this content exists already, error out and send back the hash of the existing document
-        EOS_CHECK(h_itr == hash_index.end(), "document exists already: " + util::to_str(hash));
 
         d_t.emplace(getContract(), [&](auto &d) {
             id = d_t.available_primary_key();
@@ -126,32 +80,13 @@ namespace hypha
         });
     }
 
-    void Document::update(const eosio::name& updater, ContentGroups updatedData)
+    void Document::update()
     {
         TRACE_FUNCTION();
 
-        auto oldHash = hash;
-
-        creator = updater;
-
         updated_date = eosio::current_time_point();
 
-        content_groups = std::move(updatedData);
-
-        hashContents();
-
         document_table d_t(getContract(), getContract().value);
-        auto hash_index = d_t.get_index<eosio::name("idhash")>();
-
-        {
-            auto h_itr = hash_index.find(hash);
-
-            // if this content exists already, error out and send back the hash of the existing document
-            EOS_CHECK(
-                h_itr == hash_index.end(), 
-                util::to_str("There is an existing document with hash: ", hash, " Previous hash: ", oldHash)
-            )
-        }
 
         auto it = d_t.find(id);
 
@@ -163,51 +98,6 @@ namespace hypha
         d_t.modify(it, getContract(), [&](Document& doc) {
             doc = *this;
         });
-
-        EOS_CHECK(
-            it->hash == hash,
-            util::to_str("Coundn't update document")
-        );
-    }
-
-    Document Document::getOrNew(eosio::name _contract, eosio::name _creator, ContentGroups contentGroups)
-    {
-        Document document{};
-        document.content_groups = contentGroups;
-        document.hashContents();
-
-        Document::document_table d_t(_contract, _contract.value);
-        auto hash_index = d_t.get_index<eosio::name("idhash")>();
-        auto h_itr = hash_index.find(document.hash);
-
-        // if this content exists already, return this one
-        if (h_itr != hash_index.end())
-        {
-            document.contract = _contract;
-            document.creator = h_itr->creator;
-            document.created_date = h_itr->created_date;
-            document.updated_date = h_itr->updated_date;
-            document.certificates = h_itr->certificates;
-            document.id = h_itr->id;
-            return document;
-        }
-
-        return Document(_contract, _creator, contentGroups);
-    }
-
-    Document Document::getOrNew(eosio::name contract, eosio::name creator, ContentGroup contentGroup)
-    {
-        return getOrNew(contract, creator, rollup(contentGroup));
-    }
-
-    Document Document::getOrNew(eosio::name contract, eosio::name creator, Content content)
-    {
-        return getOrNew(contract, creator, rollup(content));
-    }
-
-    Document Document::getOrNew(eosio::name contract, eosio::name creator, const std::string &label, const Content::FlexValue &value)
-    {
-        return getOrNew(contract, creator, rollup(Content(label, value)));
     }
 
     // void Document::certify(const eosio::name &certifier, const std::string &notes)
@@ -226,22 +116,9 @@ namespace hypha
     //     });
     // }
 
-    const void Document::hashContents()
-    {
-        // save/cache the hash in the member
-        hash = hashContents(content_groups);
-    }
-
     const std::string Document::toString()
     {
         return toString(content_groups);
-    }
-
-    // static version cannot cache the hash in a member
-    const eosio::checksum256 Document::hashContents(const ContentGroups &contentGroups)
-    {
-        std::string string_data = toString(contentGroups);
-        return eosio::sha256(const_cast<char *>(string_data.c_str()), string_data.length());
     }
 
     const std::string Document::toString(const ContentGroups &contentGroups)

@@ -164,19 +164,6 @@ namespace hypha
         }
     }
 
-    Document DocumentGraph::updateDocument(const eosio::name &updater,
-                                           uint64_t documentHash,
-                                           ContentGroups contentGroups)
-    {
-        TRACE_FUNCTION()
-
-        Document currentDoc(m_contract, documentHash);
-
-        currentDoc.update(updater, std::move(contentGroups));
-        
-        return currentDoc;
-    }
-
     // for now, permissions should be handled in the contract action rather than this class
     void DocumentGraph::eraseDocument(uint64_t documentID, const bool includeEdges)
     {

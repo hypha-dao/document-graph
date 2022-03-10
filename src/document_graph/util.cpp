@@ -15,10 +15,4 @@ namespace hypha
             (r += to_hex[(c[i] >> 4)]) += to_hex[(c[i] & 0x0f)];
         return r;
     }
-
-    const std::string readableHash(const eosio::checksum256 &hash)
-    {
-        auto byte_arr = hash.extract_as_byte_array();
-        return toHex((const char *)byte_arr.data(), byte_arr.size());
-    }
 } // namespace hypha

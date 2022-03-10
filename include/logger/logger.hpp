@@ -5,7 +5,7 @@
 
 #include <eosio/eosio.hpp>
 
-#include "document_graph/util.hpp"
+#include <document_graph/util.hpp>
 
 namespace hypha
 {
