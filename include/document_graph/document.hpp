@@ -77,7 +77,7 @@ namespace hypha
         uint64_t by_created() const { return created_date.sec_since_epoch(); }
         uint64_t by_creator() const { return creator.value; }
         
-        inline uint64_t getID() { return id; }
+        inline uint64_t getID() const { return id; }
     //private:
         // members, with names as serialized - these must be public for EOSIO tables
         std::uint64_t id;
