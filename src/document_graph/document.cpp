@@ -42,7 +42,7 @@ namespace hypha
         
         EOS_CHECK(
             h_itr != d_t.end(), 
-            util::to_str("document not found: ", _id)
+            to_str("document not found: ", _id)
         );
 
         id = h_itr->id;
@@ -92,7 +92,7 @@ namespace hypha
 
         EOS_CHECK(
             it != d_t.end(), 
-            util::to_str("Couldn't find document in table with id: ", id)
+            to_str("Couldn't find document in table with id: ", id)
         )
 
         d_t.modify(it, getContract(), [&](Document& doc) {

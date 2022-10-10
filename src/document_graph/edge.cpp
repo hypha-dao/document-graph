@@ -32,7 +32,7 @@ namespace hypha
 
         EOS_CHECK(
           e_t.find(edgeID) == e_t.end(), 
-          util::to_str("Edge from: ", _from_node, 
+          to_str("Edge from: ", _from_node, 
                        " to: ", _to_node, 
                        " with name: ", _edge_name, " already exists")
         );
@@ -80,7 +80,7 @@ namespace hypha
 
         EOS_CHECK(
             itr != e_t.end(), 
-            util::to_str("edge does not exist: from ", _from_node, " to ", _to_node, " with edge name of ", _edge_name)
+            to_str("edge does not exist: from ", _from_node, " to ", _to_node, " with edge name of ", _edge_name)
         );
 
         return *itr;
@@ -98,7 +98,7 @@ namespace hypha
 
         EOS_CHECK(
             itr != fromEdgeIndex.end() && itr->from_node_edge_name_index == index, 
-            util::to_str("edge does not exist: from ", _from_node, " with edge name of ", _edge_name)
+            to_str("edge does not exist: from ", _from_node, " with edge name of ", _edge_name)
         );
 
         return *itr;
@@ -116,7 +116,7 @@ namespace hypha
 
         EOS_CHECK(
             itr != toEdgeIndex.end() && itr->to_node_edge_name_index == index,
-            util::to_str("edge does not exist: to ", _to_node, " with edge name of ", _edge_name)
+            to_str("edge does not exist: to ", _to_node, " with edge name of ", _edge_name)
         );
 
         return *itr;
@@ -166,7 +166,7 @@ namespace hypha
 
         EOS_CHECK(
           e_t.find(id) == e_t.end(), 
-          util::to_str("Edge from: ", from_node, 
+          to_str("Edge from: ", from_node, 
                        " to: ", to_node, 
                        " with name: ", edge_name, " already exists")
         );
@@ -184,7 +184,7 @@ namespace hypha
 
         EOS_CHECK(
             itr != e_t.end(),
-            util::to_str("edge does not exist: from ", from_node, " to ", to_node, " with edge name of ", edge_name)
+            to_str("edge does not exist: from ", from_node, " to ", to_node, " with edge name of ", edge_name)
         );
         
         e_t.erase(itr);

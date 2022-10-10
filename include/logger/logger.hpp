@@ -9,7 +9,8 @@
 
 namespace hypha
 {
-  
+
+#ifdef USE_LOGGING 
 class Logger
 {
   public:
@@ -35,7 +36,6 @@ class Logger
   std::vector<std::string> m_log;
 };
 
-#ifdef USE_LOGGING
 #include "boost_current_function.hpp"
 
 class AutoTraceDroper 
@@ -46,9 +46,9 @@ class AutoTraceDroper
   ~AutoTraceDroper() { Logger::instance().popTrace(); }
 };
 
-#define TRACE_FUNCTION() AutoTraceDroper autoDrop##__LINE__{}; Logger::instance().pushTrace(util::to_str(__FILE__, " : ", BOOST_CURRENT_FUNCTION));
-#define TRACE_ERROR(message) AutoTraceDroper autoDrop##__LINE__{}; Logger::instance().pushTrace(util::to_str(__FILE__, ":", __LINE__, ": ", message));
-#define LOG_MESSAGE(message) Logger::instance().pushMessage(util::to_str("[DEBUG]: ", __FILE__, ":", __LINE__, ": ", message));
+#define TRACE_FUNCTION() AutoTraceDroper autoDrop##__LINE__{}; Logger::instance().pushTrace(to_str(__FILE__, " : ", BOOST_CURRENT_FUNCTION));
+#define TRACE_ERROR(message) AutoTraceDroper autoDrop##__LINE__{}; Logger::instance().pushTrace(to_str(__FILE__, ":", __LINE__, ": ", message));
+#define LOG_MESSAGE(message) Logger::instance().pushMessage(to_str("[DEBUG]: ", __FILE__, ":", __LINE__, ": ", message));
 #define EOS_CHECK(condition, message)\
 {\
 if (!(condition)) {\

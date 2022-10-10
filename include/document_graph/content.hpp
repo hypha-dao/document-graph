@@ -74,7 +74,7 @@ namespace hypha
         {
             EOS_CHECK(
                 std::holds_alternative<T>(value),
-                util::to_str(
+                to_str(
                     "Content value for label [", label, "] is not of expected type.", 
                     " Expected: ", getType<T>(), " but has: ", getIndexType()
                 )
@@ -87,7 +87,7 @@ namespace hypha
         {
             EOS_CHECK(
                 std::holds_alternative<T>(value),
-                util::to_str(
+                to_str(
                     "Content value for label [", label, "] is not of expected type.", 
                     " Expected: ", getType<T>(), " but has: ", getIndexType()
                 )

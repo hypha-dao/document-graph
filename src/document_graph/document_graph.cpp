@@ -29,7 +29,7 @@ namespace hypha
         std::vector<Edge> edges = getEdges(fromNode, toNode);
         EOS_CHECK(
             edges.size() > 0, 
-            util::to_str("no edges exist: from ", fromNode, " to ", toNode)
+            to_str("no edges exist: from ", fromNode, " to ", toNode)
         );
 
         return edges;
@@ -59,7 +59,7 @@ namespace hypha
         std::vector<Edge> edges = getEdgesFrom(fromNode, edgeName);
         EOS_CHECK(
             edges.size() > 0, 
-            util::to_str("no edges exist: from ", fromNode, " with name ", edgeName)
+            to_str("no edges exist: from ", fromNode, " with name ", edgeName)
         );
         return edges;
     }
@@ -88,7 +88,7 @@ namespace hypha
         std::vector<Edge> edges = getEdgesTo(toNode, edgeName);
         EOS_CHECK(
             edges.size() > 0, 
-            util::to_str("no edges exist: to ", toNode, " with name ", edgeName)
+            to_str("no edges exist: to ", toNode, " with name ", edgeName)
         );
         return edges;
     }
@@ -172,7 +172,7 @@ namespace hypha
 
         EOS_CHECK(
             h_itr != d_t.end(), 
-            util::to_str("Cannot erase document; does not exist: ", documentID)
+            to_str("Cannot erase document; does not exist: ", documentID)
         );
 
         if (includeEdges)

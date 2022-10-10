@@ -2,7 +2,7 @@
 
 namespace hypha
 {
-
+#ifdef USE_LOGGING 
 Logger& 
 Logger::instance() 
 {
@@ -51,6 +51,6 @@ Logger::generateMessage()
   return ss;
 }
 
-
+#endif
 
 }
