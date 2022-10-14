@@ -81,16 +81,17 @@ namespace hypha
       template<class T>
       std::string to_str_h(const T& arg);
 
+      std::string to_str_h(const char* arr);
+
       using strc = const char*;
 
-      template<std::size_t N>
-      inline std::string to_str_h(const char(&x)[N]) { return x; }
+      // template<std::size_t N>
+      // inline std::string to_str_h(const char(&x)[N]) { return x; }
 
       extern template std::string to_str_h<name>(const name&);
       extern template std::string to_str_h<time_point>(const time_point&);
       extern template std::string to_str_h<symbol_code>(const symbol_code&);
       extern template std::string to_str_h<asset>(const asset&);
-      extern template std::string to_str_h<strc>(const strc&);
       extern template std::string to_str_h<std::string>(const std::string&);
       extern template std::string to_str_h<int64_t>(const int64_t&);
       extern template std::string to_str_h<uint64_t>(const uint64_t&);

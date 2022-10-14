@@ -16,6 +16,8 @@ namespace hypha
 
     namespace util::detail {
 
+    std::string to_str_h(const char* arr) { return arr; }
+
     template<class T>
     std::string to_str_h(const T& arg)
     {
@@ -50,7 +52,6 @@ namespace hypha
       template std::string to_str_h<time_point>(const time_point&);
       template std::string to_str_h<symbol_code>(const symbol_code&);
       template std::string to_str_h<asset>(const asset&);
-      template std::string to_str_h<strc>(const strc&);
       template std::string to_str_h<std::string>(const std::string&);
       template std::string to_str_h<int64_t>(const int64_t&);
       template std::string to_str_h<uint64_t>(const uint64_t&);
