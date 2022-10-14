@@ -70,30 +70,10 @@ namespace hypha
 
         //Can return reference to stored type
         template <class T>
-        inline decltype(auto) getAs()
-        {
-            EOS_CHECK(
-                std::holds_alternative<T>(value),
-                to_str(
-                    "Content value for label [", label, "] is not of expected type.", 
-                    " Expected: ", getType<T>(), " but has: ", getIndexType()
-                )
-            );
-            return std::get<T>(value);
-        }
+        T& getAs();
 
         template <class T>
-        inline decltype(auto) getAs() const
-        {
-            EOS_CHECK(
-                std::holds_alternative<T>(value),
-                to_str(
-                    "Content value for label [", label, "] is not of expected type.", 
-                    " Expected: ", getType<T>(), " but has: ", getIndexType()
-                )
-            );
-            return std::get<T>(value);
-        }
+        const T& getAs() const;
 
         inline bool operator==(const Content& other) 
         {
@@ -102,5 +82,21 @@ namespace hypha
 
         EOSLIB_SERIALIZE(Content, (label)(value))
     };
+
+    //Specify which types are valid for casting
+    extern template eosio::name& Content::getAs<eosio::name>();
+    extern template eosio::asset& Content::getAs<eosio::asset>();
+    extern template eosio::time_point& Content::getAs<eosio::time_point>();
+    extern template eosio::checksum256& Content::getAs<eosio::checksum256>();
+    extern template std::string& Content::getAs<std::string>();
+    extern template std::int64_t& Content::getAs<std::int64_t>();
+    
+    extern template const eosio::name& Content::getAs<eosio::name>() const;
+    extern template const eosio::asset& Content::getAs<eosio::asset>() const;
+    extern template const eosio::time_point& Content::getAs<eosio::time_point>() const;
+    extern template const eosio::checksum256& Content::getAs<eosio::checksum256>() const;
+    extern template const std::string& Content::getAs<std::string>() const;
+    extern template const std::int64_t& Content::getAs<std::int64_t>() const;
+    
 
 } // namespace hypha

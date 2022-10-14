@@ -3,6 +3,11 @@
 #include <string>
 #include <eosio/crypto.hpp>
 #include <eosio/name.hpp>
+#include <eosio/asset.hpp>
+#include <eosio/time.hpp>
+#include <eosio/symbol.hpp>
+
+#include "content.hpp"
 
 namespace std {
   template <> struct hash<eosio::name>
@@ -16,6 +21,11 @@ namespace std {
 
 namespace hypha
 {
+  //class Content;
+  using eosio::name;
+  using eosio::asset;
+  using eosio::time_point;
+  using eosio::symbol_code;
 
   const std::string toHex(const char *d, std::uint32_t s);
   const std::uint64_t toUint64(const std::string &fingerprint);
@@ -69,34 +79,25 @@ namespace hypha
       };
       
       template<class T>
-      std::string to_str_h(const T& arg)
-      {
-        if constexpr (supports_to_string<T>::value) {
-          return std::to_string(arg);
-        }
-        else if constexpr (supports_call_to_string<T>::value) {
-          return arg.to_string();
-        }
-        else if constexpr (supports_call_to_string_v2<T>::value) {
-          return arg.toString();
-        }
-        else if constexpr (std::is_same_v<T, class ContentGroup>) {
+      std::string to_str_h(const T& arg);
 
-          std::string s;
+      using strc = const char*;
 
-          s = "ContentGroup {\n";
+      template<std::size_t N>
+      inline std::string to_str_h(const char(&x)[N]) { return x; }
 
-          for (auto& content : arg) {
-            s += "\tContent " + content.toString() + "\n";
-          }
-          s += "}\n";
-
-          return s;
-        }
-        else {
-          return arg;
-        }
-      }
+      extern template std::string to_str_h<name>(const name&);
+      extern template std::string to_str_h<time_point>(const time_point&);
+      extern template std::string to_str_h<symbol_code>(const symbol_code&);
+      extern template std::string to_str_h<asset>(const asset&);
+      extern template std::string to_str_h<strc>(const strc&);
+      extern template std::string to_str_h<std::string>(const std::string&);
+      extern template std::string to_str_h<int64_t>(const int64_t&);
+      extern template std::string to_str_h<uint64_t>(const uint64_t&);
+      extern template std::string to_str_h<uint8_t>(const uint8_t&);
+      extern template std::string to_str_h<uint32_t>(const uint32_t&);
+      extern template std::string to_str_h<int32_t>(const int32_t&);
+      extern template std::string to_str_h<Content>(const Content&);
     }
     
     // //Helper function to convert 1+ X type variables to string
@@ -136,6 +137,7 @@ namespace hypha
     #define to_str13(arg1, ...) (hypha::util::detail::to_str_h(arg1) + to_str12(__VA_ARGS__))
     #define to_str14(arg1, ...) (hypha::util::detail::to_str_h(arg1) + to_str13(__VA_ARGS__))
 
+    #define _s(a) &a[0]
 
     template <typename... Rest>
     uint64_t hashCombine(Rest&&... rest)

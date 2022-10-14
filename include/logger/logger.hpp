@@ -1,16 +1,16 @@
 #pragma once
 
-#include <vector>
-#include <string>
-
 #include <eosio/eosio.hpp>
-
-#include <document_graph/util.hpp>
 
 namespace hypha
 {
 
 #ifdef USE_LOGGING 
+
+#include <document_graph/util.hpp>
+#include <vector>
+#include <string>
+
 class Logger
 {
   public:
