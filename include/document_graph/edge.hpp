@@ -27,6 +27,10 @@ namespace hypha
         const eosio::name &getCreator() { return creator; }
         const eosio::name &getContract() { return contract; }
 
+        static uint64_t getEdgesFromCount(const eosio::name &contract,
+                                          uint64_t from_node,
+                                          const eosio::name &edge_name);
+
         static Edge getOrNew(const eosio::name &contract,
                              const eosio::name &creator,
                              uint64_t from_node,

@@ -51,6 +51,27 @@ namespace hypha
         });
     }
 
+    uint64_t Edge::getEdgesFromCount(const eosio::name &contract,
+                                     uint64_t from_node,
+                                     const eosio::name &edge_name)
+    {
+        uint64_t count = 0;
+
+        // this index uniquely identifies all edges that share this fromNode and edgeName
+        uint64_t index = util::hashCombine(from_node, edge_name);
+        Edge::edge_table e_t(contract, contract.value);
+        auto from_name_index = e_t.get_index<eosio::name("byfromname")>();
+        auto itr = from_name_index.find(index);
+
+        while (itr != from_name_index.end() && itr->by_from_node_edge_name_index() == index)
+        {
+            ++count;
+            ++itr;
+        }
+
+        return count;
+    }
+
     // static
     Edge Edge::getOrNew(const eosio::name &_contract,
                         const eosio::name &creator,
