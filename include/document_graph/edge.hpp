@@ -31,6 +31,10 @@ namespace hypha
                                           uint64_t from_node,
                                           const eosio::name &edge_name);
 
+        static uint64_t getEdgesToCount(const eosio::name &contract,
+                                          uint64_t to_node,
+                                          const eosio::name &edge_name);
+
         static Edge getOrNew(const eosio::name &contract,
                              const eosio::name &creator,
                              uint64_t from_node,
