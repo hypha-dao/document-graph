@@ -57,6 +57,9 @@ if (!(condition)) {\
 }\
 }
 #else
+
+//#define space_conc(str1,str2) #str1 " " #str2
+
 #define TRACE_FUNCTION()
 #define TRACE_ERROR(message)
 #define LOG_MESSAGE(message)
@@ -67,6 +70,9 @@ if (!(condition)) {\
 }\
 }
 #endif 
+
+//eosio::check(false, message);\
+//eosio::check(false, space_conc(space_conc(__FILE__, ": "), __LINE__));\
 
 }
 

@@ -7,8 +7,6 @@
 #include <eosio/time.hpp>
 #include <eosio/symbol.hpp>
 
-#include "content.hpp"
-
 namespace std {
   template <> struct hash<eosio::name>
   {
@@ -21,7 +19,7 @@ namespace std {
 
 namespace hypha
 {
-  //class Content;
+  struct Content;
   using eosio::name;
   using eosio::asset;
   using eosio::time_point;
