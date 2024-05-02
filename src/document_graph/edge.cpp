@@ -36,6 +36,11 @@ namespace hypha
                        " to: ", _to_node, 
                        " with name: ", _edge_name, " already exists")
         );
+        
+        std::string edge_name_str = _edge_name.to_string();
+        EOS_CHECK(!edge_name_str.empty(), "Edge name cannot be empty");
+        EOS_CHECK(!isdigit(edge_name_str[0]), "Edge name cannot start with a number");
+        EOS_CHECK(edge_name_str.find('.') == std::string::npos, "Edge name cannot contain '.' characters");
 
         e_t.emplace(_contract, [&](auto &e) {
             e.id = edgeID;
